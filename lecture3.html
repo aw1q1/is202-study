@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IS202 · Lecture 3 — Project Selection &amp; Methodologies</title>
+<style>
+/* ==========================================================
+   IS202 study pages — shared design system
+   ========================================================== */
+:root{
+  --bg:#0d1220; --card:#172038; --card2:#1d2848; --line:#2a3862;
+  --text:#eaf0ff; --muted:#9fb0d8;
+  --accent:#7aa8ff; --accent-rgb:122,168,255; --on-accent:#0a1226;
+  --ok:#4ade80; --ok-rgb:74,222,128;
+  --bad:#ff7b8c; --bad-rgb:255,123,140;
+  --warn:#fbbf24; --warn-rgb:251,191,36;
+  --c-plan:#4cc9f0; --c-plan-rgb:76,201,240;
+  --c-ana:#fbbf24;  --c-ana-rgb:251,191,36;
+  --c-des:#b69cff;  --c-des-rgb:182,156,255;
+  --c-imp:#4ade80;  --c-imp-rgb:74,222,128;
+  --shadow:0 12px 32px rgba(0,0,0,.35);
+  --radius:18px;
+}
+[data-theme="light"]{
+  --bg:#f5f2ea; --card:#ffffff; --card2:#f6f3ec; --line:#ddd6c3;
+  --text:#1b2336; --muted:#5a6684;
+  --accent:#2f66e0; --accent-rgb:47,102,224; --on-accent:#ffffff;
+  --ok:#15803d; --ok-rgb:21,128,61;
+  --bad:#c0263d; --bad-rgb:192,38,61;
+  --warn:#a85d00; --warn-rgb:168,93,0;
+  --c-plan:#0b84a8; --c-plan-rgb:11,132,168;
+  --c-ana:#b86e00;  --c-ana-rgb:184,110,0;
+  --c-des:#6b44e0;  --c-des-rgb:107,68,224;
+  --c-imp:#17803d;  --c-imp-rgb:23,128,61;
+  --shadow:0 10px 26px rgba(70,55,20,.12);
+}
+
+/* colour helpers: put on any element, children read --c / --c-rgb */
+.ph-plan{--c:var(--c-plan);--c-rgb:var(--c-plan-rgb)}
+.ph-ana{--c:var(--c-ana);--c-rgb:var(--c-ana-rgb)}
+.ph-des{--c:var(--c-des);--c-rgb:var(--c-des-rgb)}
+.ph-imp{--c:var(--c-imp);--c-rgb:var(--c-imp-rgb)}
+.t-ok{--c:var(--ok);--c-rgb:var(--ok-rgb)}
+.t-warn{--c:var(--warn);--c-rgb:var(--warn-rgb)}
+.t-bad{--c:var(--bad);--c-rgb:var(--bad-rgb)}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+body{
+  margin:0;min-height:100vh;color:var(--text);
+  font:17px/1.85 "Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;
+  background:
+    radial-gradient(900px 480px at 85% -8%,rgba(var(--accent-rgb),.14),transparent 62%),
+    radial-gradient(700px 420px at 5% 14%,rgba(var(--c-des-rgb),.08),transparent 60%),
+    var(--bg);
+  background-attachment:fixed;
+}
+b,strong{font-weight:700}
+button{font-family:inherit}
+h2{font-size:32px;line-height:1.35;margin:0 0 6px}
+h3{font-size:20px;margin:0 0 10px}
+h4{font-size:17px;margin:0 0 8px}
+.sec{margin:30px 0 12px;font-size:21px}
+.sec small{color:var(--muted);font-weight:400;font-size:14px}
+.lead{color:var(--muted);margin:0 0 18px;font-size:18px}
+.muted{color:var(--muted)}
+.en{direction:ltr;unicode-bidi:isolate;font-family:"Segoe UI",system-ui,sans-serif;font-weight:600}
+.en.plain{font-weight:400}
+
+/* ---------- top bar ---------- */
+.topbar{
+  position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;
+  padding:10px clamp(12px,3vw,28px);
+  background:var(--bg);
+  background:color-mix(in srgb,var(--bg) 84%,transparent);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--line);
+}
+.home,.icon-btn{
+  width:40px;height:40px;display:grid;place-items:center;border-radius:12px;
+  border:1px solid var(--line);background:var(--card);color:var(--text);
+  text-decoration:none;font-size:18px;cursor:pointer;flex:none;
+}
+.home:hover,.icon-btn:hover{border-color:var(--accent)}
+.ttl{display:flex;flex-direction:column;line-height:1.3}
+.ttl small{color:var(--muted);font-size:13px}
+.prog{margin-inline-start:auto;display:flex;align-items:center;gap:10px;min-width:150px;color:var(--muted);font-size:14px}
+.bar{flex:1;height:9px;border-radius:99px;background:rgba(var(--accent-rgb),.16);overflow:hidden;min-width:90px}
+.bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--c-imp));transition:width .5s}
+
+/* ---------- layout + nav ---------- */
+.layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:26px;max-width:1160px;margin:0 auto;padding:24px clamp(12px,3vw,24px) 70px;align-items:start}
+.nav{position:sticky;top:78px;display:flex;flex-direction:column;gap:6px}
+.nav button{
+  display:flex;align-items:center;gap:10px;text-align:start;width:100%;
+  background:transparent;border:1px solid transparent;color:var(--muted);
+  padding:9px 12px;border-radius:14px;cursor:pointer;font-size:15px;transition:.18s;
+}
+.nav button:hover{background:rgba(var(--accent-rgb),.08);color:var(--text)}
+.nav .num{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;background:var(--card2);border:1px solid var(--line)}
+.nav .lbl{flex:1}
+.nav .tick{opacity:0;color:var(--ok);font-weight:800}
+.nav button.on{background:var(--card);border-color:var(--line);color:var(--text);box-shadow:var(--shadow)}
+.nav button.on .num{background:var(--accent);color:var(--on-accent);border-color:transparent}
+.nav button.done .tick{opacity:1}
+
+/* ---------- stations ---------- */
+.station{display:none}
+.station.on{display:block;animation:rise .45s ease}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.station-foot{display:flex;justify-content:space-between;gap:12px;margin-top:34px;padding-top:18px;border-top:1px dashed var(--line)}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow);margin:16px 0}
+.card.tint{border-top:4px solid var(--c)}
+.card.tint h4{color:var(--c)}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border-radius:14px;
+  border:1px solid var(--line);background:var(--card);color:var(--text);font-size:16px;font-weight:600;
+  cursor:pointer;transition:.18s;text-decoration:none;
+}
+.btn:hover{transform:translateY(-1px);border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--on-accent);border-color:transparent}
+.btn.good{background:rgba(var(--ok-rgb),.16);border-color:rgba(var(--ok-rgb),.55)}
+.btn.bad{background:rgba(var(--bad-rgb),.14);border-color:rgba(var(--bad-rgb),.5)}
+.btn.ghost{background:transparent}
+
+.chip{
+  display:inline-flex;align-items:center;gap:6px;padding:4px 14px;margin:4px;border-radius:999px;font-size:15px;line-height:1.7;
+  background:rgba(var(--c-rgb,var(--accent-rgb)),.14);border:1px solid rgba(var(--c-rgb,var(--accent-rgb)),.45);
+}
+.chip.en{font-weight:600}
+.note{margin:14px 0;padding:12px 16px;border-radius:14px;background:rgba(var(--c-rgb,var(--accent-rgb)),.1);border:1px solid rgba(var(--c-rgb,var(--accent-rgb)),.38)}
+.note.warn{--c-rgb:var(--warn-rgb)}
+.note.ok{--c-rgb:var(--ok-rgb)}
+.note.bad{--c-rgb:var(--bad-rgb)}
+
+/* ---------- tabs / panes / segmented ---------- */
+.pane{display:none}
+.pane.on{display:block;animation:rise .35s ease}
+.seg{display:inline-flex;gap:6px;padding:5px;border-radius:16px;background:var(--card2);border:1px solid var(--line);flex-wrap:wrap;margin-bottom:14px}
+.seg button{border:0;background:transparent;color:var(--muted);padding:9px 18px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;transition:.18s}
+.seg button.on{background:rgba(var(--c-rgb,var(--accent-rgb)),.2);color:var(--text);box-shadow:inset 0 0 0 1.5px rgba(var(--c-rgb,var(--accent-rgb)),.7)}
+
+/* ---------- big picture ---------- */
+.story{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap}
+.beat{flex:1;min-width:150px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;padding:14px;border-radius:16px;background:rgba(var(--bad-rgb),.1);border:1px solid rgba(var(--bad-rgb),.4)}
+.beat.ok{background:rgba(var(--ok-rgb),.12);border-color:rgba(var(--ok-rgb),.5)}
+.beat .emo{font-size:30px;line-height:1.3}
+.arrow{align-self:center;font-size:22px;color:var(--muted)}
+.punch{text-align:center;font-size:20px;font-weight:700;margin:16px 0 12px}
+.tile{
+  display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:start;padding:18px;border-radius:18px;
+  border:1px solid rgba(var(--c-rgb),.45);background:linear-gradient(155deg,rgba(var(--c-rgb),.2),var(--card) 72%);
+  color:var(--text);cursor:pointer;transition:.2s;font-size:17px;
+}
+.tile:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.tile .emo{font-size:30px;line-height:1.3}
+.tile small{color:var(--muted);font-size:14.5px}
+
+/* ---------- translator diagram ---------- */
+.trans{display:flex;align-items:center;justify-content:center;gap:8px;direction:ltr;flex-wrap:wrap;margin-bottom:16px}
+.trans>*{direction:rtl}
+.tnode{
+  display:flex;flex-direction:column;align-items:center;gap:0;min-width:160px;padding:14px 18px;border-radius:18px;
+  border:1.5px solid rgba(var(--c-rgb),.4);background:rgba(var(--c-rgb),.1);color:var(--text);cursor:pointer;transition:.2s;font-size:16px;
+}
+.tnode .emo{font-size:30px;line-height:1.3}
+.tnode.on{background:rgba(var(--c-rgb),.24);border-color:var(--c);transform:translateY(-3px);box-shadow:0 8px 22px rgba(var(--c-rgb),.25)}
+.tlink{font-size:26px;color:var(--muted)}
+.bigq{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.bigq .chip{font:800 20px/1.5 "Segoe UI",sans-serif;padding:6px 20px}
+
+/* ---------- flip cards (roles) ---------- */
+.flip{perspective:1000px;cursor:pointer;outline:none}
+.flip-in{display:grid;min-height:170px;transition:transform .55s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
+.flip.open .flip-in{transform:rotateY(180deg)}
+.flip .face{
+  grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:18px;padding:16px 18px;
+  display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:4px;
+  border:1px solid rgba(var(--c-rgb,var(--accent-rgb)),.5);
+  background:linear-gradient(155deg,rgba(var(--c-rgb,var(--accent-rgb)),.2),var(--card) 75%);
+}
+.flip .front .emo{font-size:32px;line-height:1.3}
+.flip .front b{font-size:18px}
+.flip .front small{color:var(--muted)}
+.flip .back{transform:rotateY(180deg);background:var(--card2);font-size:16px;line-height:1.75}
+.flip:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:18px}
+.hint{color:var(--muted);font-size:13px}
+
+/* ---------- SDLC path ---------- */
+.path{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;direction:ltr;margin:6px 0 18px}
+.node{
+  position:relative;direction:rtl;display:flex;flex-direction:column;align-items:center;gap:2px;padding:16px 10px;border-radius:20px;
+  border:1.5px solid rgba(var(--c-rgb),.4);background:rgba(var(--c-rgb),.09);color:var(--text);cursor:pointer;transition:.22s;text-align:center;font-size:15px;
+}
+.node i{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font:800 24px/1 "Segoe UI",sans-serif;font-style:normal;background:rgba(var(--c-rgb),.25);color:var(--c);margin-bottom:4px;transition:.22s}
+.node b{font-size:18px;font-family:"Segoe UI",sans-serif}
+.node small{color:var(--muted);font-size:13.5px;line-height:1.4}
+.node:not(:last-child)::after{content:"➜";position:absolute;right:-22px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:18px}
+.node.on{background:rgba(var(--c-rgb),.22);border-color:var(--c);transform:translateY(-4px);box-shadow:0 12px 26px rgba(var(--c-rgb),.28)}
+.node.on i{background:var(--c);color:var(--bg)}
+.node b,.node small,.ph-head .q,.tile b.en{direction:ltr;unicode-bidi:isolate}
+.mnemo{text-align:center;font-size:19px;margin:0 0 14px;color:var(--muted)}
+.mnemo b{color:var(--text)}
+.panel{background:var(--card);border:1px solid rgba(var(--c-rgb),.5);border-top:5px solid var(--c);border-radius:18px;padding:20px 22px;box-shadow:var(--shadow)}
+.ph-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.ph-head .q{font:800 24px/1.3 "Segoe UI",sans-serif;color:var(--c);padding:4px 16px;border-radius:12px;background:rgba(var(--c-rgb),.15)}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0}
+.steps li{counter-increment:s;position:relative;padding:6px 0;padding-inline-start:50px;margin:6px 0}
+.steps li::before{content:counter(s);position:absolute;inset-inline-start:0;top:6px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:rgba(var(--c-rgb),.2);color:var(--c)}
+.deliv{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+
+/* ---------- BPM ---------- */
+.cycle{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;direction:ltr}
+.cycle>div{direction:rtl;padding:14px;border-radius:16px;background:var(--card2);border:1px solid var(--line);font-size:15.5px;line-height:1.65}
+.cycle .n{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-weight:800;margin-bottom:6px}
+.loopnote{text-align:center;color:var(--muted);margin:10px 0 0}
+.range-wrap{direction:ltr;padding:6px 6px 0}
+.range-wrap input{width:100%;height:10px;accent-color:var(--accent);cursor:pointer}
+.ticks{display:flex;justify-content:space-between;direction:ltr;font:800 16px "Segoe UI",sans-serif;margin-top:8px}
+.ticks span{cursor:pointer;padding:4px 14px;border-radius:10px;color:var(--muted);transition:.18s}
+.ticks span.on{background:rgba(var(--c-rgb),.22);color:var(--text)}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:16px 0 8px}
+.metric small{display:flex;justify-content:space-between;color:var(--muted);margin-bottom:4px}
+.meter{direction:ltr;position:relative;height:12px;border-radius:99px;background:linear-gradient(90deg,var(--ok),var(--warn),var(--bad));overflow:hidden}
+.meter i{position:absolute;top:0;bottom:0;right:0;width:100%;background:var(--card2);transition:width .55s cubic-bezier(.2,.8,.2,1)}
+
+/* ---------- decks (games / quiz) ---------- */
+.deck{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px 22px;box-shadow:var(--shadow);margin:14px 0}
+.deck-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;color:var(--muted);font-size:15px}
+.cnt,.fc-count{direction:ltr;unicode-bidi:isolate}
+.deck-bar{flex:1;height:8px;border-radius:99px;background:rgba(var(--accent-rgb),.16);overflow:hidden}
+.deck-bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--c-imp));transition:width .4s}
+.deck-q{font-size:21px;font-weight:600;line-height:1.7;margin:4px 0 16px;min-height:56px}
+.opts{display:grid;gap:10px}
+.opts.c2{grid-template-columns:repeat(2,1fr)}
+.opts.c3{grid-template-columns:repeat(3,1fr)}
+.opt{
+  text-align:start;padding:13px 16px;border-radius:14px;border:1.5px solid var(--line);background:var(--card2);
+  color:var(--text);font-size:17px;cursor:pointer;transition:.18s;line-height:1.6;
+}
+.opt.ph-plan,.opt.ph-ana,.opt.ph-des,.opt.ph-imp,.opt.t-ok,.opt.t-warn,.opt.t-bad{border-color:rgba(var(--c-rgb),.55);background:rgba(var(--c-rgb),.1);font-weight:600}
+.opt:hover:not(:disabled){border-color:var(--accent);transform:translateY(-1px)}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--ok);background:rgba(var(--ok-rgb),.2)}
+.opt.wrong{border-color:var(--bad);background:rgba(var(--bad-rgb),.2)}
+.fb{margin-top:16px;padding:14px 16px;border-radius:14px;animation:rise .3s ease}
+.fb.ok{background:rgba(var(--ok-rgb),.13);border:1px solid rgba(var(--ok-rgb),.5)}
+.fb.no{background:rgba(var(--bad-rgb),.12);border:1px solid rgba(var(--bad-rgb),.5)}
+.fb .btn{margin-top:10px}
+.deck-end{text-align:center;padding:12px 0}
+.deck-end .big{font:800 56px/1.2 "Segoe UI",sans-serif;color:var(--accent)}
+
+/* ---------- flashcards ---------- */
+.fc{background:transparent}
+.fc-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.fc-top .seg{margin:0}
+.fc-card{perspective:1200px;cursor:pointer;outline:none;margin:10px 0 14px}
+.fc-in{display:grid;min-height:270px;transition:transform .6s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
+.fc-card.open .fc-in{transform:rotateY(180deg)}
+.fc-in .face{
+  grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:24px;padding:28px;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:12px;
+  border:1px solid var(--line);font-size:23px;line-height:1.7;box-shadow:var(--shadow);
+}
+.fc-in .front{background:linear-gradient(160deg,rgba(var(--accent-rgb),.22),var(--card))}
+.fc-in .back{background:linear-gradient(160deg,rgba(var(--ok-rgb),.18),var(--card));transform:rotateY(180deg);font-size:19.5px}
+.fc-in small{color:var(--muted);font-size:13.5px}
+.fc-card:focus-visible .fc-in .front{outline:2px solid var(--accent)}
+.fc-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+.fc-stat{text-align:center;margin:8px 0 0}
+
+/* ---------- essay ---------- */
+.essay textarea{width:100%;min-height:110px;resize:vertical;padding:12px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--card2);color:var(--text);font:16px/1.7 "Segoe UI",sans-serif;margin:8px 0 12px}
+.essay textarea:focus{outline:none;border-color:var(--accent)}
+.model{margin-top:14px;animation:rise .3s ease}
+.mdl{padding:14px 16px;border-radius:14px;background:rgba(var(--ok-rgb),.1);border:1px solid rgba(var(--ok-rgb),.4);margin-bottom:12px}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:6px 0;cursor:pointer}
+.chk input{width:20px;height:20px;margin-top:5px;accent-color:var(--ok);flex:none}
+.pts-sc{font-weight:700;margin-top:6px;color:var(--ok)}
+
+/* ---------- tables (summary) ---------- */
+.tbl{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:14px;border:1px solid var(--line);font-size:15.5px;line-height:1.65;margin:8px 0 18px}
+.tbl th,.tbl td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:start;vertical-align:top}
+.tbl tr:last-child td{border-bottom:0}
+.tbl th{background:var(--card2);font-size:14.5px;color:var(--muted)}
+.tbl td:first-child{font-weight:700;white-space:nowrap}
+.tbl .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);margin-inline-end:8px}
+
+/* ---------- calculators / inputs ---------- */
+.calc-top{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.calc-top label{display:inline-flex;align-items:center;gap:8px;font-weight:600}
+.calc input[type=number]{width:100%;max-width:132px;padding:7px 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--card2);color:var(--text);font:600 16px "Segoe UI",sans-serif;direction:ltr;text-align:right}
+.calc input[type=number]:focus{outline:none;border-color:var(--accent)}
+.calc-top input[type=number]{max-width:90px}
+.calc input[type=range]{accent-color:var(--accent);cursor:pointer;direction:ltr;width:170px}
+main{min-width:0}
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:4px 0;direction:ltr}
+.ctbl{min-width:680px;direction:ltr;margin:0}
+.ctbl th,.ctbl td{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ctbl th:first-child,.ctbl td:first-child{text-align:left}
+.ctbl input[type=number]{min-width:112px}
+.tbl.ctbl td:first-child{white-space:nowrap}
+.ctbl.sm{min-width:0}
+.ctbl.sm input[type=number]{min-width:0}
+.ctbl.sm th,.ctbl.sm td{white-space:normal}
+.tbl.ctbl.sm td:first-child{white-space:nowrap}
+.ctbl .neg{color:var(--bad)}
+.ctbl .pos{color:var(--ok)}
+.ctbl tr.tot td{background:var(--card2);font-weight:700}
+.res-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:14px}
+.res{padding:12px 14px;border-radius:14px;background:var(--card2);border:1px solid var(--line)}
+.res small{display:block;color:var(--muted);font-size:14px}
+.res b{display:block;font:800 22px/1.5 "Segoe UI",sans-serif;direction:ltr;unicode-bidi:isolate;text-align:start}
+.res.pos{border-color:rgba(var(--ok-rgb),.6);background:rgba(var(--ok-rgb),.12)}
+.res.neg{border-color:rgba(var(--bad-rgb),.6);background:rgba(var(--bad-rgb),.12)}
+.verdict{margin-top:14px;padding:12px 16px;border-radius:14px;font-weight:700;font-size:18px;background:var(--card2);border:1px solid var(--line)}
+.verdict.pos{background:rgba(var(--ok-rgb),.14);border-color:rgba(var(--ok-rgb),.55)}
+.verdict.neg{background:rgba(var(--bad-rgb),.13);border-color:rgba(var(--bad-rgb),.55)}
+.checks{display:grid;gap:4px;margin-bottom:10px}
+.checks .chk{padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card2);margin:0}
+.checks .chk:hover{border-color:var(--accent)}
+.formula{direction:ltr;unicode-bidi:isolate;text-align:center;font:700 19px/1.9 "Segoe UI",sans-serif;padding:12px 16px;border-radius:14px;background:rgba(var(--accent-rgb),.1);border:1px solid rgba(var(--accent-rgb),.4);margin:12px 0}
+.formula small{display:block;font:400 14px "Segoe UI",sans-serif;color:var(--muted)}
+
+/* ---------- share disclaimer (footer injected by core.js) ---------- */
+.disclaimer{max-width:1160px;margin:0 auto;padding:0 clamp(12px,3vw,24px) 46px}
+.disclaimer>div{padding:14px 18px;border-radius:16px;border:1px solid rgba(var(--warn-rgb),.5);background:rgba(var(--warn-rgb),.08);font-size:14.5px;line-height:1.85;color:var(--muted)}
+.disclaimer b{color:var(--text)}
+.disclaimer .d-en{direction:ltr;text-align:left;margin-top:10px;padding-top:10px;border-top:1px dashed rgba(var(--warn-rgb),.4);font-family:"Segoe UI",system-ui,sans-serif;font-size:13.5px;line-height:1.7}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;gap:12px;padding-top:12px}
+  .nav{position:sticky;top:60px;z-index:20;flex-direction:row;overflow-x:auto;gap:6px;padding:8px 2px;background:var(--bg)}
+  .nav{scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav button{width:auto;flex:none;padding:6px 10px}
+  .nav button:not(.on) .lbl{display:none}
+  .nav .tick{display:none}
+  .nav button.done .num{background:var(--ok);color:#06210f;border-color:transparent}
+  .ttl small{display:none}
+}
+@media (max-width:700px){
+  body{font-size:16px}
+  h2{font-size:26px}
+  .path{grid-template-columns:repeat(2,1fr);gap:12px}
+  .node::after{display:none!important}
+  .cycle{grid-template-columns:repeat(2,1fr)}
+  .opts.c3{grid-template-columns:1fr}
+  .metrics{grid-template-columns:1fr}
+  .prog{min-width:0}
+  .tbl{font-size:14px}
+  .tbl th,.tbl td{padding:8px 7px}
+  .tbl td:first-child{white-space:normal}
+  .prog .bar{min-width:50px}
+  .card.calc{padding:16px 10px}
+  .calc input[type=number]{padding:6px 4px;font-size:15px}
+  .ctbl.sm th,.ctbl.sm td{padding:8px 4px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* ---------- print: only the summary station ---------- */
+@media print{
+  :root,[data-theme="dark"],[data-theme="light"]{--bg:#fff;--card:#fff;--card2:#f3f3f3;--line:#ccc;--text:#111;--muted:#444;--shadow:none}
+  body{background:#fff!important;font-size:12pt;line-height:1.55}
+  .topbar,.nav,.station-foot,.noprint{display:none!important}
+  .layout{display:block;padding:0}
+  .station{display:none!important}
+  .station.summary{display:block!important}
+  .card,.panel{box-shadow:none;break-inside:avoid}
+  .tbl{break-inside:avoid}
+}
+
+</style>
+<style>
+/* ---------- Lecture 3 only: methodology diagrams + selection matrix ---------- */
+.sw ul{margin:0;padding-inline-start:20px;line-height:1.9}
+.diagram{padding:6px 2px}
+
+/* waterfall staircase */
+.wf{display:grid;gap:8px;direction:ltr;margin:8px 0 12px}
+.wf-step{width:52%;margin-left:calc(var(--i) * 16%);padding:10px 14px;border-radius:14px;border:1.5px solid rgba(var(--c-rgb),.55);background:rgba(var(--c-rgb),.14);font:700 16px "Segoe UI",sans-serif;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.wf-step small{font-weight:400;color:var(--muted);font-size:12.5px;text-align:right}
+
+/* parallel */
+.par{direction:ltr;display:grid;gap:8px;margin:8px 0 12px}
+.par .row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.par .box{padding:10px 8px;border-radius:12px;text-align:center;border:1.5px solid rgba(var(--c-rgb),.55);background:rgba(var(--c-rgb),.14);font:600 14.5px/1.45 "Segoe UI",sans-serif}
+.par .box small{display:block;color:var(--muted);font-weight:400;font-size:12.5px}
+
+/* V-model */
+.vm{direction:ltr;display:grid;gap:8px;margin:10px 0}
+.vm-row{display:grid;grid-template-columns:1fr 26px 1fr;align-items:center;gap:6px;cursor:pointer;background:none;border:0;padding:0;color:var(--text);text-align:left}
+.vm .l,.vm .r{padding:9px 10px;border-radius:12px;border:1.5px solid rgba(var(--c-rgb),.45);background:rgba(var(--c-rgb),.1);font:600 14px/1.35 "Segoe UI",sans-serif;transition:.2s}
+.vm .l{margin-left:calc(var(--i) * 8%)}
+.vm .r{margin-right:calc(var(--i) * 8%);text-align:right}
+.vm .mid{text-align:center;color:var(--muted);font-size:16px}
+.vm-row.on .l,.vm-row.on .r{background:rgba(var(--c-rgb),.32);border-color:var(--c);box-shadow:0 6px 16px rgba(var(--c-rgb),.25)}
+.vm-base{text-align:center;padding:9px 10px;border-radius:12px;border:1.5px dashed var(--line);background:var(--card2);font:700 14px "Segoe UI",sans-serif;margin:0 18%}
+
+/* flows + RAD */
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px;margin:10px 0}
+.flow>div{flex:1;min-width:118px;padding:10px 12px;border-radius:14px;text-align:center;border:1.5px solid rgba(var(--c-rgb,var(--accent-rgb)),.5);background:rgba(var(--c-rgb,var(--accent-rgb)),.12);font-size:15px;line-height:1.55}
+.flow>.ar{flex:0 0 auto;min-width:0;border:0;background:transparent;align-self:center;color:var(--muted);font-size:20px;padding:0}
+.flow small{display:block;color:var(--muted);font-size:13px}
+.vers{display:flex;gap:10px;align-items:flex-end;direction:ltr;height:140px;margin:12px 0}
+.vers .v{flex:1;border-radius:12px 12px 0 0;text-align:center;padding:6px;font:700 14px/1.35 "Segoe UI",sans-serif;display:flex;flex-direction:column;justify-content:flex-end;border:1.5px solid rgba(var(--c-rgb),.6);background:rgba(var(--c-rgb),.2)}
+.vers .v small{font-weight:400;color:var(--muted);font-size:12px}
+.keydiff{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.over{display:flex;flex-direction:column;gap:2px}
+.over .a{font-weight:800;font-size:17px;direction:ltr;unicode-bidi:isolate}
+.over .o{color:var(--muted);font-size:13px;letter-spacing:.5px;direction:ltr;unicode-bidi:isolate}
+.over .b{color:var(--muted);direction:ltr;unicode-bidi:isolate}
+
+/* selection matrix */
+.hm{border-collapse:separate;border-spacing:3px;direction:ltr;min-width:660px;width:100%}
+.hm th{font:700 13px/1.3 "Segoe UI",sans-serif;color:var(--muted);padding:6px 4px;text-align:center}
+.hm td.rowh{font:600 14px/1.35 "Segoe UI",sans-serif;text-align:left;padding:8px;color:var(--text);min-width:150px;position:sticky;left:0;background:var(--card);z-index:1;border-radius:8px}
+.hm td.c{text-align:center;padding:8px 4px;border-radius:8px;font:700 13px "Segoe UI",sans-serif;transition:opacity .2s}
+.hm td.p{background:rgba(var(--bad-rgb),.2);color:var(--bad)}
+.hm td.g{background:rgba(var(--accent-rgb),.18);color:var(--accent)}
+.hm td.e{background:rgba(var(--ok-rgb),.22);color:var(--ok)}
+.hm.has-sel tr:not(.sel) td.c{opacity:.28}
+.hm tr.sel td.rowh{box-shadow:inset 0 0 0 2px var(--accent)}
+.legend{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+.legend span{padding:2px 12px;border-radius:99px;font:700 13px "Segoe UI",sans-serif}
+.legend .p{background:rgba(var(--bad-rgb),.2);color:var(--bad)}
+.legend .g{background:rgba(var(--accent-rgb),.18);color:var(--accent)}
+.legend .e{background:rgba(var(--ok-rgb),.22);color:var(--ok)}
+.rank{display:grid;gap:10px;margin-top:14px}
+.rk{display:grid;grid-template-columns:150px 1fr 30px;gap:10px;align-items:center;direction:ltr}
+.rk .nm{font:700 14px "Segoe UI",sans-serif}
+.rk .bar2{height:14px;border-radius:99px;background:rgba(var(--accent-rgb),.12);overflow:hidden}
+.rk .bar2 i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--ok));transition:width .4s}
+.rk .sc{font:800 15px "Segoe UI",sans-serif;text-align:right}
+.rk .poor{grid-column:1/-1;font-size:13px;color:var(--bad);margin-top:-4px}
+.rk.top .nm{color:var(--ok)}
+@media (max-width:700px){
+  .rk{grid-template-columns:104px 1fr 26px}
+  .keydiff{grid-template-columns:1fr}
+  .vm .l,.vm .r{font-size:12.5px;padding:8px 6px}
+  .vm-row{grid-template-columns:1fr 18px 1fr}
+  .vm .l{margin-left:calc(var(--i) * 6%)}
+  .vm .r{margin-right:calc(var(--i) * 6%)}
+  .vm-base{margin:0 10%}
+}
+@media print{
+  .tscroll{overflow:visible}
+  .hm{min-width:0}
+  .hm td.rowh{position:static}
+}
+</style>
+</head>
+<body data-lecture="l3">
+
+<header class="topbar">
+  <a class="home" href="index.html" title="القائمة الرئيسية">🏠</a>
+  <div class="ttl"><b>IS202 · Lecture 3</b><small class="en plain">Project Selection &amp; Methodologies</small></div>
+  <div class="prog"><div class="bar"><i id="progBar"></i></div><span id="progTxt">0/11</span></div>
+  <button id="themeBtn" class="icon-btn" type="button" title="فاتح / داكن">☀️</button>
+</header>
+
+<div class="layout">
+<nav class="nav" id="nav" aria-label="محطات المحاضرة"></nav>
+<main>
+
+<!-- =====================================================  0 · BIG PICTURE -->
+<section class="station" data-icon="🗺️" data-title="الصورة الكبيرة">
+  <h2>الصورة الكبيرة 🗺️</h2>
+  <p class="lead">المشروع عدّى الـ <span class="en">Feasibility</span> (Lecture 2). دلوقتي فيه <b>سؤالين كبار</b>:</p>
+
+  <div class="grid g2">
+    <div class="card tint ph-ana" style="margin:0"><h4>① المشروع يستاهل ياخد فلوس؟</h4><p style="margin:0">لما نقارنه بـ<b>كل المشاريع التانية</b> اللي الشركة عايزاها. ده <b class="en">Project Selection / PPM</b>.</p></div>
+    <div class="card tint ph-des" style="margin:0"><h4>② هنبنيه بأنهي طريقة؟</h4><p style="margin:0">اختيار الـ <b class="en">Methodology</b> المناسبة لطبيعة المشروع. ده <b>قلب المحاضرة</b> ⭐</p></div>
+  </div>
+
+  <h3 class="sec">الـ Project Manager بيعمل 4 حاجات بعد الموافقة</h3>
+  <div class="card">
+    <ol class="steps ph-plan" style="margin:0">
+      <li><b class="en">Select the best project methodology</b> — <b>المحاضرة دي ⭐</b></li>
+      <li><b class="en">Develop a project work plan</b> — Lecture 4</li>
+      <li><b class="en">Establish a staffing plan</b> — Lecture 4</li>
+      <li><b class="en">Create ways to coordinate and control the project</b> — Lecture 4</li>
+    </ol>
+  </div>
+
+  <h3 class="sec">خريطة المحاضرة <small>(اضغط على أي مربع تروحله)</small></h3>
+  <div class="grid g3">
+    <button type="button" class="tile ph-ana" data-go="2"><span class="emo">📊</span><b class="en">Project Selection &amp; PPM</b><small>اللجنة بتختار المشاريع إزاي</small></button>
+    <button type="button" class="tile ph-plan" data-go="3"><span class="emo">🧭</span><b class="en">Methodology</b><small>يعني إيه، وعائلاتها التلاتة</small></button>
+    <button type="button" class="tile ph-des" data-go="4"><span class="emo">🏗️</span><b class="en">Structured</b><small>Waterfall · Parallel · V-Model</small></button>
+    <button type="button" class="tile ph-ana" data-go="5"><span class="emo">⚡</span><b class="en">RAD</b><small>Iterative · Prototyping · Throwaway</small></button>
+    <button type="button" class="tile ph-imp" data-go="6"><span class="emo">🏃</span><b class="en">Agile</b><small>XP · Scrum</small></button>
+    <button type="button" class="tile ph-des" data-go="7"><span class="emo">🎯</span><b class="en">Selection Matrix</b><small>أهم حاجة في الامتحان ⭐</small></button>
+  </div>
+
+  <div class="note">📌 <b>الامتحان:</b> آخر الفصل في الكتاب فيه حالة (<span class="en">case</span>) لازم تختار فيها <span class="en">methodology</span> وتبرّر بالـ <b class="en">matrix</b>. عشان كده محطة 7 فيها أداة تجرّب عليها.</div>
+  <div class="note ok">💡 <b>إزاي تذاكرها:</b> افهم فكرة كل methodology بالرسمة، احفظ الـ strengths/weaknesses (بيتسألوا كتير)، وبعدين اتمرن على الـ matrix.</div>
+</section>
+
+<!-- =====================================================  1 · PROJECT SELECTION / PPM -->
+<section class="station" data-icon="📊" data-title="اختيار المشاريع و PPM">
+  <h2>اختيار المشاريع و <span class="en">PPM</span> 📊</h2>
+  <p class="lead">الشركة عندها <b>طلبات مشاريع أكتر بكتير</b> من الفلوس والناس المتاحين. فاللجنة مش بتقيّم مشروع لوحده.</p>
+
+  <div class="card">
+    <h4>🏛️ اللجنة بتاخد إيه في إيدها؟</h4>
+    <p style="margin:0">الـ <span class="en">System Request</span> + الـ <span class="en">Feasibility Study</span> (Lecture 2) ← وبتسأل: <b>المشروع ده بيركّب فين في الـ portfolio كله؟</b> <span class="en">(project portfolio perspective)</span></p>
+  </div>
+
+  <h3 class="sec">بنوصّف أي مشروع بـ 7 خصائص</h3>
+  <div class="card">
+    <span class="chip en ph-plan">📏 Size</span><span class="chip en ph-plan">💵 Cost</span><span class="chip en ph-plan">🎯 Purpose</span><span class="chip en ph-plan">⏳ Length</span><span class="chip en ph-plan">⚠️ Risk</span><span class="chip en ph-plan">🔭 Scope</span><span class="chip en ph-plan">💰 Economic value</span>
+  </div>
+
+  <div class="note warn">⚖️ <b>فكرة مهمة:</b> مشروع <b>viable</b> (NPV موجب وعدّى الـ feasibility) ممكن <b>يترفض أو يتأجّل</b> بسبب مشاكل الـ portfolio — مفيش فلوس كفاية، أو فيه مشاريع تانية أحسن، أو المحفظة مش متوازنة.</div>
+
+  <h3 class="sec">🎮 لعبة: كوّن محفظة متوازنة</h3>
+  <p>الميزانية <b>100</b> وحدة. كل المشاريع دي <b>viable</b> (NPV موجب). اختار اللي هتمولهم:</p>
+  <div class="card" id="pfSim">
+    <div class="checks">
+      <label class="chk"><input type="checkbox" data-cost="40" data-npv="30" data-risk="L"><span><b>A · نظام الفواتير الجديد</b><br><small class="muted en plain">cost 40 · NPV +30 · low risk</small></span></label>
+      <label class="chk"><input type="checkbox" data-cost="50" data-npv="45" data-risk="H"><span><b>B · تطبيق موبايل للعملاء</b><br><small class="muted en plain">cost 50 · NPV +45 · high risk</small></span></label>
+      <label class="chk"><input type="checkbox" data-cost="30" data-npv="10" data-risk="L"><span><b>C · ترقية السيرفرات</b><br><small class="muted en plain">cost 30 · NPV +10 · low risk</small></span></label>
+      <label class="chk"><input type="checkbox" data-cost="60" data-npv="50" data-risk="H"><span><b>D · نظام تحليلات AI</b><br><small class="muted en plain">cost 60 · NPV +50 · high risk</small></span></label>
+      <label class="chk"><input type="checkbox" data-cost="20" data-npv="5" data-risk="L"><span><b>E · صيانة النظام القديم</b><br><small class="muted en plain">cost 20 · NPV +5 · low risk</small></span></label>
+    </div>
+    <div class="metric"><small><span>الميزانية المستخدمة</span><b id="pfTxt" dir="ltr"></b></small><div class="meter"><i id="pfBar"></i></div></div>
+    <div class="note" id="pfMsg"></div>
+  </div>
+  <p class="hint">🏆 تحدّي: اجمع أعلى NPV ممكن وانت جوه الميزانية والمحفظة متوازنة.</p>
+
+  <h3 class="sec">🖥️ برنامج الـ <span class="en">PPM</span></h3>
+  <div class="card">
+    <p style="margin-top:0"><b>PPM software</b> بيجمّع ويدير معلومات <b>كل المشاريع</b> — الشغّالة والمستنية موافقة — وبكده الشركة بتفضل محدّثة وتتكيّف مع الظروف. أهم مميزاته:</p>
+    <span class="chip en ph-ana">Project prioritization</span><span class="chip en ph-ana">Employee allocation</span><span class="chip en ph-ana">Real-time project monitoring</span><span class="chip en ph-ana">Flagging cost &amp; time variances</span><span class="chip en ph-ana">Monitoring economic feasibility</span>
+    <div class="note ok" style="margin-bottom:0">📖 <b>الكتاب بيضيف:</b> الهدف محفظة فيها <b>مزيج</b>: مشاريع <span class="en">high-risk / high-reward</span> (تحويلية) + مشاريع <span class="en">low-risk</span> (صيانة وتشغيل).</div>
+  </div>
+
+  <h3 class="sec">🎯 تدريب</h3>
+  <div data-deck="ppm"></div>
+</section>
+
+<!-- =====================================================  2 · METHODOLOGY & FAMILIES -->
+<section class="station" data-icon="🧭" data-title="الـ Methodology وعائلاتها">
+  <h2>الـ <span class="en">Methodology</span> 🧭</h2>
+  <p class="lead">قبل ما نبدأ المشروع لازم نختار <b>طريقة الشغل</b> اللي هنمشي بيها.</p>
+
+  <div class="card">
+    <h4>📖 التعريف</h4>
+    <p style="margin-top:0"><b class="en">Methodology = a formalized approach to implementing the SDLC</b> — يعني <b>سلسلة خطوات</b> لازم تتنفذ و<b>Deliverables</b> لازم تتطلّع.</p>
+    <h4>🏭 بتيجي منين؟</h4>
+    <span class="chip en ph-plan">Internally developed by the organization</span><span class="chip en ph-plan">Consulting firms</span><span class="chip en ph-plan">Software vendors</span><span class="chip en ph-plan">Government agencies</span>
+  </div>
+
+  <h3 class="sec">3 عائلات — اضغط تروح لكل واحدة</h3>
+  <div class="grid g3">
+    <button type="button" class="tile ph-plan" data-go="4"><span class="emo">🏗️</span><b class="en">Structured</b><small>صارمة، مراحل ورا بعض، deliverables</small><span class="en plain" style="font-size:14px;margin-top:6px">Waterfall · Parallel · V-Model</span></button>
+    <button type="button" class="tile ph-ana" data-go="5"><span class="emo">⚡</span><b class="en">RAD</b><small>نسخ و prototypes، feedback سريع</small><span class="en plain" style="font-size:14px;margin-top:6px">Iterative · System Prototyping · Throwaway</span></button>
+    <button type="button" class="tile ph-imp" data-go="6"><span class="emo">🏃</span><b class="en">Agile</b><small>دورات قصيرة، تعاون مستمر</small><span class="en plain" style="font-size:14px;margin-top:6px">Extreme Programming (XP) · Scrum</span></button>
+  </div>
+
+  <div class="card">
+    <p style="margin:0"><b>الفرق الأساسي:</b> الـ <b class="en">Structured</b> بتفترض إن كل phase تخلص <b>تماماً</b> قبل اللي بعدها (وده بيدّي جودة وانضباط). الـ <b class="en">RAD</b> و <b class="en">Agile</b> هدفهم يوصّلوا <b>جزء شغّال</b> للـ users بدري.</p>
+  </div>
+
+  <h3 class="sec">🎯 لعبة: الـ methodology دي من أنهي عائلة؟</h3>
+  <div data-deck="family"></div>
+</section>
+
+<!-- =====================================================  3 · STRUCTURED -->
+<section class="station" data-icon="🏗️" data-title="Structured">
+  <h2><span class="en">Structured</span> — Waterfall · Parallel · V-Model 🏗️</h2>
+  <p class="lead">كلها مبنية على الـ <span class="en">SDLC</span> وبتفترض إن <b>الـ phase تخلص قبل ما نبدأ اللي بعدها</b>. الهدف: لو كل phase اتعملت كويس، الناتج هيبقى صح وعالي الجودة.</p>
+
+  <div class="card" data-tabs="wf">
+    <div class="seg">
+      <button type="button" class="en ph-plan" data-tab="wf">Waterfall</button>
+      <button type="button" class="en ph-ana" data-tab="par">Parallel</button>
+      <button type="button" class="en ph-des" data-tab="vm">V-Model</button>
+    </div>
+
+    <!-- Waterfall -->
+    <div class="pane" data-pane="wf">
+      <p style="margin-top:0">بنتحرك من phase للتانية زي الشلال، و<b>الـ deliverables بتتسلّم من phase للي بعدها</b>.</p>
+      <div class="wf">
+        <div class="wf-step ph-plan" style="--i:0">Planning <small>System request, plan</small></div>
+        <div class="wf-step ph-ana" style="--i:1">Analysis <small>System proposal</small></div>
+        <div class="wf-step ph-des" style="--i:2">Design <small>System specification</small></div>
+        <div class="wf-step ph-imp" style="--i:3">Implementation <small>Working system</small></div>
+      </div>
+      <div class="grid g2 sw">
+        <div class="card tint t-ok" style="margin:0"><h4>💪 Strengths</h4><ul><li>الـ requirements بتتحدد <b>بدري جداً</b> قبل ما البناء يبدأ</li><li>الـ requirements <b>متجمّدة (frozen)</b> — مفيش «moving targets»</li></ul></div>
+        <div class="card tint t-bad" style="margin:0"><h4>⚠️ Weaknesses</h4><ul><li>لازم تستنى <b>وقت طويل</b> قبل ما تشوف أي دليل ظاهر على النظام</li><li>بياخد <b>وقت طويل</b> من البداية للنهاية</li></ul></div>
+      </div>
+    </div>
+
+    <!-- Parallel -->
+    <div class="pane" data-pane="par">
+      <p style="margin-top:0">نقسّم المشروع لـ <b>subprojects</b> تتشغّل عليها فرق <b>في نفس الوقت</b> ← الوقت الكلي بيقل.</p>
+      <div class="par">
+        <div class="box ph-plan">Planning + general design<small>تصميم عام للنظام كله</small></div>
+        <div class="row">
+          <div class="box ph-ana">Subproject 1<small>design → build</small></div>
+          <div class="box ph-ana">Subproject 2<small>design → build</small></div>
+          <div class="box ph-ana">Subproject 3<small>design → build</small></div>
+        </div>
+        <div class="box ph-imp">Integration → final system<small>نجمّعهم في الآخر</small></div>
+      </div>
+      <div class="grid g2 sw">
+        <div class="card tint t-ok" style="margin:0"><h4>💪 Strengths</h4><ul><li>بيقلل وقت المشروع <b>مقارنةً بالـ Waterfall</b></li><li>بيقلل الـ <b>rework</b>: وقت أقصر ← فرصة أقل إن الـ requirements تتغير</li></ul></div>
+        <div class="card tint t-bad" style="margin:0"><h4>⚠️ Weaknesses</h4><ul><li>تقسيم الـ subprojects محتاج <b>قرارات تصميم دقيقة</b></li><li>تجميع الـ subprojects في الآخر ممكن يبقى <b>معقد وصعب</b></li></ul></div>
+      </div>
+    </div>
+
+    <!-- V-model -->
+    <div class="pane" data-pane="vm">
+      <p style="margin-top:0">بيركّز على <b>جودة النظام</b> من خلال <b>تخطيط الاختبارات</b>: وإحنا بننزل في الـ analysis والـ design، بنصمّم الـ tests اللي هتتنفذ بعدين. <small class="muted">(اضغط على أي صف)</small></p>
+      <div class="vm" id="vm">
+        <button type="button" class="vm-row ph-plan" style="--i:0"><span class="l">Analysis</span><span class="mid">⇢</span><span class="r">Acceptance test</span></button>
+        <button type="button" class="vm-row ph-ana" style="--i:1"><span class="l">System design</span><span class="mid">⇢</span><span class="r">System test</span></button>
+        <button type="button" class="vm-row ph-des" style="--i:2"><span class="l">Architectural design</span><span class="mid">⇢</span><span class="r">Integration test</span></button>
+        <button type="button" class="vm-row ph-imp" style="--i:3"><span class="l">Component design</span><span class="mid">⇢</span><span class="r">Unit test</span></button>
+        <div class="vm-base">⌨️ Construction (coding)</div>
+      </div>
+      <div class="note" id="vmDesc"></div>
+      <p class="muted" style="margin:6px 0 4px">⬇️ على الشمال بنصمّم الـ tests مع كل مرحلة. ⬆️ بعد الـ coding بننفّذهم من تحت لفوق بالترتيب ده:</p>
+      <div class="flow" style="margin-top:4px">
+        <div class="ph-imp en">1 · Unit</div><div class="ar">⬅</div>
+        <div class="ph-des en">2 · Integration</div><div class="ar">⬅</div>
+        <div class="ph-ana en">3 · System</div><div class="ar">⬅</div>
+        <div class="ph-plan en">4 · Acceptance</div>
+      </div>
+      <div class="grid g2 sw">
+        <div class="card tint t-ok" style="margin:0"><h4>💪 Strengths</h4><ul><li>بسيط ومباشر <span class="en plain">(simple and straightforward)</span></li><li>الجودة بتتحسن بسبب التركيز على الـ <b>testing</b></li><li>إدخال خبرة الـ <b class="en">QA</b> بدري بيقوّي الجودة</li></ul></div>
+        <div class="card tint t-bad" style="margin:0"><h4>⚠️ Weaknesses</h4><ul><li><b>جامد (Rigid)</b></li><li>صعب في بيئة business <b>ديناميكية</b> بتتغير</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sec">🎯 لعبة 1: الجملة دي بتوصف أنهي واحدة؟</h3>
+  <div data-deck="struct"></div>
+
+  <h3 class="sec">🎯 لعبة 2: الـ V-Model — أنهي Test؟</h3>
+  <div data-deck="vpair"></div>
+</section>
+
+<!-- =====================================================  4 · RAD -->
+<section class="station" data-icon="⚡" data-title="RAD">
+  <h2><span class="en">RAD</span> — Rapid Application Development ⚡</h2>
+  <p class="lead">الهدف: <b>نطوّر جزء من النظام بسرعة ونحطه في إيد الـ users</b>.</p>
+
+  <div class="card">
+    <h4>🧰 بيستخدم أدوات وتقنيات خاصة</h4>
+    <span class="chip en ph-ana">CASE tools</span><span class="chip en ph-ana">JAD sessions</span><span class="chip en ph-ana">Visual programming languages</span><span class="chip en ph-ana">Code generators</span>
+  </div>
+
+  <h3 class="sec">التلات أنواع <small>(اضغط على كل واحد)</small></h3>
+  <div class="card" data-tabs="iter">
+    <div class="seg">
+      <button type="button" class="en ph-plan" data-tab="iter">Iterative</button>
+      <button type="button" class="en ph-ana" data-tab="sys">System Prototyping</button>
+      <button type="button" class="en ph-des" data-tab="thr">Throwaway Prototyping</button>
+    </div>
+
+    <div class="pane" data-pane="iter">
+      <p style="margin-top:0">بنطوّر النظام كـ <b>سلسلة نسخ (versions)</b> ورا بعض. كل نسخة بتتسلّم، والـ users بيجرّبوها، وده بيحدد إيه اللي في النسخة اللي بعدها.</p>
+      <div class="vers">
+        <div class="v ph-plan" style="height:42%">V1<small>core features</small></div>
+        <div class="v ph-ana" style="height:68%">V2<small>+ features</small></div>
+        <div class="v ph-des" style="height:100%">V3<small>full system</small></div>
+      </div>
+      <div class="grid g2 sw">
+        <div class="card tint t-ok" style="margin:0"><h4>💪 Strengths</h4><ul><li>الـ users بياخدوا نظام يستخدموه <b>بسرعة</b></li><li>بيحددوا احتياجات إضافية للنسخ الجاية من <b>تجربتهم الفعلية</b></li></ul></div>
+        <div class="card tint t-bad" style="margin:0"><h4>⚠️ Weaknesses</h4><ul><li>الـ users بيستخدموا نظام <b>ناقص</b> لفترة</li><li>لازم يصبروا لحد النظام الكامل</li></ul></div>
+      </div>
+    </div>
+
+    <div class="pane" data-pane="sys">
+      <p style="margin-top:0">نعمل نسخة <b>خام وسريعة</b> «quick-and-dirty» ونكبّرها بتحسينات متكررة <b>لحد ما تبقى هي النظام النهائي</b>.</p>
+      <div class="flow">
+        <div class="ph-ana">🧪 Prototype<small>analysis + design + build في نفس الوقت</small></div><div class="ar">⬅</div>
+        <div class="ph-ana">👥 Users جرّبوه<small>feedback</small></div><div class="ar">⬅</div>
+        <div class="ph-ana">🔁 Refine<small>تحليل + تصميم + تنفيذ تاني</small></div><div class="ar">⬅</div>
+        <div class="ph-imp">✅ يبقى هو النظام النهائي</div>
+      </div>
+      <div class="grid g2 sw">
+        <div class="card tint t-ok" style="margin:0"><h4>💪 Strengths</h4><ul><li>الـ users بيشتغلوا على الـ prototype <b>بسرعة جداً</b></li><li>دورات الـ feedback بتخليهم يحدّدوا التغييرات ويصقلوا الـ <b>real requirements</b></li></ul></div>
+        <div class="card tint t-bad" style="margin:0"><h4>⚠️ Weaknesses</h4><ul><li>تحليل <b>سطحي</b> ممكن يعمل مشاكل</li><li>قرارات التصميم الأولى ممكن تبقى <b>ضعيفة</b></li><li>features اتنسيت ممكن يبقى <b>صعب</b> تضيفها بعدين</li></ul></div>
+      </div>
+    </div>
+
+    <div class="pane" data-pane="thr">
+      <p style="margin-top:0">الـ prototype هنا <b>للتجريب والتعلّم بس</b>. بعد ما نفهم خيارات التصميم، <b>بنرميه 🗑️</b> ونبني النظام الحقيقي (بناءً على اللي اتعلمناه).</p>
+      <div class="flow">
+        <div class="ph-des">🧪 Prototype A<small>تصميم بديل</small></div>
+        <div class="ph-des">🧪 Prototype B<small>تصميم بديل</small></div><div class="ar">⬅</div>
+        <div class="t-bad">🗑️ نرميهم<small>الـ learning بس هي اللي بتفضل</small></div><div class="ar">⬅</div>
+        <div class="ph-imp">🏗️ نبني النظام الحقيقي<small>على أساس التصميم النهائي</small></div>
+      </div>
+      <div class="grid g2 sw">
+        <div class="card tint t-ok" style="margin:0"><h4>💪 Strengths</h4><ul><li>بيقلل الـ <b>uncertainty</b></li><li>المسائل المهمة بتتفهم <b>قبل</b> بناء النظام النهائي</li></ul></div>
+        <div class="card tint t-bad" style="margin:0"><h4>⚠️ Weaknesses</h4><ul><li>ممكن ياخد وقت <b>أطول</b> (مقارنةً بالـ System Prototyping)</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sec">⚖️ أكتر سؤال بيتخلط: System ضد Throwaway</h3>
+  <div class="card keydiff">
+    <div class="over"><span class="a ph-ana" style="color:var(--c)">System Prototyping</span><span class="o">GROWS INTO</span><span class="b">الـ prototype <b>بيتحوّل</b> للنظام النهائي</span></div>
+    <div class="over"><span class="a ph-des" style="color:var(--c)">Throwaway Prototyping</span><span class="o">IS DISCARDED</span><span class="b">الـ prototype <b>بيتشال</b> والتعلّم بس هو اللي بيفضل</span></div>
+  </div>
+
+  <h3 class="sec">🎯 لعبة: الجملة دي بتوصف أنهي نوع RAD؟</h3>
+  <div data-deck="rad"></div>
+</section>
+
+<!-- =====================================================  5 · AGILE -->
+<section class="station" data-icon="🏃" data-title="Agile">
+  <h2><span class="en">Agile</span> 🏃</h2>
+  <p class="lead">تركيز على <b>دورات قصيرة</b> كل واحدة بتطلّع <b>منتج software كامل</b>، وقابلة للتكيّف جداً في البيئات المتغيرة. أشهر نوعين: <b class="en">XP</b> و <b class="en">Scrum</b>.</p>
+
+  <h3 class="sec">📜 القيم الأربعة (<span class="en">Agile Manifesto</span>) <small>— من الكتاب</small></h3>
+  <div class="grid g2">
+    <div class="card tint ph-imp over" style="margin:0"><span class="a">Individuals &amp; interactions</span><span class="o">OVER</span><span class="b">processes &amp; tools</span></div>
+    <div class="card tint ph-imp over" style="margin:0"><span class="a">Working software</span><span class="o">OVER</span><span class="b">comprehensive documentation</span></div>
+    <div class="card tint ph-imp over" style="margin:0"><span class="a">Customer collaboration</span><span class="o">OVER</span><span class="b">contract negotiation</span></div>
+    <div class="card tint ph-imp over" style="margin:0"><span class="a">Responding to change</span><span class="o">OVER</span><span class="b">following a plan</span></div>
+  </div>
+
+  <h3 class="sec">النوعين <small>(اضغط)</small></h3>
+  <div class="card" data-tabs="xp">
+    <div class="seg">
+      <button type="button" class="en ph-ana" data-tab="xp">Extreme Programming (XP)</button>
+      <button type="button" class="en ph-des" data-tab="scrum">Scrum</button>
+    </div>
+
+    <div class="pane" data-pane="xp">
+      <p style="margin-top:0">تركيز على <b>الممارسات الهندسية</b>:</p>
+      <span class="chip ph-ana">✅ <span class="en">Continuous testing</span></span>
+      <span class="chip ph-ana">👥 <span class="en">Pair programming</span> — مبرمجين اتنين على جهاز واحد</span>
+      <span class="chip ph-ana">⏱️ <span class="en">Short iterations</span></span>
+      <span class="chip ph-ana">🔧 <span class="en">Relentless refactoring</span></span>
+      <span class="chip ph-ana">🙋 <span class="en">Full-time customer representative</span> جوه الفريق</span>
+    </div>
+
+    <div class="pane" data-pane="scrum">
+      <p style="margin-top:0">شغل في <b>Sprints</b> ثابتة الطول (<b>2 – 4 أسابيع</b>). كل sprint بيطلّع <span class="en">potentially shippable increment</span>.</p>
+      <div class="flow">
+        <div class="ph-des">📋 Product Backlog<small>مرتّبة بالأولوية</small></div><div class="ar">⬅</div>
+        <div class="ph-des">🏁 Sprint<small>2 – 4 weeks</small></div><div class="ar">⬅</div>
+        <div class="ph-des">🧍 Daily stand-up<small>15 دقيقة كل يوم</small></div><div class="ar">⬅</div>
+        <div class="ph-imp">📦 Shippable increment</div>
+      </div>
+      <div class="grid g2">
+        <div class="card" style="margin:0"><h4>👤 <span class="en">Product Owner</span></h4><p style="margin:0">بيدير الـ <span class="en">Product Backlog</span> ويرتّبها بالأولوية.</p></div>
+        <div class="card" style="margin:0"><h4>🧑‍🏫 <span class="en">Scrum Master</span></h4><p style="margin:0">بيوجّه الفريق ويشيل العوائق <span class="en">(impediments)</span> اللي بتتذكر في الـ stand-up.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g2 sw">
+    <div class="card tint t-ok" style="margin:0"><h4>💪 Strengths</h4><ul><li><b>تسليم سريع</b> للنتايج</li><li>شغّال كويس لما الـ requirements <b>مش محددة أو بتتغير</b></li></ul></div>
+    <div class="card tint t-bad" style="margin:0"><h4>⚠️ Weaknesses</h4><ul><li>محتاج <b>انضباط</b> (discipline)</li><li>مشاركة <b>كبيرة</b> من الـ users ضرورية</li><li>منحنى تعلّم <b>عالي</b> في الأول</li><li>الأحسن مع المشاريع <b>الصغيرة</b></li></ul></div>
+  </div>
+
+  <h3 class="sec">🎯 لعبة: XP ولا Scrum؟</h3>
+  <div data-deck="agile"></div>
+</section>
+
+<!-- =====================================================  6 · SELECTION MATRIX -->
+<section class="station" data-icon="🎯" data-title="مصفوفة الاختيار ⭐">
+  <h2>مصفوفة الاختيار <span class="en">Selection Matrix</span> ⭐</h2>
+  <p class="lead">مفيش methodology أحسن من الباقي دايماً. بنختار بحسب <b>6 عوامل</b> في المشروع:</p>
+
+  <div class="card">
+    <span class="chip en ph-des">Clarity of user requirements</span><span class="chip en ph-des">Familiarity with technology</span><span class="chip en ph-des">System complexity</span><span class="chip en ph-des">System reliability</span><span class="chip en ph-des">Time frame</span><span class="chip en ph-des">Schedule visibility</span>
+  </div>
+
+  <h3 class="sec">الجدول <small>(اسحب يمين/شمال لو الشاشة صغيرة)</small></h3>
+  <div class="legend"><span class="p">Poor</span><span class="g">Good</span><span class="e">Excellent</span></div>
+  <div class="card" style="padding:12px 10px">
+    <div class="tscroll"><table class="hm" id="hmMain"></table></div>
+  </div>
+  <div class="note warn">ℹ️ خانة <span class="en">Agile × Schedule visibility</span> مش واضحة في ملف السلايدز (اتقطّعت)، وأخدتها <b>Excellent</b> زي الكتاب المرجعي <span class="en">(Dennis)</span> — راجعها لو سألوك عليها بالذات.</div>
+
+  <h3 class="sec">🧠 أنماط تساعدك تحفظ</h3>
+  <div class="grid g2">
+    <div class="card tint ph-des" style="margin:0"><h4>❓ متطلبات مش واضحة</h4><p style="margin:0">الـ 3 <b>Structured</b> = <span class="en">Poor</span>. الأحسن: <b class="en">System Prototyping · Throwaway · Agile</b> (Excellent).</p></div>
+    <div class="card tint ph-des" style="margin:0"><h4>🧪 تكنولوجيا غير مألوفة</h4><p style="margin:0"><b class="en">Throwaway</b> هو الوحيد <span class="en">Excellent</span>. الـ Iterative = Good، والباقي Poor.</p></div>
+    <div class="card tint ph-des" style="margin:0"><h4>🧩 نظام معقد</h4><p style="margin:0"><b class="en">Throwaway</b> = Excellent. الـ <span class="en">System Prototyping</span> و <span class="en">Agile</span> = Poor.</p></div>
+    <div class="card tint ph-des" style="margin:0"><h4>🛡️ Reliability عالية</h4><p style="margin:0"><b class="en">V-Model</b> و <b class="en">Throwaway</b> = Excellent. الـ <span class="en">System Prototyping</span> = Poor.</p></div>
+    <div class="card tint ph-des" style="margin:0"><h4>⏱️ وقت قصير</h4><p style="margin:0"><b class="en">Iterative · System Prototyping · Agile</b> = Excellent. الـ <span class="en">Waterfall</span> و <span class="en">V-Model</span> = Poor.</p></div>
+    <div class="card tint ph-des" style="margin:0"><h4>👀 Schedule visibility</h4><p style="margin:0"><b class="en">Iterative · System Prototyping · Agile</b> = Excellent. الـ 3 <b>Structured</b> = Poor.</p></div>
+  </div>
+  <div class="note ok">🧠 <b>ملاحظتين:</b> الـ <b class="en">Waterfall</b> عنده 4 خانات <span class="en">Poor</span> — أضعف واحد قدام المتطلبات المتغيرة. والـ <b class="en">Throwaway</b> مفيهوش ولا <span class="en">Poor</span> (بس بياخد وقت أطول).</div>
+
+  <h3 class="sec">🧪 جرّب: الأداة تقترح عليك</h3>
+  <p>علّم على خصائص مشروعك وشوف أنهي methodology بتاخد أعلى نقط <span class="muted">(Poor = 0 · Good = 1 · Excellent = 2)</span>.</p>
+  <div class="card" id="recCard">
+    <div class="checks">
+      <label class="chk"><input type="checkbox" data-r="0"><span>متطلبات الـ users <b>مش واضحة</b> <span class="muted en plain">(unclear requirements)</span></span></label>
+      <label class="chk"><input type="checkbox" data-r="1"><span>التكنولوجيا <b>غير مألوفة</b> للفريق</span></label>
+      <label class="chk"><input type="checkbox" data-r="2"><span>النظام <b>معقد</b></span></label>
+      <label class="chk"><input type="checkbox" data-r="3"><span>محتاج <b>reliability</b> عالية</span></label>
+      <label class="chk"><input type="checkbox" data-r="4"><span>الوقت <b>قصير</b></span></label>
+      <label class="chk"><input type="checkbox" data-r="5"><span>محتاج <b>schedule visibility</b> (أشوف تقدم ظاهر)</span></label>
+    </div>
+    <div class="rank" id="recOut"></div>
+    <div class="note" id="recMsg" style="margin-bottom:0"></div>
+  </div>
+  <div class="note warn">⚠️ الأداة مجرد مساعدة للتدريب. في الامتحان <b>برّر اختيارك</b> بالـ ratings: «<span class="en">Waterfall is Poor for unclear requirements...</span>» وبعدين «<span class="en">Throwaway is Excellent for...</span>».</div>
+
+  <h3 class="sec">🎯 لعبة: المشروع ده يناسبه أنهي Methodology؟</h3>
+  <div data-deck="pick"></div>
+</section>
+
+<!-- =====================================================  7 · TRAPS -->
+<section class="station" data-icon="⚠️" data-title="فخاخ الامتحان">
+  <h2>فخاخ الامتحان ⚠️</h2>
+  <p class="lead">الجمل دي بالظبط هي اللي بتتعمل منها <span class="en">True/False</span>. قرر: صح ولا غلط؟</p>
+  <div data-deck="traps"></div>
+</section>
+
+<!-- =====================================================  8 · FLASHCARDS -->
+<section class="station" data-icon="🧠" data-title="Flashcards">
+  <h2>Flashcards 🧠</h2>
+  <p class="lead">فكّر في الإجابة الأول، وبعدين اقلب الكارت. علّم اللي عرفته ✅ واللي لسه 🔁 — وراجع الأخير بس.</p>
+  <div data-flash="main"></div>
+  <p class="hint" style="text-align:center;margin-top:10px">⌨️ مسطرة (Space) تقلب · الأسهم تنقل بين الكروت</p>
+</section>
+
+<!-- =====================================================  9 · QUIZ -->
+<section class="station" data-icon="📝" data-title="الكويز النهائي">
+  <h2>الكويز النهائي 📝</h2>
+  <p class="lead">10 أسئلة <span class="en">MCQ</span> بتصحيح فوري، وبعدها 3 أسئلة <span class="en">Essay</span> (واحد منهم case زي اللي في الكتاب).</p>
+
+  <h3 class="sec">① MCQ</h3>
+  <div data-deck="mcq"></div>
+
+  <h3 class="sec">② Essay</h3>
+  <div class="card essay" data-essay="e1">
+    <h3>سؤال 1</h3>
+    <p dir="auto" class="en plain" style="font-weight:600">Compare the Waterfall, Parallel and V-Model methodologies. For each, give a brief description, one strength and one weakness.</p>
+    <textarea placeholder="اكتب إجابتك هنا (بتتحفظ في المتصفح بس)…"></textarea>
+    <button type="button" class="btn" data-show>📖 اعرض الإجابة النموذجية</button>
+    <div class="model" hidden><div class="mdl"></div><div class="pts"></div></div>
+  </div>
+  <div class="card essay" data-essay="e2">
+    <h3>سؤال 2</h3>
+    <p dir="auto" class="en plain" style="font-weight:600">Explain the three RAD-based methodologies. What is the main difference between System Prototyping and Throwaway Prototyping?</p>
+    <textarea placeholder="اكتب إجابتك هنا…"></textarea>
+    <button type="button" class="btn" data-show>📖 اعرض الإجابة النموذجية</button>
+    <div class="model" hidden><div class="mdl"></div><div class="pts"></div></div>
+  </div>
+  <div class="card essay" data-essay="e3">
+    <h3>سؤال 3 — Case 🧩</h3>
+    <p dir="auto" class="en plain" style="font-weight:600">A bank wants to build a new mobile-wallet system using a technology its team has never used before (e.g., a new blockchain platform). The business users have only vague ideas about the features, and the system is highly complex. Using the selection matrix, explain why Waterfall is inappropriate and recommend the most suitable methodology with full justification.</p>
+    <textarea placeholder="اكتب إجابتك هنا…"></textarea>
+    <button type="button" class="btn" data-show>📖 اعرض الإجابة النموذجية</button>
+    <div class="model" hidden><div class="mdl"></div><div class="pts"></div></div>
+  </div>
+</section>
+
+<!-- =====================================================  10 · SUMMARY -->
+<section class="station summary" data-icon="⚡" data-title="ملخص المراجعة">
+  <h2>ملخص المراجعة ⚡ <span class="en plain" style="font-size:18px">Lecture 3</span></h2>
+  <p class="lead noprint">ده اللي تراجعه الليلة اللي قبل الامتحان. <button type="button" class="btn" onclick="window.print()">🖨️ اطبع / احفظ PDF</button></p>
+
+  <h3 class="sec">📊 اختيار المشاريع</h3>
+  <div class="grid g2">
+    <div class="card"><h4>الـ Portfolio</h4><p style="margin:0">اللجنة بتستخدم <span class="en">System Request + Feasibility Study</span> وبتبص على الـ <b>portfolio كله</b>. مشروع viable ممكن يترفض/يتأجّل بسبب الـ portfolio.</p></div>
+    <div class="card"><h4>الـ PPM software</h4><p style="margin:0" class="en plain">Prioritization · employee allocation · real-time monitoring · cost &amp; time variance flags · economic feasibility monitoring</p></div>
+  </div>
+  <p><b>7 خصائص للمشروع:</b> <span class="en">Size · Cost · Purpose · Length · Risk · Scope · Economic value</span></p>
+
+  <h3 class="sec">🧭 الـ Methodologies</h3>
+  <table class="tbl">
+    <tr><th>الاسم</th><th>الفكرة</th><th>Strengths</th><th>Weaknesses</th></tr>
+    <tr class="ph-plan"><td><span class="dot"></span><span class="en">Waterfall</span></td><td>phase ورا phase، deliverables بتتسلّم</td><td>requirements بدري + frozen</td><td>انتظار طويل قبل ما يظهر نظام · وقت طويل</td></tr>
+    <tr class="ph-plan"><td><span class="dot"></span><span class="en">Parallel</span></td><td>subprojects بالتوازي ثم integration</td><td>وقت أقل · rework أقل</td><td>تقسيم دقيق · integration صعب</td></tr>
+    <tr class="ph-plan"><td><span class="dot"></span><span class="en">V-Model</span></td><td>تصميم الـ tests مع كل مرحلة</td><td>بسيط · جودة عالية · QA بدري</td><td>جامد · صعب في بيئة متغيرة</td></tr>
+    <tr class="ph-ana"><td><span class="dot"></span><span class="en">Iterative</span></td><td>سلسلة versions</td><td>users يستخدموا بسرعة · احتياجات من التجربة</td><td>نظام ناقص لفترة · لازم صبر</td></tr>
+    <tr class="ph-ana"><td><span class="dot"></span><span class="en">System Prototyping</span></td><td>prototype سريع يكبر ويبقى النظام</td><td>users بسرعة · feedback يصقل المتطلبات</td><td>تحليل سطحي · تصميم أولي ضعيف · features منسية</td></tr>
+    <tr class="ph-des"><td><span class="dot"></span><span class="en">Throwaway</span></td><td>prototypes للتجريب ثم تتشال</td><td>uncertainty أقل · مسائل مهمة تتفهم الأول</td><td>ممكن ياخد وقت أطول</td></tr>
+    <tr class="ph-imp"><td><span class="dot"></span><span class="en">Agile (XP, Scrum)</span></td><td>دورات قصيرة بتطلّع software كامل</td><td>تسليم سريع · يناسب المتطلبات المتغيرة</td><td>انضباط · users كتير · learning curve · مشاريع صغيرة</td></tr>
+  </table>
+  <p><b>RAD tools:</b> <span class="en">CASE tools · JAD sessions · Visual programming languages · Code generators</span></p>
+  <div class="grid g2">
+    <div class="card"><h4>🧪 V-Model pairs</h4><p style="margin:0" class="en plain">Analysis → Acceptance test · System design → System test · Architectural design → Integration test · Component design → Unit test (execution: Unit → … → Acceptance)</p></div>
+    <div class="card"><h4>🏃 XP vs Scrum</h4><p style="margin:0" class="en plain">XP: continuous testing, pair programming, short iterations, refactoring, full-time customer rep. Scrum: 2–4 week sprints, Product Owner, Product Backlog, daily 15-min stand-up, Scrum Master, shippable increment.</p></div>
+  </div>
+
+  <h3 class="sec">🎯 الـ Selection Matrix</h3>
+  <div class="tscroll"><table class="hm" id="hmSum"></table></div>
+
+  <h3 class="sec">⚠️ الفخاخ</h3>
+  <div class="note bad">
+    ❌ Parallel أبطأ من Waterfall (بالعكس، أسرع) &nbsp;·&nbsp; ❌ System Prototyping prototype بيتشال (ده Throwaway) &nbsp;·&nbsp; ❌ Waterfall مناسب لمتطلبات مش واضحة (Poor) &nbsp;·&nbsp; ❌ Agile أحسن للمشاريع الضخمة (الأحسن الصغيرة) &nbsp;·&nbsp; ❌ الـ methodologies بتتعمل داخلياً بس (كمان consulting firms وvendors وحكومة) &nbsp;·&nbsp; ❌ V-Model بيخطّط الـ tests بعد الكتابة (مع كل مرحلة) &nbsp;·&nbsp; ❌ المشروع الـ viable لازم يتوافق عليه (ممكن يتأجّل)
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+window.DATA = {
+  decks: {
+    /* ---------- PPM ---------- */
+    ppm: {
+      cols: 1, shuffleOpts: true,
+      cards: [
+        { q: 'A project is viable (positive NPV) but the approval committee defers it. Is that possible?', opts: ['Yes, because of portfolio issues such as limited resources or better-fitting projects', 'No, every viable project must be approved', 'Only if the sponsor asks for it', 'Only if the NPV is negative'], a: 0, why: 'Viable projects may be rejected or deferred due to <b>project portfolio issues</b>.' },
+        { q: 'Which of the following is NOT a feature of PPM software?', opts: ['Writing the program code for each project', 'Project prioritization', 'Employee allocation', 'Real-time project monitoring'], a: 0, why: 'PPM: prioritization، employee allocation، real-time monitoring، flagging cost/time variances، monitoring economic feasibility.' },
+        { q: 'The approval committee bases its project selection mainly on:', opts: ['The system request and the feasibility study', 'The programming language', 'The project work plan only', 'The system specification'], a: 0, why: 'اللجنة بتستخدم <b>System Request + Feasibility Study</b>.' },
+        { q: 'The “project portfolio perspective” asks:', opts: ['How does the project fit within the entire portfolio of projects?', 'How many programmers does the project need?', 'Which language will the project use?', 'Which phase is the project in?'], a: 0, why: 'بنبص على المشروع جوه <b>المحفظة كلها</b> مش لوحده.' },
+        { q: 'Which of these is NOT one of the ways to characterize a project?', opts: ['Programming language', 'Size', 'Risk', 'Economic value'], a: 0, why: 'الخصائص: Size, Cost, Purpose, Length, Risk, Scope, Economic value.' }
+      ]
+    },
+
+    /* ---------- families ---------- */
+    family: {
+      cols: 3,
+      opts: [
+        { t: 'Structured', cls: 'ph-plan' },
+        { t: 'RAD', cls: 'ph-ana' },
+        { t: 'Agile', cls: 'ph-imp' }
+      ],
+      cards: [
+        { q: 'Waterfall', a: 0, why: '<b>Structured</b> — مبنية على الـ SDLC.' },
+        { q: 'Iterative Development', a: 1, why: '<b>RAD</b> — سلسلة versions.' },
+        { q: 'Scrum', a: 2, why: '<b>Agile</b> — sprints.' },
+        { q: 'V-Model', a: 0, why: '<b>Structured</b>.' },
+        { q: 'Throwaway Prototyping', a: 1, why: '<b>RAD</b>.' },
+        { q: 'Extreme Programming (XP)', a: 2, why: '<b>Agile</b>.' },
+        { q: 'Parallel Development', a: 0, why: '<b>Structured</b>.' },
+        { q: 'System Prototyping', a: 1, why: '<b>RAD</b>.' },
+        { q: 'Uses CASE tools, JAD sessions, visual programming languages and code generators', a: 1, why: 'دي أدوات الـ <b>RAD</b>.' },
+        { q: 'Assumes each phase is completed before moving on to the next', a: 0, why: 'ده افتراض الـ <b>Structured</b> methodologies.' },
+        { q: 'Short cycles that each produce a complete software product', a: 2, why: 'ده وصف الـ <b>Agile</b>.' }
+      ]
+    },
+
+    /* ---------- structured statements ---------- */
+    struct: {
+      cols: 3,
+      opts: [
+        { t: 'Waterfall', cls: 'ph-plan' },
+        { t: 'Parallel', cls: 'ph-ana' },
+        { t: 'V-Model', cls: 'ph-des' }
+      ],
+      cards: [
+        { q: 'Requirements are frozen as the project proceeds — no moving targets', a: 0, why: 'ده <b>Waterfall</b> (strength).' },
+        { q: 'The project is subdivided into subprojects that are worked on at the same time', a: 1, why: 'ده تعريف <b>Parallel</b>.' },
+        { q: 'Integrating the subprojects at the end can be complex and difficult', a: 1, why: 'weakness بتاعة <b>Parallel</b>.' },
+        { q: 'Quality assurance expertise is included early in the project', a: 2, why: '<b>V-Model</b> — strength.' },
+        { q: 'Users must wait a long time before there is visible evidence of the new system', a: 0, why: 'weakness بتاعة <b>Waterfall</b>.' },
+        { q: 'Rigid, and difficult to use in a dynamic business environment', a: 2, why: 'weakness بتاعة <b>V-Model</b>.' },
+        { q: 'Reduces the need for rework because the shorter time frame leaves less chance of requirements changing', a: 1, why: 'strength بتاعة <b>Parallel</b>.' },
+        { q: 'Requirements are identified long before construction begins', a: 0, why: 'strength بتاعة <b>Waterfall</b>.' },
+        { q: 'Quality improves through the emphasis on testing', a: 2, why: 'strength بتاعة <b>V-Model</b>.' },
+        { q: 'Creating the subprojects requires careful design decisions', a: 1, why: 'weakness بتاعة <b>Parallel</b>.' }
+      ]
+    },
+
+    /* ---------- V-model pairs ---------- */
+    vpair: {
+      cols: 2,
+      opts: [
+        { t: 'Acceptance test', cls: 'ph-plan' },
+        { t: 'System test', cls: 'ph-ana' },
+        { t: 'Integration test', cls: 'ph-des' },
+        { t: 'Unit test', cls: 'ph-imp' }
+      ],
+      cards: [
+        { q: 'Designed during Analysis (from the requirements)', a: 0, why: 'Analysis ← <b>Acceptance test design</b>.' },
+        { q: 'Designed from the System design', a: 1, why: 'System design ← <b>System test design</b>.' },
+        { q: 'Designed from the Architectural design', a: 2, why: 'Architectural design ← <b>Integration test design</b>.' },
+        { q: 'Designed from the Component design', a: 3, why: 'Component design ← <b>Unit test design</b>.' },
+        { q: 'The FIRST test executed after the code is constructed (bottom of the V)', a: 3, why: 'التنفيذ بيطلع من تحت: <b>Unit</b> الأول.' },
+        { q: 'The LAST test executed (top of the right arm)', a: 0, why: 'آخر واحد في الذراع اليمين = <b>Acceptance test</b>.' }
+      ]
+    },
+
+    /* ---------- RAD statements ---------- */
+    rad: {
+      cols: 3,
+      opts: [
+        { t: 'Iterative', cls: 'ph-plan' },
+        { t: 'System Prototyping', cls: 'ph-ana' },
+        { t: 'Throwaway', cls: 'ph-des' }
+      ],
+      cards: [
+        { q: 'The system is developed as a series of versions, one after another', a: 0, why: 'ده <b>Iterative</b>.' },
+        { q: 'A rough version is created quickly and “grown” into the final system with repeated refinement', a: 1, why: 'ده <b>System Prototyping</b>.' },
+        { q: 'The prototype is discarded; the real system is built following the prototype design', a: 2, why: 'ده <b>Throwaway</b>.' },
+        { q: 'Users must use an incomplete system for a time and be patient', a: 0, why: 'weakness بتاعة <b>Iterative</b>.' },
+        { q: 'Superficial analysis may cause problems, and initial design decisions may be poor', a: 1, why: 'weaknesses بتاعة <b>System Prototyping</b>.' },
+        { q: 'May take longer (compared to system prototyping)', a: 2, why: 'weakness بتاعة <b>Throwaway</b>.' },
+        { q: 'Users identify needs for later versions based on real experience with the current version', a: 0, why: 'strength بتاعة <b>Iterative</b>.' },
+        { q: 'Uncertainty is minimized, and important issues are understood before the final system is built', a: 2, why: 'strength بتاعة <b>Throwaway</b>.' },
+        { q: 'Overlooked features may be hard to add later', a: 1, why: 'weakness بتاعة <b>System Prototyping</b>.' },
+        { q: 'Alternative designs are prototyped in an experimental way before the design is finalized', a: 2, why: '<b>Throwaway</b> — التجريب قبل التصميم النهائي.' }
+      ]
+    },
+
+    /* ---------- XP / Scrum ---------- */
+    agile: {
+      cols: 2,
+      opts: [{ t: 'Extreme Programming (XP)', cls: 'ph-ana' }, { t: 'Scrum', cls: 'ph-des' }],
+      cards: [
+        { q: 'Pair programming — two programmers share one workstation', a: 0, why: 'ممارسة أساسية في <b>XP</b>.' },
+        { q: 'Product Backlog', a: 1, why: 'من مصطلحات <b>Scrum</b>.' },
+        { q: 'Scrum Master', a: 1, why: 'دور في <b>Scrum</b>.' },
+        { q: 'A full-time customer representative embedded with the development team', a: 0, why: 'ممارسة <b>XP</b>.' },
+        { q: 'A daily 15-minute stand-up meeting', a: 1, why: '<b>Scrum</b>.' },
+        { q: 'Relentless refactoring', a: 0, why: '<b>XP</b>.' },
+        { q: 'Fixed-length sprints of 2 to 4 weeks', a: 1, why: '<b>Scrum</b>.' },
+        { q: 'Continuous testing', a: 0, why: '<b>XP</b>.' },
+        { q: 'Product Owner who keeps a prioritized backlog', a: 1, why: 'دور في <b>Scrum</b>.' }
+      ]
+    },
+
+    /* ---------- scenario picker ---------- */
+    pick: {
+      cols: 2,
+      opts: [
+        { t: 'Waterfall', cls: 'ph-plan' },
+        { t: 'Parallel', cls: 'ph-plan' },
+        { t: 'V-Model', cls: 'ph-plan' },
+        { t: 'Iterative', cls: 'ph-ana' },
+        { t: 'System Prototyping', cls: 'ph-ana' },
+        { t: 'Throwaway Prototyping', cls: 'ph-ana' },
+        { t: 'Agile', cls: 'ph-imp' }
+      ],
+      cards: [
+        { q: 'برنامج تحكم لجهاز طبي: المتطلبات ثابتة وواضحة، التكنولوجيا مألوفة، الـ reliability حرجة جداً، ومحتاجين مراحل testing متدرجة (unit ← integration ← system ← acceptance).', a: 2, why: '<b>V-Model</b>: Excellent في الـ reliability وبيصمّم الـ tests مع كل مرحلة.' },
+        { q: 'المتطلبات واضحة ومقسّمة لـ modules مستقلة (inventory, billing, reports) و3 فرق تقدر تشتغل عليهم في نفس الوقت عشان الوقت ضيق.', a: 1, why: '<b>Parallel</b>: بنقسّم لـ subprojects ونشتغل عليهم بالتوازي لتقليل الوقت.' },
+        { q: 'فكرة النظام لسه مش واضحة للـ users، والتكنولوجيا جديدة على الفريق، والنظام معقد ومحتاج reliability عالية.', a: 5, why: '<b>Throwaway</b>: Excellent في الأربع خصائص دي (unclear requirements, unfamiliar tech, complexity, reliability).' },
+        { q: 'فريق صغير، المتطلبات متغيرة وغير واضحة، الـ users متاحين طول الوقت، والمطلوب نتايج سريعة وتقدم ظاهر وكمان نظام موثوق.', a: 6, why: '<b>Agile</b>: Excellent في unclear/time/visibility وGood في reliability — مجموعه الأعلى.' },
+        { q: 'عايزين نسخة أولى بسيطة تدخل الخدمة بسرعة، وبعدها نضيف features في إصدارات لاحقة بناءً على تجربة المستخدمين الفعلية.', a: 3, why: '<b>Iterative</b>: سلسلة versions، كل نسخة من تجربة اللي قبلها.' },
+        { q: 'المتطلبات مش واضحة عند الـ users والنظام بسيط والتكنولوجيا مألوفة، ومحتاجين نوريهم نموذج شغال بسرعة ونكبّره لحد ما يبقى هو النظام النهائي.', a: 4, why: '<b>System Prototyping</b>: الـ prototype بيكبر ويبقى هو النظام.' },
+        { q: 'فريق عنده خبرة، المتطلبات مفهومة وثابتة، التكنولوجيا مألوفة، مفيش ضغط وقت، والإدارة عايزة كل مرحلة تتوثّق وتتعمد قبل اللي بعدها.', a: 0, why: '<b>Waterfall</b>: متطلبات frozen ومراحل متتالية.' },
+        { q: 'تكنولوجيا غير مألوفة ومتطلبات معقدة، والفريق عايز يجرّب تصاميم بديلة ويتعلم منها، وبعدين يبني النظام الحقيقي من الصفر ويرمي النماذج.', a: 5, why: '<b>Throwaway Prototyping</b>: التجريب ثم الرمي ثم بناء النظام الحقيقي.' }
+      ]
+    },
+
+    /* ---------- True / False traps ---------- */
+    traps: {
+      cols: 2,
+      opts: [{ t: 'صح ✔ (True)', cls: 't-ok' }, { t: 'غلط ✘ (False)', cls: 't-bad' }],
+      cards: [
+        { q: 'In the Waterfall methodology, requirements are frozen as the project proceeds.', a: 0, why: 'صح — «no moving targets».' },
+        { q: 'Parallel development usually takes longer than Waterfall.', a: 1, why: 'العكس — بيقلل الوقت لأن الـ subprojects بتتشغل في نفس الوقت.' },
+        { q: 'The V-Model emphasizes system quality through test plan development and brings QA expertise in early.', a: 0, why: 'صح — دي نقطة قوته.' },
+        { q: 'In System Prototyping, the prototype is thrown away once the design is understood.', a: 1, why: 'ده <b>Throwaway</b>. في System Prototyping الـ prototype بيتحوّل للنظام.' },
+        { q: 'Throwaway prototyping may take longer than system prototyping.', a: 0, why: 'صح — دي weakness بتاعته.' },
+        { q: 'Iterative development delivers the entire system at once at the end of the project.', a: 1, why: 'لأ — بيتسلّم كسلسلة <b>versions</b>.' },
+        { q: 'RAD methodologies use tools such as CASE tools, JAD sessions, visual programming languages and code generators.', a: 0, why: 'صح.' },
+        { q: 'Agile methodologies work best on large projects with fixed, well-defined requirements.', a: 1, why: 'الـ Agile بتشتغل أحسن مع المشاريع <b>الأصغر</b> ومتطلبات <b>متغيرة أو غير محددة</b>.' },
+        { q: 'Extreme Programming (XP) and Scrum are examples of Agile methodologies.', a: 0, why: 'صح.' },
+        { q: 'According to the selection matrix, Waterfall is Excellent for developing systems with unclear user requirements.', a: 1, why: '<b>Poor</b> — الـ Waterfall بيجمّد المتطلبات.' },
+        { q: 'A viable project can still be rejected or deferred because of portfolio issues.', a: 0, why: 'صح — لازم نوازن بين المشاريع.' },
+        { q: 'A methodology is a formalized approach to implementing the SDLC, made of steps to perform and deliverables to produce.', a: 0, why: 'صح — دي تعريفها.' },
+        { q: 'Methodologies can only be developed internally by the organization itself.', a: 1, why: 'كمان من <b>consulting firms</b> و <b>software vendors</b> و <b>government agencies</b>.' },
+        { q: 'In the V-Model, tests are planned only after the coding is finished.', a: 1, why: 'العكس — الـ tests بتتصمم <b>مع</b> كل مرحلة (Analysis ← Acceptance test).' },
+        { q: 'Significant user involvement is essential for Agile methodologies.', a: 0, why: 'صح — من weaknesses/متطلبات الـ Agile.' }
+      ]
+    },
+
+    /* ---------- MCQ ---------- */
+    mcq: {
+      cols: 1, shuffleOpts: true,
+      cards: [
+        { q: 'Which group of methodologies assumes each phase is complete before moving to the next one?', opts: ['Structured methodologies', 'RAD', 'Agile', 'Throwaway prototyping'], a: 0, why: 'الـ Structured: Waterfall, Parallel, V-Model.' },
+        { q: 'The main benefit of Parallel Development compared with Waterfall is that it:', opts: ['Reduces overall project time by working on subprojects at the same time', 'Eliminates the need for integration', 'Lets users see prototypes immediately', 'Removes the need for a general design'], a: 0, why: 'Parallel = تقليل الوقت الكلي.' },
+        { q: 'The main weakness of Parallel Development is that:', opts: ['Integrating the subprojects at the end can be complex and difficult', 'Requirements keep changing', 'It produces no deliverables', 'It requires pair programming'], a: 0, why: 'تجميع الـ subprojects في الآخر هو الصعب.' },
+        { q: 'Which methodology emphasizes system quality through test plan development and early QA involvement?', opts: ['V-Model', 'Waterfall', 'Iterative development', 'Scrum'], a: 0, why: '<b>V-Model</b>.' },
+        { q: 'In System Prototyping, the prototype is:', opts: ['Refined repeatedly until it becomes the final system', 'Thrown away after the design is understood', 'Built only after the final system is complete', 'Used only by the programmers'], a: 0, why: 'الـ prototype بيتحوّل للنظام النهائي.' },
+        { q: 'A weakness of Throwaway Prototyping (compared with System Prototyping) is that it:', opts: ['May take longer', 'Increases uncertainty', 'Produces less reliable systems', 'Needs no user involvement'], a: 0, why: '«May take longer».' },
+        { q: 'Which two methodologies are the Agile methodologies named in the lecture?', opts: ['Extreme Programming and Scrum', 'Waterfall and Parallel', 'Iterative and Throwaway', 'V-Model and System Prototyping'], a: 0, why: 'XP و Scrum.' },
+        { q: 'Which of the following is NOT a technique or tool associated with RAD?', opts: ['Frozen requirements baseline', 'CASE tools', 'JAD sessions', 'Code generators'], a: 0, why: 'الـ frozen requirements من Waterfall. أدوات RAD: CASE, JAD, visual programming, code generators.' },
+        { q: 'According to the selection matrix, which methodology is rated Poor for systems with unclear user requirements?', opts: ['Waterfall', 'System Prototyping', 'Throwaway Prototyping', 'Agile'], a: 0, why: 'الـ 3 Structured (Waterfall, Parallel, V-Model) = Poor.' },
+        { q: 'Which of the following is NOT one of the factors used to select a methodology?', opts: ['Popularity of the programming language', 'Clarity of user requirements', 'Schedule visibility', 'System reliability'], a: 0, why: 'العوامل الستة: clarity, technology familiarity, complexity, reliability, time frame, schedule visibility.' }
+      ]
+    }
+  },
+
+  /* ---------- flashcards ---------- */
+  flash: {
+    main: [
+      { f: 'يعني إيه <span class="en">Methodology</span>؟ وبتيجي منين؟', b: 'منهج رسمي لتنفيذ الـ <span class="en">SDLC</span>: سلسلة خطوات + deliverables.<br>المصادر: <span class="en">internal · consulting firms · software vendors · government agencies</span>' },
+      { f: 'بعد موافقة المشروع، الـ Project Manager لازم يعمل إيه؟ (4)', b: '① يختار أحسن <span class="en">methodology</span> ② <span class="en">work plan</span> ③ <span class="en">staffing plan</span> ④ طرق لـ <span class="en">coordination &amp; control</span>' },
+      { f: 'إزاي بنوصّف المشروع في الـ selection؟ (7)', b: '<span class="en">Size · Cost · Purpose · Length · Risk · Scope · Economic value</span>' },
+      { f: '<span class="en">Project Portfolio Management</span> (PPM)', b: 'نبص على كل المشاريع (الشغّالة والمستنية) كمحفظة واحدة ونوازن بينها. برنامج PPM بيدير المعلومات دي: <span class="en">prioritization, employee allocation, real-time monitoring, cost/time variance flags, economic feasibility monitoring</span>.' },
+      { f: 'مشروع viable ممكن يتأجّل؟ ليه؟', b: 'آه. مشروع viable ممكن يتأجّل أو يترفض بسبب <b>مشاكل الـ portfolio</b> (موارد محدودة / مشاريع تانية أحسن / عدم توازن).' },
+      { f: 'العائلات التلاتة للـ Methodologies', b: '<b class="en">Structured:</b> Waterfall, Parallel, V-Model<br><b class="en">RAD:</b> Iterative, System Prototyping, Throwaway<br><b class="en">Agile:</b> XP, Scrum' },
+      { f: '<span class="en">Waterfall</span>: الفكرة والـ S/W', b: 'phase ورا phase.<br>💪 requirements بدري ومتجمّدة.<br>⚠️ انتظار طويل قبل ما يظهر نظام، ووقت طويل.' },
+      { f: '<span class="en">Parallel</span>: الفكرة والـ S/W', b: 'subprojects بالتوازي.<br>💪 وقت أقل وrework أقل.<br>⚠️ تقسيم محتاج قرارات دقيقة، والـ integration صعب.' },
+      { f: '<span class="en">V-Model</span>: الفكرة والـ S/W', b: 'بيصمّم الـ tests مع كل مرحلة.<br>💪 بسيط، جودة أعلى، QA بدري.<br>⚠️ جامد، صعب في بيئة متغيرة.' },
+      { f: 'أزواج الـ <span class="en">V-Model</span>', b: '<span class="en">Analysis → Acceptance test<br>System design → System test<br>Architectural design → Integration test<br>Component design → Unit test</span><br>والتنفيذ بعد الكتابة: Unit ← … ← Acceptance.' },
+      { f: '<span class="en">RAD</span>: الهدف والأدوات', b: 'نطوّر جزء من النظام بسرعة ونوصّله للـ users.<br>الأدوات: <span class="en">CASE tools · JAD sessions · Visual programming languages · Code generators</span>' },
+      { f: '<span class="en">Iterative</span>: الفكرة والـ S/W', b: 'سلسلة versions.<br>💪 users يستخدموا بسرعة، واحتياجات النسخ الجاية من التجربة.<br>⚠️ نظام ناقص لفترة، ولازم صبر.' },
+      { f: '<span class="en">System Prototyping</span>: الفكرة والـ S/W', b: 'prototype سريع بيكبر ويبقى هو النظام.<br>💪 users بسرعة، وfeedback يصقل المتطلبات.<br>⚠️ تحليل سطحي، تصميم أولي ضعيف، features منسية.' },
+      { f: '<span class="en">Throwaway Prototyping</span>: الفكرة والـ S/W', b: 'prototypes تجريبية لبدائل التصميم، ثم تتشال ونبني النظام الحقيقي.<br>💪 uncertainty أقل، مسائل مهمة تتفهم الأول.<br>⚠️ ممكن ياخد وقت أطول.' },
+      { f: 'الفرق بين System و Throwaway Prototyping', b: '<b>System:</b> الـ prototype <b>بيكبر</b> ويبقى النظام.<br><b>Throwaway:</b> الـ prototype <b>بيتشال</b> والتعلّم بس هو اللي بيفضل.' },
+      { f: '<span class="en">Agile</span> باختصار', b: 'دورات قصيرة بتطلّع software كامل، تكيّف عالي. 💪 تسليم سريع، يناسب المتطلبات غير المحددة. ⚠️ انضباط، user involvement كبير، learning curve، الأحسن للمشاريع الصغيرة.' },
+      { f: '<span class="en">XP</span> — أهم ممارساته', b: '<span class="en">Continuous testing · Pair programming · Short iterations · Relentless refactoring · Full-time customer representative</span>' },
+      { f: '<span class="en">Scrum</span> — أهم عناصره', b: 'Sprints من 2 – 4 أسابيع · <span class="en">Product Owner</span> + <span class="en">Product Backlog</span> · daily 15-minute stand-up · <span class="en">Scrum Master</span> · potentially shippable increment' },
+      { f: 'القيم الأربعة للـ <span class="en">Agile Manifesto</span>', b: '<span class="en">Individuals &amp; interactions over processes &amp; tools<br>Working software over comprehensive documentation<br>Customer collaboration over contract negotiation<br>Responding to change over following a plan</span>' },
+      { f: 'عوامل اختيار الـ methodology (6)', b: '<span class="en">Clarity of user requirements · Familiarity with technology · System complexity · System reliability · Time frame · Schedule visibility</span>' },
+      { f: 'متطلبات مش واضحة ← إيه الأنسب؟', b: 'الـ 3 Structured = <b>Poor</b>. الأفضل: <span class="en">System Prototyping · Throwaway · Agile</span> (Excellent). Iterative = Good.' },
+      { f: 'تكنولوجيا غير مألوفة ← إيه الأنسب؟', b: '<b class="en">Throwaway</b> هو الوحيد Excellent. Iterative = Good. الباقي Poor.' },
+      { f: 'Reliability عالية ← إيه الأنسب؟', b: '<span class="en">V-Model</span> و <span class="en">Throwaway</span> = Excellent. الـ System Prototyping = Poor.' },
+      { f: 'وقت قصير / schedule visibility ← إيه الأنسب؟', b: '<span class="en">Iterative · System Prototyping · Agile</span> = Excellent. الـ Waterfall و V-Model = Poor للوقت.' },
+      { f: 'أنهي methodology عندها أكتر خانات Poor؟', b: '<b class="en">Waterfall</b> — 4 خانات (unclear requirements, unfamiliar tech, short time, schedule visibility). والـ Throwaway مفيهوش ولا Poor.' },
+      { f: 'إزاي أكتب إجابة case في الامتحان؟', b: '① أحدد خصائص المشروع (unclear? new tech? time?...) ② أقول ليه methodology X مش مناسبة بالـ ratings (Poor) ③ أختار الأنسب وأذكر الـ Excellent/Good ④ أقول الـ trade-off (مثلاً Throwaway ممكن ياخد وقت أطول).' }
+    ]
+  },
+
+  /* ---------- essay model answers ---------- */
+  essays: {
+    e1: {
+      model:
+        '<table class="tbl" style="margin:0"><tr><th>Method</th><th>Description</th><th>Strength</th><th>Weakness</th></tr>' +
+        '<tr><td class="en">Waterfall</td><td class="en plain">Phases proceed in sequence; each is completed before the next; deliverables flow forward</td><td class="en plain">Requirements identified early and frozen</td><td class="en plain">Long wait before a visible system; takes a long time</td></tr>' +
+        '<tr><td class="en">Parallel</td><td class="en plain">After a general design, the project is split into subprojects developed at the same time, then integrated</td><td class="en plain">Shorter overall time; less rework</td><td class="en plain">Careful design needed; integration is difficult</td></tr>' +
+        '<tr><td class="en">V-Model</td><td class="en plain">Tests are designed alongside each phase (analysis → acceptance test ... component design → unit test)</td><td class="en plain">High quality; QA involved early; simple</td><td class="en plain">Rigid; hard in a dynamic environment</td></tr></table>',
+      points: [
+        'Waterfall: sequential phases / deliverables flow — strength (early frozen requirements) — weakness (long wait)',
+        'Parallel: subprojects at the same time — strength (shorter time) — weakness (integration)',
+        'V-Model: tests designed with each phase — strength (quality, QA) — weakness (rigid)',
+        'All three are structured methodologies: each phase completed before the next'
+      ]
+    },
+    e2: {
+      model:
+        '<p dir="ltr" style="margin:0 0 8px">RAD aims to get part of the system developed quickly and into the users’ hands, using CASE tools, JAD sessions, visual programming languages and code generators.</p>' +
+        '<p dir="ltr" style="margin:0 0 8px"><b>Iterative:</b> the system is developed as a series of versions; users work with each version and identify needs for the next.</p>' +
+        '<p dir="ltr" style="margin:0 0 8px"><b>System Prototyping:</b> a rough prototype is built quickly and refined repeatedly with user feedback until it <i>becomes</i> the final system.</p>' +
+        '<p dir="ltr" style="margin:0 0 8px"><b>Throwaway Prototyping:</b> prototypes of alternative designs are built to experiment and learn; they are <i>discarded</i> and the real system is built using what was learned.</p>' +
+        '<p dir="ltr" style="margin:0"><b>Difference:</b> in system prototyping the prototype grows into the final system; in throwaway prototyping it is thrown away.</p>',
+      points: [
+        'Iterative — series of versions',
+        'System Prototyping — prototype refined into the final system',
+        'Throwaway Prototyping — prototypes for experimenting, then discarded',
+        'Difference: the prototype becomes the system vs is discarded'
+      ]
+    },
+    e3: {
+      model:
+        '<div dir="ltr" style="line-height:1.85">' +
+        '<b>Project characteristics:</b> unclear user requirements, unfamiliar technology, high system complexity.<br>' +
+        '<b>Why not Waterfall:</b> in the matrix Waterfall is <b>Poor</b> for unclear requirements (it freezes requirements early) and <b>Poor</b> for unfamiliar technology; it is only <b>Good</b> for complexity. Users would wait a long time to see anything, so wrong assumptions would be discovered late.<br>' +
+        '<b>Recommendation: Throwaway Prototyping</b> — it is <b>Excellent</b> for unclear requirements, <b>Excellent</b> for unfamiliar technology and <b>Excellent</b> for complex systems. The team can experiment with alternative designs, learn about the new technology, and clarify requirements with users, then discard the prototypes and build the real system on a solid design.<br>' +
+        '<b>Trade-off:</b> it may take longer than system prototyping. (System Prototyping and Agile are <b>Poor</b> for unfamiliar technology and complexity.)</div>',
+      points: [
+        'Identified the three characteristics (unclear requirements, unfamiliar technology, complexity)',
+        'Waterfall: Poor for unclear requirements and unfamiliar technology (requirements frozen, late feedback)',
+        'Recommended Throwaway Prototyping — Excellent for all three',
+        'Mentioned the trade-off (may take longer) or why other methods (System Prototyping/Agile) are Poor for tech/complexity'
+      ]
+    }
+  }
+};
+</script>
+<script>
+/* ==========================================================
+   IS202 study pages — shared interactive engine
+   Reads window.DATA = { decks:{}, flash:{}, essays:{} }
+   ========================================================== */
+(function () {
+  'use strict';
+
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const shuffle = (a) => {
+    a = a.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+
+  const DATA = window.DATA || {};
+  const KEY = 'is202:' + (document.body.dataset.lecture || 'x');
+  let S = {};
+  try { S = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { S = {}; }
+  S.done = S.done || {}; S.best = S.best || {}; S.fc = S.fc || {}; S.essay = S.essay || {};
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+
+  /* ---------- theme ---------- */
+  const TK = 'is202:theme';
+  let theme = 'dark';
+  try { theme = localStorage.getItem(TK) || 'dark'; } catch (e) {}
+  const themeBtn = $('#themeBtn');
+  function applyTheme(t) {
+    theme = t;
+    document.documentElement.setAttribute('data-theme', t);
+    if (themeBtn) themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
+    try { localStorage.setItem(TK, t); } catch (e) {}
+  }
+  applyTheme(theme);
+  if (themeBtn) themeBtn.addEventListener('click', () => applyTheme(theme === 'dark' ? 'light' : 'dark'));
+
+  /* ---------- stations ---------- */
+  const stations = $$('.station');
+  const nav = $('#nav');
+  const navBtns = [];
+  let cur = -1;
+
+  stations.forEach((st, i) => {
+    if (nav) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.innerHTML = `<span class="num">${i + 1}</span><span class="lbl">${st.dataset.icon || ''} ${st.dataset.title || ''}</span><span class="tick">✓</span>`;
+      b.addEventListener('click', () => go(i));
+      nav.appendChild(b);
+      navBtns.push(b);
+    }
+    const last = i === stations.length - 1;
+    const f = document.createElement('div');
+    f.className = 'station-foot noprint';
+    f.innerHTML =
+      `<button type="button" class="btn ghost" data-prev${i === 0 ? ' style="visibility:hidden"' : ''}>→ السابق</button>` +
+      (last
+        ? `<a class="btn primary" href="index.html" data-finish>خلّصت المحاضرة 🏁</a>`
+        : `<button type="button" class="btn primary" data-next>التالي ←</button>`);
+    st.appendChild(f);
+    const p = $('[data-prev]', f), n = $('[data-next]', f), fin = $('[data-finish]', f);
+    if (p) p.addEventListener('click', () => go(i - 1));
+    if (n) n.addEventListener('click', () => go(i + 1));
+    if (fin) fin.addEventListener('click', () => { S.done[i] = true; save(); });
+  });
+
+  function refresh() {
+    navBtns.forEach((b, k) => {
+      b.classList.toggle('on', k === cur);
+      b.classList.toggle('done', !!S.done[k]);
+    });
+    const n = stations.filter((_, k) => S.done[k]).length;
+    const pb = $('#progBar'), pt = $('#progTxt');
+    if (pb) pb.style.width = (n / stations.length * 100) + '%';
+    if (pt) pt.textContent = n + '/' + stations.length;
+  }
+
+  function go(i, init) {
+    i = Math.max(0, Math.min(stations.length - 1, i));
+    if (!init && cur >= 0 && i > cur) S.done[cur] = true;
+    cur = i;
+    stations.forEach((s, k) => s.classList.toggle('on', k === i));
+    S.last = i; save(); refresh();
+    try { history.replaceState(null, '', '#' + (i + 1)); } catch (e) {}
+    if (!init) window.scrollTo({ top: 0, behavior: 'smooth' });
+    const nb = navBtns[i];
+    if (nb && nav && nav.scrollWidth > nav.clientWidth) nb.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }
+
+  $$('[data-go]').forEach((e) => e.addEventListener('click', () => go(parseInt(e.dataset.go, 10) - 1)));
+
+  /* ---------- flip cards ---------- */
+  $$('.flip').forEach((el) => {
+    const f = $('.f', el), b = $('.b', el);
+    if (!f || !b) return;
+    const inn = document.createElement('div');
+    inn.className = 'flip-in';
+    f.className = 'face front'; b.className = 'face back';
+    inn.append(f, b); el.append(inn);
+    el.tabIndex = 0;
+    el.addEventListener('click', () => el.classList.toggle('open'));
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.classList.toggle('open'); }
+    });
+  });
+
+  /* ---------- tabs ---------- */
+  $$('[data-tabs]').forEach((root) => {
+    const btns = $$('[data-tab]', root), panes = $$('[data-pane]', root);
+    const set = (id) => {
+      btns.forEach((b) => b.classList.toggle('on', b.dataset.tab === id));
+      panes.forEach((p) => p.classList.toggle('on', p.dataset.pane === id));
+    };
+    btns.forEach((b) => b.addEventListener('click', () => set(b.dataset.tab)));
+    set(root.dataset.tabs || (btns[0] && btns[0].dataset.tab));
+  });
+
+  /* ---------- deck (quiz / sorting / true-false) ---------- */
+  function Deck(root, cfg) {
+    let cards = shuffle(cfg.cards), i = 0, score = 0, locked = false, order = [];
+    root.classList.add('deck');
+    root.innerHTML =
+      `<div class="deck-head"><span class="cnt"></span><div class="deck-bar"><i></i></div><span class="sc"></span></div><div class="deck-body"></div>`;
+    const body = $('.deck-body', root), cnt = $('.cnt', root), bar = $('.deck-bar i', root), sc = $('.sc', root);
+
+    function render() {
+      if (i >= cards.length) return end();
+      const c = cards[i];
+      locked = false;
+      cnt.textContent = (i + 1) + ' / ' + cards.length;
+      bar.style.width = (i / cards.length * 100) + '%';
+      sc.textContent = '⭐ ' + score;
+      const opts = c.opts || cfg.opts;
+      const cols = cfg.cols ? ' c' + cfg.cols : '';
+      body.innerHTML = `<div class="deck-q" dir="auto">${c.q}</div><div class="opts${cols}"></div><div class="fbwrap"></div>`;
+      const wrap = $('.opts', body);
+      // cfg.shuffleOpts: mix the answer order of per-card MCQ options so position never gives the answer away
+      order = opts.map((_, k) => k);
+      if (cfg.shuffleOpts && c.opts) order = shuffle(order);
+      order.forEach((oi, k) => {
+        const o = opts[oi];
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'opt' + (typeof o === 'object' && o.cls ? ' ' + o.cls : '');
+        b.setAttribute('dir', 'auto');
+        b.innerHTML = typeof o === 'string' ? o : o.t;
+        b.addEventListener('click', () => pick(k));
+        wrap.appendChild(b);
+      });
+    }
+
+    function pick(k) {
+      if (locked) return;
+      locked = true;
+      const c = cards[i], ok = order[k] === c.a;
+      if (ok) score++;
+      $$('.opt', body).forEach((b, j) => {
+        b.disabled = true;
+        if (order[j] === c.a) b.classList.add('right');
+        else if (j === k) b.classList.add('wrong');
+      });
+      sc.textContent = '⭐ ' + score;
+      const fb = $('.fbwrap', body);
+      fb.innerHTML =
+        `<div class="fb ${ok ? 'ok' : 'no'}"><b>${ok ? '✔ تمام!' : '✘ لأ — راجع الشرح'}</b><div dir="auto">${c.why || ''}</div>` +
+        `<button type="button" class="btn primary nxt">${i === cards.length - 1 ? 'شوف النتيجة' : 'التالي ←'}</button></div>`;
+      const nx = $('.nxt', fb);
+      nx.addEventListener('click', () => { i++; render(); });
+      nx.focus({ preventScroll: true });
+    }
+
+    function end() {
+      bar.style.width = '100%';
+      const pct = Math.round(score / cards.length * 100);
+      const best = Math.max(S.best[cfg.id] || 0, pct);
+      S.best[cfg.id] = best; save();
+      const msg = pct === 100 ? 'ممتاز! 🔥 الجزء ده تمام' : pct >= 70 ? 'كويس جداً 👏 راجع الغلطات بس' : 'لسه محتاج مراجعة — ارجع للشرح وجرّب تاني 💪';
+      sc.textContent = '⭐ ' + score;
+      cnt.textContent = 'خلصت';
+      body.innerHTML =
+        `<div class="deck-end"><div class="big">${pct}%</div><p>${score} من ${cards.length} — ${msg}</p>` +
+        `<p class="muted">أحسن نتيجة ليك: ${best}%</p><button type="button" class="btn primary again">🔁 العب تاني</button></div>`;
+      $('.again', body).addEventListener('click', () => { cards = shuffle(cfg.cards); i = 0; score = 0; render(); });
+      if (cfg.onDone) cfg.onDone(pct);
+    }
+    render();
+  }
+
+  /* ---------- flashcards ---------- */
+  function Flash(root, cards, id) {
+    let mode = 'all', pos = 0, list = [], timer;
+    root.classList.add('fc');
+    root.innerHTML =
+      `<div class="fc-top"><div class="seg"><button type="button" data-m="all" class="on">كل الكروت</button><button type="button" data-m="review">اللي لسه مش حافظها</button></div><span class="fc-count muted"></span></div>` +
+      `<div class="fc-card" tabindex="0"><div class="fc-in"><div class="face front"></div><div class="face back"></div></div></div>` +
+      `<div class="fc-actions"><button type="button" class="btn" data-a="prev">→ اللي قبلها</button><button type="button" class="btn bad" data-a="r">🔁 لسه مش حافظها</button><button type="button" class="btn good" data-a="k">✅ عرفتها</button><button type="button" class="btn" data-a="next">اللي بعدها ←</button></div>` +
+      `<div class="deck-bar"><i></i></div><p class="fc-stat muted"></p>`;
+    const card = $('.fc-card', root), front = $('.front', root), back = $('.back', root);
+    const cnt = $('.fc-count', root), bar = $('.deck-bar i', root), stat = $('.fc-stat', root);
+    const key = (n) => id + ':' + n;
+
+    function stats() {
+      const k = cards.filter((_, n) => S.fc[key(n)] === 'k').length;
+      stat.textContent = 'عرفت ' + k + ' من ' + cards.length;
+      bar.style.width = (k / cards.length * 100) + '%';
+    }
+    function show() {
+      list = cards.map((_, n) => n).filter((n) => mode === 'all' || S.fc[key(n)] !== 'k');
+      stats();
+      clearTimeout(timer);
+      if (!list.length) {
+        card.classList.remove('open');
+        front.innerHTML = '<div dir="auto">🎉 خلصت كل الكروت!</div><small>ارجع لـ "كل الكروت" لو عايز تراجع تاني</small>';
+        back.innerHTML = '';
+        cnt.textContent = '0 / 0';
+        return;
+      }
+      pos = ((pos % list.length) + list.length) % list.length;
+      const c = cards[list[pos]];
+      const fill = () => {
+        front.innerHTML = `<small>السؤال</small><div dir="auto">${c.f}</div><small>👆 اضغط عشان تقلب الكارت</small>`;
+        back.innerHTML = `<small>الإجابة</small><div dir="auto">${c.b}</div>`;
+      };
+      if (card.classList.contains('open')) { card.classList.remove('open'); timer = setTimeout(fill, 230); } else fill();
+      cnt.textContent = (pos + 1) + ' / ' + list.length;
+    }
+
+    root.addEventListener('click', (e) => {
+      const a = e.target.closest('[data-a]');
+      if (a) {
+        const act = a.dataset.a;
+        if (act === 'next') pos++;
+        else if (act === 'prev') pos--;
+        else {
+          S.fc[key(list[pos])] = act; save();
+          if (!(mode === 'review' && act === 'k')) pos++;
+        }
+        show();
+        return;
+      }
+      const m = e.target.closest('[data-m]');
+      if (m) {
+        mode = m.dataset.m; pos = 0;
+        $$('[data-m]', root).forEach((x) => x.classList.toggle('on', x === m));
+        show();
+        return;
+      }
+      if (e.target.closest('.fc-card')) card.classList.toggle('open');
+    });
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.classList.toggle('open'); }
+    });
+    show();
+  }
+
+  /* ---------- essay ---------- */
+  $$('.essay').forEach((el) => {
+    const id = el.dataset.essay, d = (DATA.essays || {})[id];
+    if (!d) return;
+    const ta = $('textarea', el), btn = $('[data-show]', el), box = $('.model', el);
+    ta.value = S.essay[id] || '';
+    ta.addEventListener('input', () => { S.essay[id] = ta.value; save(); });
+    $('.mdl', box).innerHTML = d.model;
+    const pts = $('.pts', box);
+    pts.innerHTML =
+      '<h4>✅ علّم على النقط اللي غطّيتها في إجابتك:</h4>' +
+      d.points.map((p) => `<label class="chk"><input type="checkbox"> <span dir="auto">${p}</span></label>`).join('') +
+      '<div class="pts-sc"></div>';
+    const sc = $('.pts-sc', pts);
+    const upd = () => {
+      const n = $$('input:checked', pts).length;
+      sc.textContent = 'غطّيت ' + n + ' من ' + d.points.length + (n === d.points.length ? ' 🔥' : '');
+    };
+    pts.addEventListener('change', upd); upd();
+    btn.addEventListener('click', () => {
+      box.hidden = !box.hidden;
+      btn.textContent = box.hidden ? '📖 اعرض الإجابة النموذجية' : '🙈 اخفي الإجابة';
+    });
+  });
+
+  /* ---------- keyboard for flashcards ---------- */
+  document.addEventListener('keydown', (e) => {
+    if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    const st = stations[cur];
+    const fc = st && $('.fc', st);
+    if (!fc) return;
+    if (e.key === 'ArrowLeft') $('[data-a="next"]', fc).click();
+    else if (e.key === 'ArrowRight') $('[data-a="prev"]', fc).click();
+    else if (e.key === ' ' && e.target.tagName !== 'BUTTON') { e.preventDefault(); $('.fc-card', fc).classList.toggle('open'); }
+  });
+
+  /* ---------- init decks / flashcards ---------- */
+  const markDone = (el) => {
+    const i = stations.indexOf(el.closest('.station'));
+    if (i >= 0) { S.done[i] = true; save(); refresh(); }
+  };
+  $$('[data-deck]').forEach((el) => {
+    const c = (DATA.decks || {})[el.dataset.deck];
+    if (c) Deck(el, Object.assign({}, c, { id: el.dataset.deck, onDone: () => markDone(el) }));
+  });
+  $$('[data-flash]').forEach((el) => {
+    const c = (DATA.flash || {})[el.dataset.flash];
+    if (c) Flash(el, c, el.dataset.flash);
+  });
+
+  /* ---------- share disclaimer: ONE place, shows at the bottom of every page (index.src.html has its own copy) ---------- */
+  (function () {
+    const f = document.createElement('footer');
+    f.className = 'disclaimer';
+    f.innerHTML =
+      '<div dir="rtl"><b>⚠️ تنبيه مهم قبل ما تعتمد على الصفحات دي:</b> دي ملخصات ومراجعة شخصية من إعداد طالب لمساعدة زمايله، وهي <b>مش مادة رسمية</b> ومش معتمدة من الدكتور ولا من الكلية. ممكن يكون فيها أخطاء أو نقص، والأسئلة اللي فيها مش بالضرورة شبه الامتحان الحقيقي. ' +
+      '<b>ومبتغنيش أبداً عن الكتاب والمحاضرات (المصدر الأساسي)</b> — ذاكر منهم الأول، وارجع لهم عشان تتأكد من أي معلومة. أي اعتماد مباشر على الصفحات دي بيكون على مسئولية المستخدم نفسه، ومُعِدّ الملخص غير مسئول عن أي نتيجة أو خسارة درجات. ' +
+      '<span class="muted">المصادر: كتاب المادة <span class="en">Systems Analysis and Design</span> (د. أسماء سعد) وسلايدات المحاضرات (مبنية على <span class="en">Dennis, Wixom &amp; Roth</span>).</span>' +
+      '<div class="d-en"><b>Disclaimer:</b> Unofficial, student-made study notes shared to help classmates — not official course material and not endorsed by the instructor or the university. They may contain mistakes or omissions, and the practice questions may differ from the real exam. ' +
+      'These pages are <b>NOT a substitute for the textbook and the lectures</b> (the primary source): study those first and use them to verify anything written here. Anyone relying on these pages directly does so at their own risk; the author accepts no responsibility for any result or loss of marks. Sources: the course textbook “Systems Analysis and Design” (Dr. Asmaa Saad) and the lecture slides (based on Dennis, Wixom &amp; Roth).</div></div>';
+    document.body.appendChild(f);
+  })();
+
+  /* ---------- start ---------- */
+  let start = parseInt((location.hash || '').slice(1), 10) - 1;
+  if (!(start >= 0 && start < stations.length)) start = Math.min(S.last || 0, stations.length - 1);
+  go(start, true);
+
+  window.Study = { go };
+})();
+
+</script>
+<script>
+/* ---------- selection matrix data ---------- */
+var METHODS = ['Waterfall', 'Parallel', 'V-Model', 'Iterative', 'System<br>Proto.', 'Throwaway<br>Proto.', 'Agile'];
+var METHOD_NAMES = ['Waterfall', 'Parallel', 'V-Model', 'Iterative', 'System Prototyping', 'Throwaway Prototyping', 'Agile'];
+var CRIT = [
+  { k: 'Unclear user requirements', v: 'PPPGEEE' },
+  { k: 'Unfamiliar technology', v: 'PPPGPEP' },
+  { k: 'Complex systems', v: 'GGGGPEP' },
+  { k: 'Reliable systems', v: 'GGEGPEG' },
+  { k: 'Short time schedule', v: 'PGPEEGE' },
+  { k: 'Schedule visibility', v: 'PPPEEGE' }
+];
+var WORD = { P: 'Poor', G: 'Good', E: 'Excellent' };
+var CLS = { P: 'p', G: 'g', E: 'e' };
+
+function buildMatrix(tbl) {
+  var h = '<tr><th></th>' + METHODS.map(function (m) { return '<th>' + m + '</th>'; }).join('') + '</tr>';
+  CRIT.forEach(function (r, i) {
+    h += '<tr data-r="' + i + '"><td class="rowh">' + r.k + '</td>' +
+      r.v.split('').map(function (c) { return '<td class="c ' + CLS[c] + '">' + WORD[c] + '</td>'; }).join('') + '</tr>';
+  });
+  tbl.innerHTML = h;
+}
+
+/* ---------- Portfolio simulator ---------- */
+(function () {
+  var root = document.getElementById('pfSim');
+  if (!root) return;
+  var boxes = [].slice.call(root.querySelectorAll('input'));
+  var BUDGET = 100, BEST = 80;
+  function upd() {
+    var cost = 0, npv = 0, hi = 0, lo = 0, n = 0;
+    boxes.forEach(function (b) {
+      if (!b.checked) return;
+      n++; cost += +b.dataset.cost; npv += +b.dataset.npv;
+      if (b.dataset.risk === 'H') hi++; else lo++;
+    });
+    var pct = Math.min(100, cost / BUDGET * 100);
+    document.getElementById('pfBar').style.width = (100 - pct) + '%';
+    document.getElementById('pfTxt').textContent = cost + ' / ' + BUDGET;
+    var m = document.getElementById('pfMsg');
+    if (!n) { m.className = 'note'; m.textContent = 'اختار المشاريع اللي هتمولها — ميزانيتك 100.'; }
+    else if (cost > BUDGET) { m.className = 'note bad'; m.textContent = '❌ عدّيت الميزانية بـ ' + (cost - BUDGET) + ' — كل المشاريع دي viable بس مش هينفع نمولها كلها. لازم تأجّل أو ترفض بعضها (portfolio trade-off).'; }
+    else if (!hi || !lo) { m.className = 'note warn'; m.textContent = '⚠️ جوه الميزانية، بس المحفظة مش متوازنة (كلها ' + (hi ? 'high-risk' : 'low-risk') + '). المحفظة المتوازنة فيها مزيج high-risk/high-reward + low-risk.'; }
+    else { m.className = 'note ok'; m.textContent = '✅ جوه الميزانية ومحفظة متوازنة — NPV الإجمالي = ' + npv + (npv === BEST ? ' 🏆 وده أعلى NPV ممكن!' : ' (أعلى NPV ممكن = ' + BEST + ')'); }
+  }
+  root.addEventListener('change', upd);
+  upd();
+})();
+
+/* ---------- V-model explorer ---------- */
+(function () {
+  var rows = [].slice.call(document.querySelectorAll('#vm .vm-row'));
+  var d = document.getElementById('vmDesc');
+  if (!rows.length) return;
+  var T = [
+    '<b class="en">Analysis → Acceptance test.</b> الـ requirements بتحدد إزاي هنتأكد إن الـ users هيقبلوا النظام. بنصمّم الـ acceptance test بدري، وبيتنفّذ <b>آخر حاجة</b>.',
+    '<b class="en">System design → System test.</b> بنصمّم اختبار النظام كله وهو شغّال مع بعض.',
+    '<b class="en">Architectural design → Integration test.</b> بنصمّم اختبار إن الأجزاء (components) بتتكامل مع بعض صح.',
+    '<b class="en">Component design → Unit test.</b> بنصمّم اختبار كل component لوحده. بيتنفّذ <b>أول حاجة</b> بعد الكتابة (قاع الـ V).'
+  ];
+  function sel(i) {
+    rows.forEach(function (r, k) { r.classList.toggle('on', k === i); });
+    d.innerHTML = T[i];
+  }
+  rows.forEach(function (r, i) { r.addEventListener('click', function () { sel(i); }); });
+  sel(0);
+})();
+
+/* ---------- Matrix tables + recommender ---------- */
+(function () {
+  var main = document.getElementById('hmMain'), sum = document.getElementById('hmSum');
+  if (main) buildMatrix(main);
+  if (sum) buildMatrix(sum);
+  var root = document.getElementById('recCard');
+  if (!root || !main) return;
+  var boxes = [].slice.call(root.querySelectorAll('input'));
+  var out = document.getElementById('recOut'), msg = document.getElementById('recMsg');
+  var SC = { P: 0, G: 1, E: 2 };
+  function upd() {
+    var sel = boxes.map(function (b, i) { return b.checked ? i : -1; }).filter(function (i) { return i >= 0; });
+    [].slice.call(main.querySelectorAll('tr[data-r]')).forEach(function (tr) { tr.classList.toggle('sel', sel.indexOf(+tr.dataset.r) >= 0); });
+    main.classList.toggle('has-sel', sel.length > 0);
+    if (!sel.length) {
+      out.innerHTML = '';
+      msg.className = 'note'; msg.textContent = '👆 علّم على خصائص مشروعك وهيظهر الترتيب.';
+      return;
+    }
+    var res = METHOD_NAMES.map(function (nm, m) {
+      var s = 0, poor = [];
+      sel.forEach(function (r) { var c = CRIT[r].v[m]; s += SC[c]; if (c === 'P') poor.push(CRIT[r].k); });
+      return { nm: nm, s: s, poor: poor, i: m };
+    }).sort(function (a, b) { return b.s - a.s || a.i - b.i; });
+    var max = 2 * sel.length;
+    out.innerHTML = res.map(function (r, k) {
+      return '<div class="rk' + (k === 0 ? ' top' : '') + '"><span class="nm">' + r.nm + '</span><span class="bar2"><i style="width:' + (r.s / max * 100) + '%"></i></span><span class="sc">' + r.s + '</span>' +
+        (r.poor.length ? '<span class="poor">⚠ Poor: ' + r.poor.join(', ') + '</span>' : '') + '</div>';
+    }).join('');
+    var top = res.filter(function (r) { return r.s === res[0].s; });
+    var names = top.map(function (r) { return r.nm; }).join(' / ');
+    if (top.length > 1) { msg.className = 'note warn'; msg.innerHTML = '🤝 تعادل بين <b class="en">' + names + '</b> (' + res[0].s + ' من ' + max + '). في الامتحان اختار واحدة وبرّر بالـ ratings واذكر الـ trade-off.'; }
+    else { msg.className = 'note ok'; msg.innerHTML = '🏆 الأنسب حسب الـ matrix: <b class="en">' + names + '</b> (' + res[0].s + ' من ' + max + ')' + (res[0].poor.length ? ' — مع إن عنده Poor في حاجة.' : ' — ومفيهوش أي Poor في اللي اخترته.'); }
+  }
+  root.addEventListener('change', upd);
+  upd();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IS202 · Lecture 2 — System Request &amp; Feasibility</title>
+<style>
+/* ==========================================================
+   IS202 study pages — shared design system
+   ========================================================== */
+:root{
+  --bg:#0d1220; --card:#172038; --card2:#1d2848; --line:#2a3862;
+  --text:#eaf0ff; --muted:#9fb0d8;
+  --accent:#7aa8ff; --accent-rgb:122,168,255; --on-accent:#0a1226;
+  --ok:#4ade80; --ok-rgb:74,222,128;
+  --bad:#ff7b8c; --bad-rgb:255,123,140;
+  --warn:#fbbf24; --warn-rgb:251,191,36;
+  --c-plan:#4cc9f0; --c-plan-rgb:76,201,240;
+  --c-ana:#fbbf24;  --c-ana-rgb:251,191,36;
+  --c-des:#b69cff;  --c-des-rgb:182,156,255;
+  --c-imp:#4ade80;  --c-imp-rgb:74,222,128;
+  --shadow:0 12px 32px rgba(0,0,0,.35);
+  --radius:18px;
+}
+[data-theme="light"]{
+  --bg:#f5f2ea; --card:#ffffff; --card2:#f6f3ec; --line:#ddd6c3;
+  --text:#1b2336; --muted:#5a6684;
+  --accent:#2f66e0; --accent-rgb:47,102,224; --on-accent:#ffffff;
+  --ok:#15803d; --ok-rgb:21,128,61;
+  --bad:#c0263d; --bad-rgb:192,38,61;
+  --warn:#a85d00; --warn-rgb:168,93,0;
+  --c-plan:#0b84a8; --c-plan-rgb:11,132,168;
+  --c-ana:#b86e00;  --c-ana-rgb:184,110,0;
+  --c-des:#6b44e0;  --c-des-rgb:107,68,224;
+  --c-imp:#17803d;  --c-imp-rgb:23,128,61;
+  --shadow:0 10px 26px rgba(70,55,20,.12);
+}
+
+/* colour helpers: put on any element, children read --c / --c-rgb */
+.ph-plan{--c:var(--c-plan);--c-rgb:var(--c-plan-rgb)}
+.ph-ana{--c:var(--c-ana);--c-rgb:var(--c-ana-rgb)}
+.ph-des{--c:var(--c-des);--c-rgb:var(--c-des-rgb)}
+.ph-imp{--c:var(--c-imp);--c-rgb:var(--c-imp-rgb)}
+.t-ok{--c:var(--ok);--c-rgb:var(--ok-rgb)}
+.t-warn{--c:var(--warn);--c-rgb:var(--warn-rgb)}
+.t-bad{--c:var(--bad);--c-rgb:var(--bad-rgb)}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+body{
+  margin:0;min-height:100vh;color:var(--text);
+  font:17px/1.85 "Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;
+  background:
+    radial-gradient(900px 480px at 85% -8%,rgba(var(--accent-rgb),.14),transparent 62%),
+    radial-gradient(700px 420px at 5% 14%,rgba(var(--c-des-rgb),.08),transparent 60%),
+    var(--bg);
+  background-attachment:fixed;
+}
+b,strong{font-weight:700}
+button{font-family:inherit}
+h2{font-size:32px;line-height:1.35;margin:0 0 6px}
+h3{font-size:20px;margin:0 0 10px}
+h4{font-size:17px;margin:0 0 8px}
+.sec{margin:30px 0 12px;font-size:21px}
+.sec small{color:var(--muted);font-weight:400;font-size:14px}
+.lead{color:var(--muted);margin:0 0 18px;font-size:18px}
+.muted{color:var(--muted)}
+.en{direction:ltr;unicode-bidi:isolate;font-family:"Segoe UI",system-ui,sans-serif;font-weight:600}
+.en.plain{font-weight:400}
+
+/* ---------- top bar ---------- */
+.topbar{
+  position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;
+  padding:10px clamp(12px,3vw,28px);
+  background:var(--bg);
+  background:color-mix(in srgb,var(--bg) 84%,transparent);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--line);
+}
+.home,.icon-btn{
+  width:40px;height:40px;display:grid;place-items:center;border-radius:12px;
+  border:1px solid var(--line);background:var(--card);color:var(--text);
+  text-decoration:none;font-size:18px;cursor:pointer;flex:none;
+}
+.home:hover,.icon-btn:hover{border-color:var(--accent)}
+.ttl{display:flex;flex-direction:column;line-height:1.3}
+.ttl small{color:var(--muted);font-size:13px}
+.prog{margin-inline-start:auto;display:flex;align-items:center;gap:10px;min-width:150px;color:var(--muted);font-size:14px}
+.bar{flex:1;height:9px;border-radius:99px;background:rgba(var(--accent-rgb),.16);overflow:hidden;min-width:90px}
+.bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--c-imp));transition:width .5s}
+
+/* ---------- layout + nav ---------- */
+.layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:26px;max-width:1160px;margin:0 auto;padding:24px clamp(12px,3vw,24px) 70px;align-items:start}
+.nav{position:sticky;top:78px;display:flex;flex-direction:column;gap:6px}
+.nav button{
+  display:flex;align-items:center;gap:10px;text-align:start;width:100%;
+  background:transparent;border:1px solid transparent;color:var(--muted);
+  padding:9px 12px;border-radius:14px;cursor:pointer;font-size:15px;transition:.18s;
+}
+.nav button:hover{background:rgba(var(--accent-rgb),.08);color:var(--text)}
+.nav .num{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;background:var(--card2);border:1px solid var(--line)}
+.nav .lbl{flex:1}
+.nav .tick{opacity:0;color:var(--ok);font-weight:800}
+.nav button.on{background:var(--card);border-color:var(--line);color:var(--text);box-shadow:var(--shadow)}
+.nav button.on .num{background:var(--accent);color:var(--on-accent);border-color:transparent}
+.nav button.done .tick{opacity:1}
+
+/* ---------- stations ---------- */
+.station{display:none}
+.station.on{display:block;animation:rise .45s ease}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.station-foot{display:flex;justify-content:space-between;gap:12px;margin-top:34px;padding-top:18px;border-top:1px dashed var(--line)}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow);margin:16px 0}
+.card.tint{border-top:4px solid var(--c)}
+.card.tint h4{color:var(--c)}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border-radius:14px;
+  border:1px solid var(--line);background:var(--card);color:var(--text);font-size:16px;font-weight:600;
+  cursor:pointer;transition:.18s;text-decoration:none;
+}
+.btn:hover{transform:translateY(-1px);border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--on-accent);border-color:transparent}
+.btn.good{background:rgba(var(--ok-rgb),.16);border-color:rgba(var(--ok-rgb),.55)}
+.btn.bad{background:rgba(var(--bad-rgb),.14);border-color:rgba(var(--bad-rgb),.5)}
+.btn.ghost{background:transparent}
+
+.chip{
+  display:inline-flex;align-items:center;gap:6px;padding:4px 14px;margin:4px;border-radius:999px;font-size:15px;line-height:1.7;
+  background:rgba(var(--c-rgb,var(--accent-rgb)),.14);border:1px solid rgba(var(--c-rgb,var(--accent-rgb)),.45);
+}
+.chip.en{font-weight:600}
+.note{margin:14px 0;padding:12px 16px;border-radius:14px;background:rgba(var(--c-rgb,var(--accent-rgb)),.1);border:1px solid rgba(var(--c-rgb,var(--accent-rgb)),.38)}
+.note.warn{--c-rgb:var(--warn-rgb)}
+.note.ok{--c-rgb:var(--ok-rgb)}
+.note.bad{--c-rgb:var(--bad-rgb)}
+
+/* ---------- tabs / panes / segmented ---------- */
+.pane{display:none}
+.pane.on{display:block;animation:rise .35s ease}
+.seg{display:inline-flex;gap:6px;padding:5px;border-radius:16px;background:var(--card2);border:1px solid var(--line);flex-wrap:wrap;margin-bottom:14px}
+.seg button{border:0;background:transparent;color:var(--muted);padding:9px 18px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;transition:.18s}
+.seg button.on{background:rgba(var(--c-rgb,var(--accent-rgb)),.2);color:var(--text);box-shadow:inset 0 0 0 1.5px rgba(var(--c-rgb,var(--accent-rgb)),.7)}
+
+/* ---------- big picture ---------- */
+.story{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap}
+.beat{flex:1;min-width:150px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;padding:14px;border-radius:16px;background:rgba(var(--bad-rgb),.1);border:1px solid rgba(var(--bad-rgb),.4)}
+.beat.ok{background:rgba(var(--ok-rgb),.12);border-color:rgba(var(--ok-rgb),.5)}
+.beat .emo{font-size:30px;line-height:1.3}
+.arrow{align-self:center;font-size:22px;color:var(--muted)}
+.punch{text-align:center;font-size:20px;font-weight:700;margin:16px 0 12px}
+.tile{
+  display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:start;padding:18px;border-radius:18px;
+  border:1px solid rgba(var(--c-rgb),.45);background:linear-gradient(155deg,rgba(var(--c-rgb),.2),var(--card) 72%);
+  color:var(--text);cursor:pointer;transition:.2s;font-size:17px;
+}
+.tile:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.tile .emo{font-size:30px;line-height:1.3}
+.tile small{color:var(--muted);font-size:14.5px}
+
+/* ---------- translator diagram ---------- */
+.trans{display:flex;align-items:center;justify-content:center;gap:8px;direction:ltr;flex-wrap:wrap;margin-bottom:16px}
+.trans>*{direction:rtl}
+.tnode{
+  display:flex;flex-direction:column;align-items:center;gap:0;min-width:160px;padding:14px 18px;border-radius:18px;
+  border:1.5px solid rgba(var(--c-rgb),.4);background:rgba(var(--c-rgb),.1);color:var(--text);cursor:pointer;transition:.2s;font-size:16px;
+}
+.tnode .emo{font-size:30px;line-height:1.3}
+.tnode.on{background:rgba(var(--c-rgb),.24);border-color:var(--c);transform:translateY(-3px);box-shadow:0 8px 22px rgba(var(--c-rgb),.25)}
+.tlink{font-size:26px;color:var(--muted)}
+.bigq{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.bigq .chip{font:800 20px/1.5 "Segoe UI",sans-serif;padding:6px 20px}
+
+/* ---------- flip cards (roles) ---------- */
+.flip{perspective:1000px;cursor:pointer;outline:none}
+.flip-in{display:grid;min-height:170px;transition:transform .55s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
+.flip.open .flip-in{transform:rotateY(180deg)}
+.flip .face{
+  grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:18px;padding:16px 18px;
+  display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:4px;
+  border:1px solid rgba(var(--c-rgb,var(--accent-rgb)),.5);
+  background:linear-gradient(155deg,rgba(var(--c-rgb,var(--accent-rgb)),.2),var(--card) 75%);
+}
+.flip .front .emo{font-size:32px;line-height:1.3}
+.flip .front b{font-size:18px}
+.flip .front small{color:var(--muted)}
+.flip .back{transform:rotateY(180deg);background:var(--card2);font-size:16px;line-height:1.75}
+.flip:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:18px}
+.hint{color:var(--muted);font-size:13px}
+
+/* ---------- SDLC path ---------- */
+.path{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;direction:ltr;margin:6px 0 18px}
+.node{
+  position:relative;direction:rtl;display:flex;flex-direction:column;align-items:center;gap:2px;padding:16px 10px;border-radius:20px;
+  border:1.5px solid rgba(var(--c-rgb),.4);background:rgba(var(--c-rgb),.09);color:var(--text);cursor:pointer;transition:.22s;text-align:center;font-size:15px;
+}
+.node i{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font:800 24px/1 "Segoe UI",sans-serif;font-style:normal;background:rgba(var(--c-rgb),.25);color:var(--c);margin-bottom:4px;transition:.22s}
+.node b{font-size:18px;font-family:"Segoe UI",sans-serif}
+.node small{color:var(--muted);font-size:13.5px;line-height:1.4}
+.node:not(:last-child)::after{content:"➜";position:absolute;right:-22px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:18px}
+.node.on{background:rgba(var(--c-rgb),.22);border-color:var(--c);transform:translateY(-4px);box-shadow:0 12px 26px rgba(var(--c-rgb),.28)}
+.node.on i{background:var(--c);color:var(--bg)}
+.node b,.node small,.ph-head .q,.tile b.en{direction:ltr;unicode-bidi:isolate}
+.mnemo{text-align:center;font-size:19px;margin:0 0 14px;color:var(--muted)}
+.mnemo b{color:var(--text)}
+.panel{background:var(--card);border:1px solid rgba(var(--c-rgb),.5);border-top:5px solid var(--c);border-radius:18px;padding:20px 22px;box-shadow:var(--shadow)}
+.ph-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.ph-head .q{font:800 24px/1.3 "Segoe UI",sans-serif;color:var(--c);padding:4px 16px;border-radius:12px;background:rgba(var(--c-rgb),.15)}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0}
+.steps li{counter-increment:s;position:relative;padding:6px 0;padding-inline-start:50px;margin:6px 0}
+.steps li::before{content:counter(s);position:absolute;inset-inline-start:0;top:6px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:rgba(var(--c-rgb),.2);color:var(--c)}
+.deliv{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+
+/* ---------- BPM ---------- */
+.cycle{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;direction:ltr}
+.cycle>div{direction:rtl;padding:14px;border-radius:16px;background:var(--card2);border:1px solid var(--line);font-size:15.5px;line-height:1.65}
+.cycle .n{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-weight:800;margin-bottom:6px}
+.loopnote{text-align:center;color:var(--muted);margin:10px 0 0}
+.range-wrap{direction:ltr;padding:6px 6px 0}
+.range-wrap input{width:100%;height:10px;accent-color:var(--accent);cursor:pointer}
+.ticks{display:flex;justify-content:space-between;direction:ltr;font:800 16px "Segoe UI",sans-serif;margin-top:8px}
+.ticks span{cursor:pointer;padding:4px 14px;border-radius:10px;color:var(--muted);transition:.18s}
+.ticks span.on{background:rgba(var(--c-rgb),.22);color:var(--text)}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:16px 0 8px}
+.metric small{display:flex;justify-content:space-between;color:var(--muted);margin-bottom:4px}
+.meter{direction:ltr;position:relative;height:12px;border-radius:99px;background:linear-gradient(90deg,var(--ok),var(--warn),var(--bad));overflow:hidden}
+.meter i{position:absolute;top:0;bottom:0;right:0;width:100%;background:var(--card2);transition:width .55s cubic-bezier(.2,.8,.2,1)}
+
+/* ---------- decks (games / quiz) ---------- */
+.deck{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px 22px;box-shadow:var(--shadow);margin:14px 0}
+.deck-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;color:var(--muted);font-size:15px}
+.cnt,.fc-count{direction:ltr;unicode-bidi:isolate}
+.deck-bar{flex:1;height:8px;border-radius:99px;background:rgba(var(--accent-rgb),.16);overflow:hidden}
+.deck-bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--c-imp));transition:width .4s}
+.deck-q{font-size:21px;font-weight:600;line-height:1.7;margin:4px 0 16px;min-height:56px}
+.opts{display:grid;gap:10px}
+.opts.c2{grid-template-columns:repeat(2,1fr)}
+.opts.c3{grid-template-columns:repeat(3,1fr)}
+.opt{
+  text-align:start;padding:13px 16px;border-radius:14px;border:1.5px solid var(--line);background:var(--card2);
+  color:var(--text);font-size:17px;cursor:pointer;transition:.18s;line-height:1.6;
+}
+.opt.ph-plan,.opt.ph-ana,.opt.ph-des,.opt.ph-imp,.opt.t-ok,.opt.t-warn,.opt.t-bad{border-color:rgba(var(--c-rgb),.55);background:rgba(var(--c-rgb),.1);font-weight:600}
+.opt:hover:not(:disabled){border-color:var(--accent);transform:translateY(-1px)}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--ok);background:rgba(var(--ok-rgb),.2)}
+.opt.wrong{border-color:var(--bad);background:rgba(var(--bad-rgb),.2)}
+.fb{margin-top:16px;padding:14px 16px;border-radius:14px;animation:rise .3s ease}
+.fb.ok{background:rgba(var(--ok-rgb),.13);border:1px solid rgba(var(--ok-rgb),.5)}
+.fb.no{background:rgba(var(--bad-rgb),.12);border:1px solid rgba(var(--bad-rgb),.5)}
+.fb .btn{margin-top:10px}
+.deck-end{text-align:center;padding:12px 0}
+.deck-end .big{font:800 56px/1.2 "Segoe UI",sans-serif;color:var(--accent)}
+
+/* ---------- flashcards ---------- */
+.fc{background:transparent}
+.fc-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.fc-top .seg{margin:0}
+.fc-card{perspective:1200px;cursor:pointer;outline:none;margin:10px 0 14px}
+.fc-in{display:grid;min-height:270px;transition:transform .6s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
+.fc-card.open .fc-in{transform:rotateY(180deg)}
+.fc-in .face{
+  grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:24px;padding:28px;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:12px;
+  border:1px solid var(--line);font-size:23px;line-height:1.7;box-shadow:var(--shadow);
+}
+.fc-in .front{background:linear-gradient(160deg,rgba(var(--accent-rgb),.22),var(--card))}
+.fc-in .back{background:linear-gradient(160deg,rgba(var(--ok-rgb),.18),var(--card));transform:rotateY(180deg);font-size:19.5px}
+.fc-in small{color:var(--muted);font-size:13.5px}
+.fc-card:focus-visible .fc-in .front{outline:2px solid var(--accent)}
+.fc-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+.fc-stat{text-align:center;margin:8px 0 0}
+
+/* ---------- essay ---------- */
+.essay textarea{width:100%;min-height:110px;resize:vertical;padding:12px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--card2);color:var(--text);font:16px/1.7 "Segoe UI",sans-serif;margin:8px 0 12px}
+.essay textarea:focus{outline:none;border-color:var(--accent)}
+.model{margin-top:14px;animation:rise .3s ease}
+.mdl{padding:14px 16px;border-radius:14px;background:rgba(var(--ok-rgb),.1);border:1px solid rgba(var(--ok-rgb),.4);margin-bottom:12px}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:6px 0;cursor:pointer}
+.chk input{width:20px;height:20px;margin-top:5px;accent-color:var(--ok);flex:none}
+.pts-sc{font-weight:700;margin-top:6px;color:var(--ok)}
+
+/* ---------- tables (summary) ---------- */
+.tbl{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:14px;border:1px solid var(--line);font-size:15.5px;line-height:1.65;margin:8px 0 18px}
+.tbl th,.tbl td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:start;vertical-align:top}
+.tbl tr:last-child td{border-bottom:0}
+.tbl th{background:var(--card2);font-size:14.5px;color:var(--muted)}
+.tbl td:first-child{font-weight:700;white-space:nowrap}
+.tbl .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);margin-inline-end:8px}
+
+/* ---------- calculators / inputs ---------- */
+.calc-top{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.calc-top label{display:inline-flex;align-items:center;gap:8px;font-weight:600}
+.calc input[type=number]{width:100%;max-width:132px;padding:7px 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--card2);color:var(--text);font:600 16px "Segoe UI",sans-serif;direction:ltr;text-align:right}
+.calc input[type=number]:focus{outline:none;border-color:var(--accent)}
+.calc-top input[type=number]{max-width:90px}
+.calc input[type=range]{accent-color:var(--accent);cursor:pointer;direction:ltr;width:170px}
+main{min-width:0}
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:4px 0;direction:ltr}
+.ctbl{min-width:680px;direction:ltr;margin:0}
+.ctbl th,.ctbl td{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ctbl th:first-child,.ctbl td:first-child{text-align:left}
+.ctbl input[type=number]{min-width:112px}
+.tbl.ctbl td:first-child{white-space:nowrap}
+.ctbl.sm{min-width:0}
+.ctbl.sm input[type=number]{min-width:0}
+.ctbl.sm th,.ctbl.sm td{white-space:normal}
+.tbl.ctbl.sm td:first-child{white-space:nowrap}
+.ctbl .neg{color:var(--bad)}
+.ctbl .pos{color:var(--ok)}
+.ctbl tr.tot td{background:var(--card2);font-weight:700}
+.res-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:14px}
+.res{padding:12px 14px;border-radius:14px;background:var(--card2);border:1px solid var(--line)}
+.res small{display:block;color:var(--muted);font-size:14px}
+.res b{display:block;font:800 22px/1.5 "Segoe UI",sans-serif;direction:ltr;unicode-bidi:isolate;text-align:start}
+.res.pos{border-color:rgba(var(--ok-rgb),.6);background:rgba(var(--ok-rgb),.12)}
+.res.neg{border-color:rgba(var(--bad-rgb),.6);background:rgba(var(--bad-rgb),.12)}
+.verdict{margin-top:14px;padding:12px 16px;border-radius:14px;font-weight:700;font-size:18px;background:var(--card2);border:1px solid var(--line)}
+.verdict.pos{background:rgba(var(--ok-rgb),.14);border-color:rgba(var(--ok-rgb),.55)}
+.verdict.neg{background:rgba(var(--bad-rgb),.13);border-color:rgba(var(--bad-rgb),.55)}
+.checks{display:grid;gap:4px;margin-bottom:10px}
+.checks .chk{padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card2);margin:0}
+.checks .chk:hover{border-color:var(--accent)}
+.formula{direction:ltr;unicode-bidi:isolate;text-align:center;font:700 19px/1.9 "Segoe UI",sans-serif;padding:12px 16px;border-radius:14px;background:rgba(var(--accent-rgb),.1);border:1px solid rgba(var(--accent-rgb),.4);margin:12px 0}
+.formula small{display:block;font:400 14px "Segoe UI",sans-serif;color:var(--muted)}
+
+/* ---------- share disclaimer (footer injected by core.js) ---------- */
+.disclaimer{max-width:1160px;margin:0 auto;padding:0 clamp(12px,3vw,24px) 46px}
+.disclaimer>div{padding:14px 18px;border-radius:16px;border:1px solid rgba(var(--warn-rgb),.5);background:rgba(var(--warn-rgb),.08);font-size:14.5px;line-height:1.85;color:var(--muted)}
+.disclaimer b{color:var(--text)}
+.disclaimer .d-en{direction:ltr;text-align:left;margin-top:10px;padding-top:10px;border-top:1px dashed rgba(var(--warn-rgb),.4);font-family:"Segoe UI",system-ui,sans-serif;font-size:13.5px;line-height:1.7}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;gap:12px;padding-top:12px}
+  .nav{position:sticky;top:60px;z-index:20;flex-direction:row;overflow-x:auto;gap:6px;padding:8px 2px;background:var(--bg)}
+  .nav{scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav button{width:auto;flex:none;padding:6px 10px}
+  .nav button:not(.on) .lbl{display:none}
+  .nav .tick{display:none}
+  .nav button.done .num{background:var(--ok);color:#06210f;border-color:transparent}
+  .ttl small{display:none}
+}
+@media (max-width:700px){
+  body{font-size:16px}
+  h2{font-size:26px}
+  .path{grid-template-columns:repeat(2,1fr);gap:12px}
+  .node::after{display:none!important}
+  .cycle{grid-template-columns:repeat(2,1fr)}
+  .opts.c3{grid-template-columns:1fr}
+  .metrics{grid-template-columns:1fr}
+  .prog{min-width:0}
+  .tbl{font-size:14px}
+  .tbl th,.tbl td{padding:8px 7px}
+  .tbl td:first-child{white-space:normal}
+  .prog .bar{min-width:50px}
+  .card.calc{padding:16px 10px}
+  .calc input[type=number]{padding:6px 4px;font-size:15px}
+  .ctbl.sm th,.ctbl.sm td{padding:8px 4px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* ---------- print: only the summary station ---------- */
+@media print{
+  :root,[data-theme="dark"],[data-theme="light"]{--bg:#fff;--card:#fff;--card2:#f3f3f3;--line:#ccc;--text:#111;--muted:#444;--shadow:none}
+  body{background:#fff!important;font-size:12pt;line-height:1.55}
+  .topbar,.nav,.station-foot,.noprint{display:none!important}
+  .layout{display:block;padding:0}
+  .station{display:none!important}
+  .station.summary{display:block!important}
+  .card,.panel{box-shadow:none;break-inside:avoid}
+  .tbl{break-inside:avoid}
+}
+
+</style>
+</head>
+<body data-lecture="l2">
+
+<header class="topbar">
+  <a class="home" href="index.html" title="القائمة الرئيسية">🏠</a>
+  <div class="ttl"><b>IS202 · Lecture 2</b><small class="en plain">System Request &amp; Feasibility</small></div>
+  <div class="prog"><div class="bar"><i id="progBar"></i></div><span id="progTxt">0/11</span></div>
+  <button id="themeBtn" class="icon-btn" type="button" title="فاتح / داكن">☀️</button>
+</header>
+
+<div class="layout">
+<nav class="nav" id="nav" aria-label="محطات المحاضرة"></nav>
+<main>
+
+<!-- =====================================================  0 · BIG PICTURE -->
+<section class="station" data-icon="🗺️" data-title="الصورة الكبيرة">
+  <h2>الصورة الكبيرة 🗺️</h2>
+  <p class="lead">المحاضرة دي عن <b>أول خطوة في أي مشروع</b>: الفكرة جت — نصرف عليها فلوس ولا لأ؟</p>
+
+  <div class="card">
+    <div class="story">
+      <div class="beat ok"><div class="emo">💡</div><b>الفكرة</b><span>الـ <span class="en">Sponsor</span> عنده مشكلة أو فرصة</span></div>
+      <div class="arrow">⬅</div>
+      <div class="beat ok"><div class="emo">📝</div><b class="en">System Request</b><span>يكتب فكرته رسمياً</span></div>
+      <div class="arrow">⬅</div>
+      <div class="beat ok"><div class="emo">🔍</div><b class="en">Feasibility Study</b><span>نفحص: ينفع؟ يستاهل؟ هيتقبل؟</span></div>
+      <div class="arrow">⬅</div>
+      <div class="beat ok"><div class="emo">🏛️</div><b>القرار</b><span>الـ <span class="en">Steering Committee</span> يوافق أو يرفض</span></div>
+    </div>
+    <p class="punch">قبل ما نصرف مليون جنيه، لازم نثبت إن المشروع <u>يستاهل</u> 💸</p>
+  </div>
+
+  <div class="note">📍 <b>احنا فين في الـ SDLC؟</b> في <span class="en">Planning</span> ← <span class="en">Project Initiation</span> (من Lecture 1): الـ sponsor يكتب الـ <span class="en">System Request</span> + بنعمل <span class="en">preliminary feasibility analysis</span>.</div>
+
+  <h3 class="sec">الـ Feasibility = 3 أسئلة <small>(احفظهم: <span class="en">T · E · O</span>)</small></h3>
+  <div class="grid g3">
+    <div class="card tint ph-des"><h4><span class="emo">🔧</span> <span class="en">Technical</span></h4><p class="en" style="margin:0">Can we build it?</p><p class="muted" style="margin:4px 0 0">نقدر نبنيه؟</p></div>
+    <div class="card tint ph-ana"><h4><span class="emo">💰</span> <span class="en">Economic</span></h4><p class="en" style="margin:0">Should we build it?</p><p class="muted" style="margin:4px 0 0">يستاهل نبنيه؟</p></div>
+    <div class="card tint ph-imp"><h4><span class="emo">🏢</span> <span class="en">Organizational</span></h4><p class="en" style="margin:0">If we build it, will they come?</p><p class="muted" style="margin:4px 0 0">لو بنيناه، هيستخدموه؟</p></div>
+  </div>
+  <p>الدراسة التفصيلية دي اسمها <b class="en">Feasibility Study</b> — وهي <b>business case</b> مفصّل للمشروع. والأهم: <b>لازم نراجعها طول المشروع</b> مش مرة واحدة.</p>
+
+  <h3 class="sec">خريطة المحاضرة <small>(اضغط على أي مربع تروحله)</small></h3>
+  <div class="grid g3">
+    <button type="button" class="tile ph-plan" data-go="2"><span class="emo">📝</span><b class="en">System Request</b><small>الـ 5 elements + مثال DrnTeq</small></button>
+    <button type="button" class="tile ph-ana" data-go="3"><span class="emo">💰</span><b class="en">Business Value</b><small>إزاي نقدّر القيمة بالأرقام</small></button>
+    <button type="button" class="tile ph-des" data-go="4"><span class="emo">🔧</span><b class="en">Technical</b><small>مصادر الـ risk الأربعة</small></button>
+    <button type="button" class="tile ph-imp" data-go="5"><span class="emo">📦</span><b>التكاليف والفوايد</b><small>Costs &amp; Benefits</small></button>
+    <button type="button" class="tile ph-ana" data-go="6"><span class="emo">🧮</span><b class="en">NPV</b><small>أهم حساب — فيه calculator ⭐</small></button>
+    <button type="button" class="tile ph-imp" data-go="7"><span class="emo">🏢</span><b class="en">Organizational</b><small>Champion · Alignment · Users</small></button>
+  </div>
+
+  <div class="note">📌 <b>الامتحان:</b> الكتاب (الـ Chapter 2) بيختم بمسألة حسابية على الـ <span class="en">NPV</span> — يعني لازم تعرف تحسبها بإيدك. عشان كده محطة <span class="en">NPV</span> فيها calculator تلعب فيه.</div>
+</section>
+
+<!-- =====================================================  1 · SYSTEM REQUEST -->
+<section class="station" data-icon="📝" data-title="الـ System Request">
+  <h2>الـ <span class="en">System Request</span> 📝</h2>
+  <p class="lead">الورقة الرسمية اللي بتشرح <b>ليه</b> المشروع ده و<b>إيه قيمته</b>. بيكتبها الـ <span class="en">Sponsor</span>.</p>
+
+  <div class="card">
+    <h4>🎯 بنكتبه ليه؟ <span class="muted">(الغرض منه)</span></h4>
+    <ol class="steps ph-plan" style="margin-bottom:0">
+      <li><b>يجبر</b> الـ sponsor يترجم فكرته لشكل رسمي <span class="en">(formalize)</span></li>
+      <li>إطار <span class="en">(framework)</span> لجمع المعلومات الأولية عن المشروع</li>
+      <li><b>يوحّد</b> شكل المعلومات اللي بتتعرض على <span class="en">steering (approval) committee</span></li>
+    </ol>
+  </div>
+
+  <h3 class="sec">الـ 5 Elements <small>(اضغط على كل واحد)</small></h3>
+  <p class="mnemo"><b>مين؟</b> · <b>ليه؟</b> · <b>إيه؟</b> · <b>بكام؟</b> · <b>قيود؟</b></p>
+
+  <div class="card" data-tabs="sponsor">
+    <div class="seg">
+      <button type="button" class="en ph-plan" data-tab="sponsor">Project Sponsor</button>
+      <button type="button" class="en ph-ana" data-tab="need">Business Need</button>
+      <button type="button" class="en ph-des" data-tab="req">Business Requirements</button>
+      <button type="button" class="en ph-imp" data-tab="value">Business Value</button>
+      <button type="button" class="en t-bad" data-tab="special">Special Issues / Constraints</button>
+    </div>
+
+    <div class="pane panel ph-plan" data-pane="sponsor">
+      <div class="ph-head"><span class="q">Who?</span><span>مين اللي بيبدأ المشروع؟</span></div>
+      <p>الشخص (أو المجموعة) من <b>الـ business</b> اللي بيبدأ المشروع، وهو <b>نقطة الاتصال الأساسية</b> <span class="en">(primary point of contact)</span> للمشروع من ناحية الـ business. مش لازم يكون technical.</p>
+      <div>أمثلة: <span class="chip en">Several members of the finance department</span><span class="chip en">Vice president of marketing</span><span class="chip en">CIO</span><span class="chip en">CEO</span></div>
+    </div>
+    <div class="pane panel ph-ana" data-pane="need">
+      <div class="ph-head"><span class="q">Why?</span><span>إيه السبب اللي خلانا نفكر في النظام؟</span></div>
+      <p>السبب المرتبط بالـ business اللي بيبدأ بيه المشروع <span class="en">(business-related reason)</span>. دي <b>المشكلة أو الفرصة</b> نفسها.</p>
+      <div>أمثلة: <span class="chip en">Reach a new market segment</span><span class="chip en">Offer a capability to keep up with competitors</span><span class="chip en">Improve access to information</span><span class="chip en">Decrease product defects</span><span class="chip en">Streamline supply acquisition processes</span></div>
+    </div>
+    <div class="pane panel ph-des" data-pane="req">
+      <div class="ph-head"><span class="q">What?</span><span>النظام هيوفّر إيه بالظبط؟</span></div>
+      <p>الإمكانيات الجديدة أو المحسّنة <span class="en">(new or enhanced business capabilities)</span> اللي النظام هيدّيها للـ business.</p>
+      <div>أمثلة: <span class="chip en">Provide online access to information</span><span class="chip en">Capture customer demographic information</span><span class="chip en">Include product search capabilities</span><span class="chip en">Produce performance reports</span><span class="chip en">Enhance online user support</span></div>
+    </div>
+    <div class="pane panel ph-imp" data-pane="value">
+      <div class="ph-head"><span class="q">How much?</span><span>النظام هيجيب فايدة بكام؟</span></div>
+      <p>الفوايد اللي النظام هيعملها للمنظمة <span class="en">(benefits)</span> — يفضّل <b>بأرقام</b>، وفيها <span class="en">tangible</span> و <span class="en">intangible</span>.</p>
+      <div>أمثلة: <span class="chip en">3% increase in sales</span><span class="chip en">1% increase in market share</span><span class="chip en">Reduction in headcount by 5 FTEs</span><span class="chip en">$200,000 cost savings from decreased supply costs</span><span class="chip en">$150,000 savings from removal of outdated technology</span></div>
+    </div>
+    <div class="pane panel t-bad" data-pane="special">
+      <div class="ph-head"><span class="q">Watch out!</span><span>فيه قيود لازم اللجنة تعرفها؟</span></div>
+      <p>أي مسائل بتخص <b>قرار لجنة الموافقة</b> <span class="en">(approval committee's decision)</span> — زي المواعيد النهائية والشروط الخاصة.</p>
+      <div>أمثلة: <span class="chip en">Government-mandated deadline for May 30</span><span class="chip en">System needed in time for the Christmas holiday season</span><span class="chip en">Top-level security clearance needed by project team to work with data</span></div>
+    </div>
+  </div>
+
+  <div class="note warn">⚠️ <b>تنبيه (تناقض بسيط):</b> في الـ learning objectives بتاعة السلايد مكتوب <span class="en">"four main sections"</span>، لكن القايمة اللي في السلايد <b>والكتاب</b> فيهم <b>5 elements</b> (الكتاب بيقول <span class="en">five</span> صراحةً). اكتب <b>5</b>.</div>
+
+  <h3 class="sec">🛩️ مثال حقيقي من المحاضرة: <span class="en">DrnTeq</span></h3>
+  <p class="muted">شركة بتقدم خدمات طيران درون وتحليل بيانات. الـ <span class="en">Client Services</span> وحدة جديدة محتاجة نظام. شوف الـ 5 elements اتملت إزاي:</p>
+  <table class="tbl">
+    <tr><th>Element</th><th>في الـ DrnTeq Client Services System</th></tr>
+    <tr class="ph-plan"><td><span class="dot"></span><span class="en">Project Sponsor</span></td><td dir="ltr" class="en plain">Carmella Herrera, General Manager, Client Services Business Unit</td></tr>
+    <tr class="ph-ana"><td><span class="dot"></span><span class="en">Business Need</span></td><td>العملاء يطلبوا خدمة طيران درون وتحليل بيانات من <b>موقع الشركة</b> — ده عنصر أساسي في نموذج شغل الوحدة الجديدة.</td></tr>
+    <tr class="ph-des"><td><span class="dot"></span><span class="en">Business Requirements</span></td><td>العميل يطلب الخدمة أونلاين ← الطلب يتعرض على الطيارين المتعاقدين القريبين ← يقدّموا عروض (bids) في فترة محددة ← الطيار صاحب العرض «الفائز» ياخد الطلب.</td></tr>
+    <tr class="ph-imp"><td><span class="dot"></span><span class="en">Business Value</span></td><td>دخل متوقع <b>$357,500</b> من عقود الطيارين وتأجير الدرون + <b>$565,000</b> من خدمة الطيران وتحليل البيانات (تقديرات محافظة).</td></tr>
+    <tr class="t-bad"><td><span class="dot"></span><span class="en">Special Issues</span></td><td>القدرات دي <b>ضرورية</b> لنموذج شغل الوحدة — المشروع لازم يتعمل عشان الوحدة تشتغل.</td></tr>
+  </table>
+  <div class="note">📖 <b>الكتاب بيضيف حاجتين:</b>
+    <div style="margin-top:6px"><b>① قيمة intangible:</b> <span class="chip en">first-mover market presence</span> <span class="chip en">brand equity</span></div>
+    <div style="margin-top:2px"><b>② قيود:</b> <span class="chip en">Civil Aviation encryption standards</span> + لازم ينزل <b>قبل Q2</b> (موسم المسح الزراعي)</div>
+  </div>
+
+  <h3 class="sec">🎯 لعبة: الجملة دي تخص أنهي Element؟</h3>
+  <div data-deck="reqSort"></div>
+</section>
+
+<!-- =====================================================  2 · BUSINESS VALUE -->
+<section class="station" data-icon="💰" data-title="قيمة المشروع">
+  <h2>تقدير الـ <span class="en">Business Value</span> 💰</h2>
+  <p class="lead">اللجنة مش هتوافق على «فكرة حلوة». لازم <b>أرقام</b>. إزاي نجيبها؟</p>
+
+  <div class="card">
+    <h4>1️⃣ نحدد مصادر القيمة</h4>
+    <span class="chip en">📈 Increased sales</span><span class="chip en">📉 Decreased costs</span><span class="chip en">👥 Reduced headcount</span><span class="chip en">🔄 Lower turnover</span>
+    <h4 style="margin-top:14px">2️⃣ نحط لكل مصدر رقم تقديري مبدئي <span class="muted">(initial estimate)</span></h4>
+    <p style="margin:0">بس التقدير فيه شك... فبنعمل 3 سيناريوهات ونوزّنهم بالاحتمالات 👇</p>
+  </div>
+
+  <h3 class="sec">⚖️ المتوسط الموزون <span class="en">(Weighted Average)</span></h3>
+  <div class="formula">Expected value = Σ ( Estimate × Probability )<small>لكل سيناريو: High / Medium / Low — مجموع الاحتمالات لازم يبقى 100%</small></div>
+  <p>مثال DrnTeq (تقدير الدخل من عقود الطيارين): <span class="en plain">500,000×25% + 350,000×60% + 150,000×15% = 125,000 + 210,000 + 22,500 = <b>357,500</b></span></p>
+
+  <p><b>🎮 جرّب بنفسك:</b> غيّر الأرقام أو الاحتمالات وشوف النتيجة. (الأرقام الافتراضية هي مثال المحاضرة.)</p>
+  <div class="card calc" id="evCalc">
+    <div class="tscroll">
+      <table class="tbl ctbl sm">
+        <tr><th>Scenario</th><th>Prob. (%)</th><th>Pilot contracts &amp; leases ($)</th><th>Client services ($)</th></tr>
+        <tr><td>High</td><td><input type="number" data-p value="25" min="0" max="100"></td><td><input type="number" data-a value="500000"></td><td><input type="number" data-b value="700000"></td></tr>
+        <tr><td>Medium</td><td><input type="number" data-p value="60" min="0" max="100"></td><td><input type="number" data-a value="350000"></td><td><input type="number" data-b value="550000"></td></tr>
+        <tr><td>Low</td><td><input type="number" data-p value="15" min="0" max="100"></td><td><input type="number" data-a value="150000"></td><td><input type="number" data-b value="400000"></td></tr>
+        <tr class="tot"><td>Weighted average</td><td id="evP"></td><td id="evA"></td><td id="evB"></td></tr>
+      </table>
+    </div>
+    <div class="verdict" id="evMsg"></div>
+  </div>
+  <div class="note ok">🧠 <b>الفرق عن المتوسط العادي:</b> المتوسط العادي بيعامل السيناريوهات كلها بنفس الأهمية. الموزون بيدّي وزن أكبر للسيناريو الأرجح (<span class="en">Medium = 60%</span>).</div>
+
+  <h3 class="sec">🎯 تدريب حسابي</h3>
+  <div data-deck="ev"></div>
+</section>
+
+<!-- =====================================================  3 · TECHNICAL -->
+<section class="station" data-icon="🔧" data-title="Technical Feasibility">
+  <h2><span class="en">Technical Feasibility</span> 🔧</h2>
+  <p class="lead"><b class="en">Can we build it?</b> — عندنا القدرة التقنية نبنيه فعلاً؟ اضغط على كل كارت — دي <b>4 مصادر للـ risk</b>:</p>
+
+  <div class="grid g2">
+    <div class="flip ph-ana"><div class="f"><span class="emo">🏭</span><b class="en">Familiarity with the application area</b><small>مجال التطبيق</small></div><div class="b">لو الـ <b>users والـ analysts</b> مش عارفين مجال الـ business اللي النظام بيخدمه، هتحصل سوء فهم في الـ requirements ← الـ risk بيزيد.</div></div>
+    <div class="flip ph-des"><div class="f"><span class="emo">🧪</span><b class="en">Familiarity with the technology</b><small>التكنولوجيا</small></div><div class="b">هل استخدمناها قبل كده؟ <b>قد إيه هي جديدة؟</b> كل ما كانت أجدد وأقل معرفة، الـ risk أعلى (learning curve).</div></div>
+    <div class="flip ph-plan"><div class="f"><span class="emo">📏</span><b class="en">Project size</b><small>حجم المشروع</small></div><div class="b">عدد الناس، الـ time frame، وعدد الـ distinct features. <b>كل ما كبر، الـ risk زاد.</b></div></div>
+    <div class="flip ph-imp"><div class="f"><span class="emo">🔌</span><b class="en">Compatibility with existing systems</b><small>التوافق مع الأنظمة الموجودة</small></div><div class="b">لازم النظام الجديد يشتغل مع القديم؟ <b>درجة الـ integration</b> المطلوبة (mainframe, databases, APIs) كل ما زادت، الـ risk زاد.</div></div>
+  </div>
+
+  <h3 class="sec">🎛️ جرّب: مين فيهم موجود في مشروعك؟</h3>
+  <div class="card" id="riskCard">
+    <p class="muted" style="margin-top:0">علّم على اللي ينطبق وشوف مقياس الـ risk:</p>
+    <div class="checks">
+      <label class="chk"><input type="checkbox"><span>الـ analysts والـ users مش عارفين مجال التطبيق</span></label>
+      <label class="chk"><input type="checkbox"><span>التكنولوجيا جديدة على الفريق</span></label>
+      <label class="chk"><input type="checkbox"><span>المشروع كبير (ناس كتير، وقت طويل، features كتير)</span></label>
+      <label class="chk"><input type="checkbox"><span>لازم يتكامل مع أنظمة قديمة موجودة</span></label>
+    </div>
+    <div class="metric"><small><span>مستوى الـ technical risk</span><b id="riskTxt"></b></small><div class="meter"><i id="riskBar"></i></div></div>
+    <div class="note" id="riskMsg"></div>
+  </div>
+
+  <h3 class="sec">🛟 لو الـ risk عالي، نقلله إزاي؟ <small>(مثال: تكنولوجيا مش مألوفة)</small></h3>
+  <ol class="steps ph-des">
+    <li>نوفّر <b>ميزانية للـ training</b></li>
+    <li>نوفّر ميزانية <b>نستعين فيها بـ consultants</b> عندهم الخبرة</li>
+    <li>نديّ الجدول <b>وقت أكتر</b> عشان الفريق يتعلم (<span class="en">learning curve</span>)</li>
+    <li>نستخدم <b>methodology فيها experimentation</b> (زي الـ prototyping — هنشوفه في Lecture 3)</li>
+  </ol>
+  <div class="note ok">💡 <b>مهم:</b> الـ risk العالي <b>مش معناه</b> نرفض المشروع. لو قيمته الاستراتيجية كبيرة وفيه mitigation (training, prototyping)، ممكن يتوافق عليه. الهدف: <b>نعرف الـ risks وحجمها</b> ونقللها.</div>
+
+  <h3 class="sec">🎯 لعبة: ده أنهي مصدر risk؟</h3>
+  <div data-deck="tech"></div>
+</section>
+
+<!-- =====================================================  4 · COSTS & BENEFITS -->
+<section class="station" data-icon="📦" data-title="التكاليف والفوايد">
+  <h2>التكاليف والفوايد 📦</h2>
+  <p class="lead"><b class="en">Economic Feasibility</b> = <b class="en">Should we build it?</b> — الفوايد أكبر من التكاليف ولا لأ؟ بتتعمل في <b>4 خطوات</b>:</p>
+
+  <div class="card">
+    <div class="cycle">
+      <div><span class="n">1</span><br><b class="en">Identify</b><br>نحدد الـ costs والـ benefits</div>
+      <div><span class="n">2</span><br><b class="en">Assign values</b><br>نحط لكل واحدة رقم</div>
+      <div><span class="n">3</span><br><b class="en">Cash flow</b><br>نحدد الـ cash flow سنة بسنة</div>
+      <div><span class="n">4</span><br><b class="en">Assess viability</b><br><span class="en">ROI · Break-even · NPV</span></div>
+    </div>
+  </div>
+
+  <h3 class="sec">القسمين: تكاليف وفوايد <small>(ولازم نحسب الـ development والـ operational)</small></h3>
+  <div class="grid g2">
+    <div class="card tint ph-plan"><h4>🏗️ <span class="en">Development costs</span> <small class="muted">— مرة واحدة (غالباً Year 0)</small></h4>
+      <span class="chip en">Development team salaries</span><span class="chip en">Consultant fees</span><span class="chip en">Development training</span><span class="chip en">Hardware and software</span><span class="chip en">Vendor installation</span><span class="chip en">Office space and equipment</span><span class="chip en">Data conversion costs</span></div>
+    <div class="card tint ph-ana"><h4>🔁 <span class="en">Operational costs</span> <small class="muted">— متكررة كل سنة</small></h4>
+      <span class="chip en">Software upgrades</span><span class="chip en">Software licensing fees</span><span class="chip en">Hardware repair and upgrades</span><span class="chip en">Cloud storage fees</span><span class="chip en">Operational team salaries</span><span class="chip en">Communications charges</span><span class="chip en">User training</span></div>
+    <div class="card tint t-ok"><h4>💵 <span class="en">Tangible benefits</span> <small class="muted">— تتقاس بالفلوس</small></h4>
+      <span class="chip en">Increased sales</span><span class="chip en">Reductions in staff</span><span class="chip en">Reductions in inventory</span><span class="chip en">Reductions in IT costs</span><span class="chip en">Better supplier prices</span></div>
+    <div class="card tint ph-des"><h4>🌟 <span class="en">Intangible benefits</span> <small class="muted">— صعب تتحط لها رقم</small></h4>
+      <span class="chip en">Increased market share</span><span class="chip en">Increased brand recognition</span><span class="chip en">Higher-quality products</span><span class="chip en">Improved customer service</span><span class="chip en">Better supplier relations</span></div>
+  </div>
+  <div class="note ok">🧠 <b>حيلة:</b> <b>Development</b> = بنبني النظام (مرة واحدة). <b>Operational</b> = النظام شغال (كل سنة). و<b>Tangible</b> = تحط له رقم بسهولة، <b>Intangible</b> = إحساس وسمعة.<br>⚖️ فخ: <span class="en">Better supplier <u>prices</u></span> = tangible، لكن <span class="en">Better supplier <u>relations</u></span> = intangible.</div>
+  <div class="note warn">⚠️ <b>تناقض بين السلايد والكتاب:</b> السلايد حاطط <span class="en">User training</span> في الـ <b>Operational</b> costs، لكن الكتاب بيحط <span class="en">user training programs</span> في الـ <b>Development</b> costs. ما أخدتهاش في أي لعبة هنا عشان الغموض ده — لو جه سؤال عليها، فكّر في مصدر السؤال (الكتاب الأولوية حسب الدكتورة).</div>
+
+  <h3 class="sec">🎯 لعبة: التكلفة/الفايدة دي من أنهي نوع؟</h3>
+  <div data-deck="cb"></div>
+</section>
+
+<!-- =====================================================  5 · NPV -->
+<section class="station" data-icon="🧮" data-title="الـ NPV ⭐">
+  <h2><span class="en">NPV</span> — أهم حساب ⭐</h2>
+  <p class="lead">بنقيّم الجدوى المالية بـ <b class="en">Discounted Cash Flow</b>. والـ <span class="en">NPV</span> هي الطريقة المفضّلة في المحاضرة.</p>
+
+  <div class="card">
+    <h4>🤔 ليه بنخصم (discount)؟</h4>
+    <p style="margin-bottom:6px">1,000 جنيه <b>النهارده</b> أحسن من 1,000 جنيه <b>بعد سنة</b> — لأني ممكن أستثمر الفلوس النهارده. دي <b class="en">time value of money</b>.</p>
+    <p style="margin:0">فبنحوّل أي فلوس هتيجي في المستقبل لـ <b>قيمتها النهارده</b> <span class="en">(Present Value)</span> قبل ما نقارن.</p>
+  </div>
+
+  <h3 class="sec">القوانين الاتنين</h3>
+  <div class="formula">PV = Amount / (1 + r)<sup>n</sup><small>r = الـ discount rate · n = رقم السنة (Year 0 ← n = 0 ← مفيش خصم)</small></div>
+  <div class="formula">NPV = PV of Total Benefits − PV of Total Costs<small>موجب ✅ ← المشروع مجدي ماليّاً · سالب ❌ ← مش مجدي</small></div>
+
+  <h3 class="sec">مثال بسيط خطوة بخطوة</h3>
+  <div class="card">
+    <p style="margin-top:0">تكلفة <b>1,800</b> النهارده (Year 0). فايدة <b>1,100</b> بعد سنة، و<b>1,210</b> بعد سنتين. الـ rate = 10%.</p>
+    <ol class="steps ph-ana">
+      <li>PV السنة 1 = <span class="en plain">1,100 / (1.10)<sup>1</sup> = <b>1,000</b></span></li>
+      <li>PV السنة 2 = <span class="en plain">1,210 / (1.10)<sup>2</sup> = 1,210 / 1.21 = <b>1,000</b></span></li>
+      <li>PV of Total Benefits = <span class="en plain">1,000 + 1,000 = <b>2,000</b></span></li>
+      <li>PV of Total Costs = <span class="en plain"><b>1,800</b></span> (Year 0 ← من غير خصم)</li>
+      <li>NPV = <span class="en plain">2,000 − 1,800 = <b>+200</b></span> ← <b>موجب ✅ المشروع مجدي</b></li>
+    </ol>
+  </div>
+
+  <h3 class="sec">🧮 الـ Calculator <small>(الافتراضي = جدول المحاضرة)</small></h3>
+  <p>غيّر أي رقم، وحرّك الـ <span class="en">discount rate</span> وشوف النتيجة بتتغير. جرّب مثلاً <b>8%</b> على مثال المحاضرة وشوف الـ NPV بيبقى إيه 👀</p>
+  <div class="card calc" id="npvCalc">
+    <div class="calc-top">
+      <div class="seg" id="npvPre" style="margin:0">
+        <button type="button" class="on" data-p="lec">مثال المحاضرة</button>
+        <button type="button" data-p="simple">المثال البسيط</button>
+        <button type="button" data-p="blank">فاضي</button>
+      </div>
+      <label><span class="en">Discount rate</span> <input type="number" id="npvRate" value="6" min="0" max="100" step="0.5"> %</label>
+      <input type="range" id="npvRange" min="0" max="20" step="0.5" value="6" aria-label="Discount rate">
+    </div>
+    <div class="tscroll"><table class="tbl ctbl" id="npvTbl"></table></div>
+    <div class="res-row">
+      <div class="res" id="rB"><small>PV of Total Benefits</small><b></b></div>
+      <div class="res" id="rC"><small>PV of Total Costs</small><b></b></div>
+      <div class="res" id="rN"><small>NPV</small><b></b></div>
+      <div class="res" id="rR"><small>ROI (محسوب من الـ PV)</small><b></b></div>
+      <div class="res" id="rBE"><small>Break-even (PV تراكمي)</small><b></b></div>
+    </div>
+    <div class="verdict" id="npvV"></div>
+  </div>
+
+  <div class="note">📖 <b>مثال المحاضرة بالتفصيل:</b> <span class="en">Total development costs = 1,632,295</span> (سيرفرات + برامج + شغل تطوير) في Year 0. الـ benefits سنوياً = <span class="en">Increased sales + complaint-call reductions + reduced inventory costs</span> (638,000 في Year 1). الـ operational costs = <span class="en">hardware + software + operational labor</span> (185,000 في Year 1). النتيجة: <b>PV benefits 2,364,978 − PV costs 2,296,686 = NPV +68,292</b>.</div>
+
+  <div class="grid g2">
+    <div class="card"><h4>📊 <span class="en">ROI</span></h4><p style="margin:0" class="en plain">ROI = (Total benefits − Total costs) / Total costs</p><p class="muted" style="margin:6px 0 0">العائد على كل جنيه مستثمر.</p></div>
+    <div class="card"><h4>⏱️ <span class="en">Break-even point</span></h4><p style="margin:0">اللحظة (السنة) اللي الفوايد المتراكمة بتغطي فيها التكاليف المتراكمة. في مثال المحاضرة = <b>Year 4</b>.</p></div>
+  </div>
+  <div class="note warn">ℹ️ السلايد بيذكر <span class="en">ROI</span> و <span class="en">Break-even</span> كأسماء من غير حساب، والكتاب بيذكرهم في الأهداف بس. الصيغتين اللي فوق هما التعريف القياسي. اللي متركّز عليه في المحاضرة والكتاب هو <b class="en">NPV</b>.</div>
+
+  <h3 class="sec">🎯 تدريب على الـ NPV</h3>
+  <div data-deck="npvQ"></div>
+</section>
+
+<!-- =====================================================  6 · ORGANIZATIONAL -->
+<section class="station" data-icon="🏢" data-title="Organizational Feasibility">
+  <h2><span class="en">Organizational Feasibility</span> 🏢</h2>
+  <p class="lead"><b class="en">If we build it, will they come?</b> — ممكن النظام يبقى سليم تقنياً ومربح ماليّاً... ويفشل لأن الناس رفضته!</p>
+
+  <div class="grid g2">
+    <div class="flip ph-plan"><div class="f"><span class="emo">🧭</span><b class="en">Strategic alignment</b><small>المشروع ماشي مع استراتيجية الشركة؟</small></div><div class="b">هل أهداف المشروع متماشية مع الـ <b>business strategy</b>؟ <b>كل ما كان التماشي أقرب، احتمال النجاح أكبر</b> والدعم والتمويل أثبت.</div></div>
+    <div class="flip ph-ana"><div class="f"><span class="emo">🏆</span><b class="en">Project champion</b><small>فيه حد قوي بيدافع عنه؟</small></div><div class="b">شخص <b>قوي ومؤثر</b> (غالباً إدارة عليا) بيروّج للمشروع، بيتغلب على المقاومة، وبيوفّر الموارد.</div></div>
+    <div class="flip ph-des"><div class="f"><span class="emo">🤝</span><b class="en">Management support</b><small>دعم الإدارة على نطاق واسع</small></div><div class="b">دعم <b>واسع</b> من مديري الأقسام اللي هيشجعوا (أو يلزموا) الناس تستخدم النظام كل يوم.</div></div>
+    <div class="flip ph-imp"><div class="f"><span class="emo">👩‍💻</span><b class="en">End users</b><small>متقبلين ولا بيقاوموا؟</small></div><div class="b">هل المستخدمين <b>receptive</b> (متقبلين) ولا <b>resistant</b> (بيقاوموا)؟ إشراكهم بدري بيقلل المقاومة.</div></div>
+  </div>
+  <div class="note">🧠 الأربعة دول هم <b>الـ stakeholders</b>: <span class="en">strategic alignment + champion + management + users</span>. (السلايد بيجمّع الـ 3 الأخيرين تحت «stakeholder groups».)</div>
+
+  <h3 class="sec">📣 نأثّر على الـ stakeholders إزاي؟ <small>(4 طرق)</small></h3>
+  <div class="grid g2">
+    <div class="card tint ph-plan"><h4>🎤 <span class="en">Presentations</span></h4><p style="margin:0">عروض بتشرح وتروّج لفوايد المشروع.</p></div>
+    <div class="card tint ph-ana"><h4>🙋 <span class="en">Personal benefits</span></h4><p style="margin:0">نركّز على الفوايد <b>الشخصية</b> كمان مش بس فوايد المنظمة.</p></div>
+    <div class="card tint ph-des"><h4>🧪 <span class="en">Prototypes</span></h4><p style="margin:0">نموذج أولي بيثبت فكرة النظام ويخليها ملموسة.</p></div>
+    <div class="card tint ph-imp"><h4>👥 <span class="en">Real user involvement</span></h4><p style="margin:0">إشراك حقيقي للمستخدمين <b>طول المشروع</b> (مش في الآخر).</p></div>
+  </div>
+
+  <h3 class="sec">🎯 لعبة: المشكلة دي حلها إيه؟</h3>
+  <div data-deck="infl"></div>
+
+  <h3 class="sec">🧷 خلاصة: كل المشاريع فيها <span class="en">feasibility risks</span></h3>
+  <div class="card">
+    <p style="margin-top:0">الهدف مش إن مفيش risks — الهدف إننا <b>نعرفهم ونعرف أهميتهم</b>، وبعد كده نقللهم. والـ <span class="en">Sponsor</span> والـ <span class="en">Project Manager</span> وباقي الفريق لازم يكونوا عارفينهم. وبعد كده <b>نراجع باستمرار</b>:</p>
+    <div class="grid g2">
+      <div class="note ok" style="margin:0">❓ الـ risks اللي حددناها قبل كده — <b>بتتدار كويس</b> ولا <b>محتاجة اهتمام أكتر</b>؟</div>
+      <div class="note warn" style="margin:0">❓ هل ظهرت <b>risks جديدة</b>؟ لو آه: إيه الإجراء؟ وأثرها على الميزانية والجدول؟</div>
+    </div>
+  </div>
+
+  <h3 class="sec">🏁 لعبة الخلاصة: Technical ولا Economic ولا Organizational؟</h3>
+  <div data-deck="feas3"></div>
+</section>
+
+<!-- =====================================================  7 · TRAPS -->
+<section class="station" data-icon="⚠️" data-title="فخاخ الامتحان">
+  <h2>فخاخ الامتحان ⚠️</h2>
+  <p class="lead">الجمل دي بالظبط هي اللي بتتعمل منها <span class="en">True/False</span>. قرر: صح ولا غلط؟</p>
+  <div data-deck="traps"></div>
+</section>
+
+<!-- =====================================================  8 · FLASHCARDS -->
+<section class="station" data-icon="🧠" data-title="Flashcards">
+  <h2>Flashcards 🧠</h2>
+  <p class="lead">فكّر في الإجابة الأول، وبعدين اقلب الكارت. علّم اللي عرفته ✅ واللي لسه 🔁 — وراجع الأخير بس.</p>
+  <div data-flash="main"></div>
+  <p class="hint" style="text-align:center;margin-top:10px">⌨️ مسطرة (Space) تقلب · الأسهم تنقل بين الكروت</p>
+</section>
+
+<!-- =====================================================  9 · QUIZ -->
+<section class="station" data-icon="📝" data-title="الكويز النهائي">
+  <h2>الكويز النهائي 📝</h2>
+  <p class="lead">10 أسئلة <span class="en">MCQ</span> بتصحيح فوري، وبعدها 3 أسئلة <span class="en">Essay</span> (واحد حسابي) تكتب إجابتك وتقارنها بالنموذجية.</p>
+
+  <h3 class="sec">① MCQ</h3>
+  <div data-deck="mcq"></div>
+
+  <h3 class="sec">② Essay</h3>
+  <div class="card essay" data-essay="e1">
+    <h3>سؤال 1</h3>
+    <p dir="auto" class="en plain" style="font-weight:600">Explain the elements of the System Request. Give an example for each element.</p>
+    <textarea placeholder="اكتب إجابتك هنا (بتتحفظ في المتصفح بس)…"></textarea>
+    <button type="button" class="btn" data-show>📖 اعرض الإجابة النموذجية</button>
+    <div class="model" hidden><div class="mdl"></div><div class="pts"></div></div>
+  </div>
+  <div class="card essay" data-essay="e2">
+    <h3>سؤال 2</h3>
+    <p dir="auto" class="en plain" style="font-weight:600">Define the three types of feasibility analysis. For technical feasibility, list the sources of technical risk.</p>
+    <textarea placeholder="اكتب إجابتك هنا…"></textarea>
+    <button type="button" class="btn" data-show>📖 اعرض الإجابة النموذجية</button>
+    <div class="model" hidden><div class="mdl"></div><div class="pts"></div></div>
+  </div>
+  <div class="card essay" data-essay="e3">
+    <h3>سؤال 3 — حسابي 🧮</h3>
+    <p dir="auto" class="en plain" style="font-weight:600">A project has a development cost of 1,400 in Year 0. Operational costs are 110 in Year 1 and 121 in Year 2. Benefits are 770 in Year 1 and 968 in Year 2. The discount rate is 10%. Calculate the NPV and state your recommendation.</p>
+    <textarea placeholder="اكتب خطوات الحل هنا…"></textarea>
+    <button type="button" class="btn" data-show>📖 اعرض الحل</button>
+    <div class="model" hidden><div class="mdl"></div><div class="pts"></div></div>
+  </div>
+</section>
+
+<!-- =====================================================  10 · SUMMARY -->
+<section class="station summary" data-icon="⚡" data-title="ملخص المراجعة">
+  <h2>ملخص المراجعة ⚡ <span class="en plain" style="font-size:18px">Lecture 2</span></h2>
+  <p class="lead noprint">ده اللي تراجعه الليلة اللي قبل الامتحان. <button type="button" class="btn" onclick="window.print()">🖨️ اطبع / احفظ PDF</button></p>
+
+  <h3 class="sec">📝 الـ System Request (5 elements)</h3>
+  <table class="tbl">
+    <tr><th>Element</th><th>بيجاوب</th><th>أمثلة</th></tr>
+    <tr class="ph-plan"><td><span class="dot"></span><span class="en">Project Sponsor</span></td><td>مين؟ (من الـ business)</td><td class="en">VP of marketing, CIO, CEO</td></tr>
+    <tr class="ph-ana"><td><span class="dot"></span><span class="en">Business Need</span></td><td>ليه؟ (السبب)</td><td class="en">Decrease product defects; reach a new market segment</td></tr>
+    <tr class="ph-des"><td><span class="dot"></span><span class="en">Business Requirements</span></td><td>إيه؟ (الإمكانيات)</td><td class="en">Produce performance reports; capture customer demographics</td></tr>
+    <tr class="ph-imp"><td><span class="dot"></span><span class="en">Business Value</span></td><td>بكام؟ (الفوايد)</td><td class="en">3% increase in sales; $200,000 savings; −5 FTEs</td></tr>
+    <tr class="t-bad"><td><span class="dot"></span><span class="en">Special Issues</span></td><td>قيود؟ (تخص قرار اللجنة)</td><td class="en">Government deadline May 30; Christmas season; security clearance</td></tr>
+  </table>
+  <p><b>Weighted average</b> = Σ (Estimate × Probability) — مثال DrnTeq: <span class="en">357,500</span> و <span class="en">565,000</span>.</p>
+
+  <h3 class="sec">🔍 الـ Feasibility (3 أنواع — T·E·O)</h3>
+  <table class="tbl">
+    <tr><th>النوع</th><th>السؤال</th><th>بنفحص إيه؟</th></tr>
+    <tr class="ph-des"><td><span class="dot"></span><span class="en">Technical</span></td><td class="en">Can we build it?</td><td>الـ risk من: <span class="en">application area · technology · project size · compatibility</span></td></tr>
+    <tr class="ph-ana"><td><span class="dot"></span><span class="en">Economic</span></td><td class="en">Should we build it?</td><td>costs وbenefits ← cash flow ← <span class="en">ROI · Break-even · NPV</span></td></tr>
+    <tr class="ph-imp"><td><span class="dot"></span><span class="en">Organizational</span></td><td class="en">If we build it, will they come?</td><td><span class="en">Strategic alignment · champion · management support · users</span></td></tr>
+  </table>
+
+  <h3 class="sec">📦 التكاليف والفوايد</h3>
+  <table class="tbl">
+    <tr><th></th><th>إيه هو</th><th>أمثلة</th></tr>
+    <tr class="ph-plan"><td><span class="dot"></span><span class="en">Development costs</span></td><td>مرة واحدة (Year 0)</td><td class="en">Salaries, consultants, hardware &amp; software, vendor installation, data conversion</td></tr>
+    <tr class="ph-ana"><td><span class="dot"></span><span class="en">Operational costs</span></td><td>متكررة كل سنة</td><td class="en">Upgrades, licensing, cloud fees, operational salaries, communications</td></tr>
+    <tr class="t-ok"><td><span class="dot"></span><span class="en">Tangible benefits</span></td><td>بتتقاس بالفلوس</td><td class="en">Increased sales, reductions in staff / inventory / IT costs, better supplier prices</td></tr>
+    <tr class="ph-des"><td><span class="dot"></span><span class="en">Intangible benefits</span></td><td>صعب تتحسب</td><td class="en">Market share, brand recognition, quality, customer service, supplier relations</td></tr>
+  </table>
+
+  <h3 class="sec">🧮 الـ NPV</h3>
+  <div class="formula" style="margin:6px 0">PV = Amount / (1 + r)<sup>n</sup> &nbsp;·&nbsp; NPV = PV(Benefits) − PV(Costs)</div>
+  <div class="grid g2">
+    <div class="card"><h4>✅ القرار</h4><p style="margin:0">NPV موجب ← مجدي ماليّاً · NPV سالب ← مش مجدي. والـ NPV أحسن من الـ payback لأنه بيحسب <span class="en">time value of money</span>.</p></div>
+    <div class="card"><h4>📌 مثال المحاضرة (6%)</h4><p style="margin:0" class="en plain">Dev costs 1,632,295 · PV benefits 2,364,978 · PV costs 2,296,686 · <b>NPV +68,292</b> · break-even Year 4</p></div>
+    <div class="card"><h4>📊 ROI و Break-even</h4><p style="margin:0" class="en plain">ROI = (benefits − costs) / costs · Break-even = year cumulative benefits cover cumulative costs</p></div>
+    <div class="card"><h4>📣 نأثّر على الـ stakeholders</h4><p style="margin:0" class="en plain">Presentations · personal + organizational benefits · prototypes · real user involvement</p></div>
+  </div>
+
+  <h3 class="sec">📌 نقط سريعة</h3>
+  <div class="grid g2">
+    <div class="card"><h4>🛟 تقليل الـ risk (تكنولوجيا جديدة)</h4><p style="margin:0">training · consultants · وقت أكتر · methodology فيها experimentation</p></div>
+    <div class="card"><h4>🔁 مراجعة الـ feasibility</h4><p style="margin:0">طول المشروع: الـ risks القديمة بتتدار؟ فيه risks جديدة؟</p></div>
+    <div class="card"><h4>🏛️ مين بيستخدمهم</h4><p style="margin:0">الـ <span class="en">steering (approval) committee</span> بتقرر على أساس الـ System Request + Feasibility Study</p></div>
+    <div class="card"><h4>💡 Risk عالي</h4><p style="margin:0">مش معناه نرفض — لو القيمة كبيرة وفيه mitigation يتوافق عليه</p></div>
+  </div>
+
+  <h3 class="sec">⚠️ الفخاخ</h3>
+  <div class="note bad">
+    ❌ System Request = 4 elements (هي <b>5</b>) &nbsp;·&nbsp; ❌ Technical = Should we build it? (ده Economic) &nbsp;·&nbsp; ❌ Development costs متكررة (دي Operational) &nbsp;·&nbsp; ❌ NPV من غير خصم &nbsp;·&nbsp; ❌ Better supplier relations = tangible (intangible) &nbsp;·&nbsp; ❌ الـ Sponsor لازم يكون technical (من الـ business) &nbsp;·&nbsp; ❌ Feasibility مرة واحدة في الأول (بتتراجع باستمرار) &nbsp;·&nbsp; ❌ Risk عالي = نرفض المشروع
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+window.DATA = {
+  decks: {
+    /* ---------- System Request sorting ---------- */
+    reqSort: {
+      cols: 3,
+      opts: [
+        { t: 'Project Sponsor', cls: 'ph-plan' },
+        { t: 'Business Need', cls: 'ph-ana' },
+        { t: 'Business Requirements', cls: 'ph-des' },
+        { t: 'Business Value', cls: 'ph-imp' },
+        { t: 'Special Issues', cls: 't-bad' }
+      ],
+      cards: [
+        { q: 'Vice president of marketing', a: 0, why: 'ده مثال على <b>Project Sponsor</b> — الشخص من الـ business اللي بيبدأ المشروع. (CEO و CIO كمان أمثلة.)' },
+        { q: 'Decrease product defects', a: 1, why: 'ده <b>السبب</b> اللي بنبدأ المشروع عشانه = <b>Business Need</b>.' },
+        { q: 'Produce performance reports', a: 2, why: 'إمكانية جديدة هيوفرها النظام = <b>Business Requirements</b>.' },
+        { q: '3% increase in sales', a: 3, why: 'فايدة بالأرقام = <b>Business Value</b>.' },
+        { q: 'Government-mandated deadline for May 30', a: 4, why: 'قيد بيأثر على قرار اللجنة = <b>Special Issues or Constraints</b>.' },
+        { q: 'Reach a new market segment', a: 1, why: 'سبب business لبدء المشروع = <b>Business Need</b>.' },
+        { q: 'Capture customer demographic information', a: 2, why: 'قدرة النظام لازم يوفّرها = <b>Business Requirements</b>.' },
+        { q: '$200,000 cost savings from decreased supply costs', a: 3, why: 'توفير بالأرقام = <b>Business Value</b>.' },
+        { q: 'Top-level security clearance needed by the project team to work with the data', a: 4, why: 'شرط خاص بيأثر على قرار اللجنة = <b>Special Issues or Constraints</b>.' },
+        { q: 'CEO', a: 0, why: 'الـ CEO / CIO / VP كلهم أمثلة على الـ <b>Project Sponsor</b>.' },
+        { q: 'Include product search capabilities', a: 2, why: 'قدرة جديدة في النظام = <b>Business Requirements</b>.' },
+        { q: 'Offer a capability to keep up with competitors', a: 1, why: 'سبب business (المنافسة) = <b>Business Need</b>.' }
+      ]
+    },
+
+    /* ---------- weighted average practice ---------- */
+    ev: {
+      cols: 1, shuffleOpts: true,
+      cards: [
+        { q: 'Estimates: High (20%) = $1,000,000 · Medium (50%) = $600,000 · Low (30%) = $200,000. What is the weighted average?', opts: ['$600,000', '$560,000', '$1,800,000', '$280,000'], a: 1, why: '1,000,000×0.20 = 200,000 · 600,000×0.50 = 300,000 · 200,000×0.30 = 60,000 ← المجموع <b>560,000</b>.<br>(600,000 = المتوسط العادي من غير احتمالات. 1,800,000 = مجرد جمع.)' },
+        { q: 'Estimates: High (25%) = $400,000 · Medium (60%) = $200,000 · Low (15%) = $100,000. Weighted average?', opts: ['$235,000', '$233,333', '$700,000', '$200,000'], a: 0, why: '400,000×0.25 = 100,000 · 200,000×0.60 = 120,000 · 100,000×0.15 = 15,000 ← <b>235,000</b>.' },
+        { q: 'Why do we assign probabilities to the High / Medium / Low estimates?', opts: ['Because estimates are uncertain, so we weigh each scenario by how likely it is', 'Because the steering committee requires percentages', 'To calculate the discount rate', 'To replace the feasibility study'], a: 0, why: 'التقدير فيه شك، فبنوزّن كل سيناريو بحسب احتماله.' },
+        { q: 'Which of the following is a typical source of business value?', opts: ['Increased sales', 'Higher programmer salaries', 'A longer project schedule', 'Additional hardware purchases'], a: 0, why: 'مصادر القيمة: <b>Increased sales · Decreased costs · Reduced headcount · Lower turnover</b>.' }
+      ]
+    },
+
+    /* ---------- technical risk sorting ---------- */
+    tech: {
+      cols: 2,
+      opts: [
+        { t: 'Application area', cls: 'ph-ana' },
+        { t: 'Technology', cls: 'ph-des' },
+        { t: 'Project size', cls: 'ph-plan' },
+        { t: 'Compatibility', cls: 'ph-imp' }
+      ],
+      cards: [
+        { q: 'الـ analysts والـ users مش فاهمين شغل شركات الشحن البحري اللي النظام بتاعها', a: 0, why: 'عدم معرفة مجال الـ business = <b>Familiarity with the application area</b>.' },
+        { q: 'الفريق عمره ما اشتغل بـ blockchain، وهي تكنولوجيا جديدة', a: 1, why: 'تكنولوجيا غير مألوفة = <b>Familiarity with the technology</b>.' },
+        { q: 'المشروع محتاج 80 مطور وهياخد 3 سنين', a: 2, why: 'عدد الناس والوقت = <b>Project size</b>.' },
+        { q: 'النظام الجديد لازم يتربط بـ mainframe قديم', a: 3, why: 'الشغل مع نظام موجود = <b>Compatibility with existing systems</b>.' },
+        { q: 'عدد الـ features كبير والـ time frame ضيق', a: 2, why: 'عدد الـ features والوقت = <b>Project size</b>.' },
+        { q: 'أول مرة نستخدم cloud platform نزلت السنة دي', a: 1, why: 'تكنولوجيا جديدة على الفريق = <b>Technology</b>.' },
+        { q: 'الـ users نفسهم مش متأكدين العملية بتمشي إزاي في المجال ده', a: 0, why: 'عدم الإلمام بمجال التطبيق = <b>Application area</b>.' },
+        { q: 'لازم نتكامل مع 5 databases مختلفة (درجة integration عالية)', a: 3, why: 'درجة الـ integration المطلوبة = <b>Compatibility</b>.' }
+      ]
+    },
+
+    /* ---------- costs and benefits sorting ---------- */
+    cb: {
+      cols: 2,
+      opts: [
+        { t: 'Development cost', cls: 'ph-plan' },
+        { t: 'Operational cost', cls: 'ph-ana' },
+        { t: 'Tangible benefit', cls: 't-ok' },
+        { t: 'Intangible benefit', cls: 'ph-des' }
+      ],
+      cards: [
+        { q: 'Consultant fees', a: 0, why: 'بنبني النظام (مرة واحدة) = <b>Development cost</b>.' },
+        { q: 'Cloud storage fees', a: 1, why: 'بتتدفع كل سنة والنظام شغال = <b>Operational cost</b>.' },
+        { q: 'Reductions in inventory', a: 2, why: 'توفير بيتحسب بالفلوس = <b>Tangible benefit</b>.' },
+        { q: 'Improved customer service', a: 3, why: 'صعب تتحط له رقم = <b>Intangible benefit</b>.' },
+        { q: 'Data conversion costs', a: 0, why: 'تحويل البيانات وقت بناء النظام = <b>Development cost</b>.' },
+        { q: 'Software licensing fees', a: 1, why: 'في السلايد = <b>Operational cost</b> (متكررة).' },
+        { q: 'Better supplier prices', a: 2, why: 'سعر = فلوس = <b>Tangible</b>.' },
+        { q: 'Better supplier relations', a: 3, why: 'علاقات = <b>Intangible</b>. (فخ: prices tangible / relations intangible)' },
+        { q: 'Increased brand recognition', a: 3, why: 'سمعة = <b>Intangible</b>.' },
+        { q: 'Operational team salaries', a: 1, why: 'مرتبات فريق التشغيل كل سنة = <b>Operational cost</b>.' },
+        { q: 'Development team salaries', a: 0, why: 'مرتبات فريق التطوير = <b>Development cost</b>.' },
+        { q: 'Reductions in staff', a: 2, why: 'توفير في المرتبات = <b>Tangible benefit</b>.' },
+        { q: 'Vendor installation', a: 0, why: 'تركيب من البائع وقت البناء = <b>Development cost</b>.' },
+        { q: 'Communications charges', a: 1, why: 'فواتير اتصالات مستمرة = <b>Operational cost</b>.' }
+      ]
+    },
+
+    /* ---------- NPV practice ---------- */
+    npvQ: {
+      cols: 1, shuffleOpts: true,
+      cards: [
+        { q: 'What is the present value of $1,210 received after 2 years at a 10% discount rate?', opts: ['$1,000', '$1,100', '$1,210', '$968'], a: 0, why: 'PV = 1,210 / (1.10)² = 1,210 / 1.21 = <b>1,000</b>.' },
+        { q: 'PV of total benefits = $900,000 and PV of total costs = $950,000. What do we conclude?', opts: ['NPV = +$50,000, the project is viable', 'NPV = −$50,000, the project is not financially viable', 'NPV = $1,850,000', 'NPV = 0.95'], a: 1, why: 'NPV = 900,000 − 950,000 = <b>−50,000</b> ← سالب ← مش مجدي ماليّاً.' },
+        { q: 'If the discount rate increases, the NPV of a typical project (costs early, benefits later) will:', opts: ['Decrease', 'Increase', 'Stay the same', 'Become equal to the ROI'], a: 0, why: 'الفلوس المستقبلية بتتخصم أكتر، فالـ PV of benefits بيقل (جرّب في الـ calculator: 6% ← 8%).' },
+        { q: 'In the lecture’s cost-benefit table, where do the one-time development costs appear?', opts: ['In Year 0, with no discounting', 'Spread equally across all years', 'Only in the last year', 'They are excluded from the NPV'], a: 0, why: 'Year 0 ← n = 0 ← (1+r)⁰ = 1 ← PV = نفس الرقم.' },
+        { q: 'Which formula for the present value is correct?', opts: ['PV = Amount / (1 + r)^n', 'PV = Amount × (1 + r)^n', 'PV = Amount × r × n', 'PV = Amount − r'], a: 0, why: 'بنقسم على (1 + r)^n عشان نرجّع الفلوس لقيمتها النهارده.' }
+      ]
+    },
+
+    /* ---------- influencing stakeholders ---------- */
+    infl: {
+      cols: 2,
+      opts: [
+        { t: 'Presentations promoting the benefits', cls: 'ph-plan' },
+        { t: 'Emphasize personal benefits', cls: 'ph-ana' },
+        { t: 'Prototypes', cls: 'ph-des' },
+        { t: 'Real user involvement', cls: 'ph-imp' }
+      ],
+      cards: [
+        { q: 'مدير القسم مش فاهم الفوايد اللي هتعود على الشركة من النظام', a: 0, why: 'نعمل <b>presentations</b> تشرح وتروّج للفوايد.' },
+        { q: 'الموظفين شايفين النظام زيادة شغل عليهم ومش شايفين فيه مصلحتهم', a: 1, why: 'نركّز على <b>الفوايد الشخصية</b> ليهم مش بس فوايد المنظمة.' },
+        { q: 'الـ users مش متخيلين النظام هيبقى شكله إيه ومش متأكدين إنه هيشتغل', a: 2, why: '<b>Prototype</b> بيثبت الـ concept ويخليه ملموس.' },
+        { q: 'الـ users حاسين إن النظام اتفرض عليهم ومحدش استشارهم', a: 3, why: '<b>إشراك حقيقي</b> للـ users طول المشروع.' },
+        { q: 'عايزين نعرض على الإدارة مزايا المشروع الاستراتيجية في اجتماع', a: 0, why: '<b>Presentations</b> بتشرح الفوايد للإدارة.' },
+        { q: 'عايزين المستخدمين يجرّبوا حاجة ملموسة بدل الكلام النظري', a: 2, why: '<b>Prototypes</b> — حاجة تتجرّب فعلاً.' }
+      ]
+    },
+
+    /* ---------- T / E / O ---------- */
+    feas3: {
+      cols: 3,
+      opts: [
+        { t: 'Technical', cls: 'ph-des' },
+        { t: 'Economic', cls: 'ph-ana' },
+        { t: 'Organizational', cls: 'ph-imp' }
+      ],
+      cards: [
+        { q: 'هل عندنا مطورين بيعرفوا التكنولوجيا دي؟', a: 0, why: 'الـ familiarity with technology = <b>Technical</b>.' },
+        { q: 'هل الـ NPV موجب؟', a: 1, why: 'الجدوى المالية = <b>Economic</b>.' },
+        { q: 'هل فيه project champion قوي من الإدارة العليا؟', a: 2, why: 'الـ champion = <b>Organizational</b>.' },
+        { q: 'هل المشروع متماشي مع الـ business strategy؟', a: 2, why: 'الـ strategic alignment = <b>Organizational</b>.' },
+        { q: 'هل النظام هيتكامل مع النظام القديم؟', a: 0, why: 'الـ compatibility = <b>Technical</b>.' },
+        { q: 'كام تكلفة الـ development والـ operations؟', a: 1, why: 'التكاليف = <b>Economic</b>.' },
+        { q: 'هل المستخدمين هيقاوموا التغيير؟', a: 2, why: 'تقبّل المستخدمين = <b>Organizational</b>.' },
+        { q: 'هل حجم المشروع (ناس، وقت، features) كبير؟', a: 0, why: 'الـ project size = <b>Technical</b>.' },
+        { q: 'حساب الـ break-even point', a: 1, why: 'أدوات الجدوى المالية: ROI / break-even / NPV = <b>Economic</b>.' },
+        { q: 'Should we build it?', a: 1, why: 'الجدوى المالية: يستاهل؟ = <b>Economic</b>.' },
+        { q: 'If we build it, will they come?', a: 2, why: 'هيتقبلوه؟ = <b>Organizational</b>.' },
+        { q: 'Can we build it?', a: 0, why: 'نقدر نبنيه؟ = <b>Technical</b>.' }
+      ]
+    },
+
+    /* ---------- True / False traps ---------- */
+    traps: {
+      cols: 2,
+      opts: [{ t: 'صح ✔ (True)', cls: 't-ok' }, { t: 'غلط ✘ (False)', cls: 't-bad' }],
+      cards: [
+        { q: 'The System Request is written by the systems analyst after the Design phase.', a: 1, why: 'الـ <b>Sponsor</b> هو اللي بيكتبه في بداية المشروع (<b>Project Initiation</b> جوه Planning).' },
+        { q: 'The Project Sponsor must be a technical expert from the IT department.', a: 1, why: 'الـ sponsor نقطة الاتصال من جانب الـ <b>business</b> — مش لازم يكون technical (أمثلة: VP of marketing, CEO, finance members).' },
+        { q: 'The “Business Value” element lists the benefits that the system will create for the organization.', a: 0, why: 'صح — Business Value = الفوايد (tangible + intangible).' },
+        { q: '“Special Issues or Constraints” are issues that pertain to the approval committee’s decision, such as a government-mandated deadline.', a: 0, why: 'صح — دي بالظبط تعريفها.' },
+        { q: 'Technical feasibility answers the question “Should we build it?”', a: 1, why: 'ده بتاع <b>Economic</b>. Technical = <b>Can we build it?</b>' },
+        { q: 'Organizational feasibility asks whether the organization and its users will accept and use the system.', a: 0, why: 'صح — <i>If we build it, will they come?</i>' },
+        { q: 'Development costs are recurring expenses that are paid every year.', a: 1, why: 'دي <b>Operational costs</b>. الـ development مرة واحدة.' },
+        { q: 'Increased brand recognition is an example of an intangible benefit.', a: 0, why: 'صح — سمعة وعلامة تجارية = intangible.' },
+        { q: 'A positive NPV means the PV of benefits is greater than the PV of costs, so the project is financially viable.', a: 0, why: 'صح — NPV موجب = مجدي ماليّاً.' },
+        { q: 'To compute the NPV we simply add the benefits and subtract the costs without discounting them.', a: 1, why: 'لأ — لازم نحوّل كل cash flow لـ <b>Present Value</b> الأول (الخصم).' },
+        { q: 'Feasibility is assessed once at the beginning of the project and never revisited.', a: 1, why: 'لازم نراجعها <b>باستمرار</b> طول المشروع.' },
+        { q: 'Larger projects (more people, more time, more features) generally carry higher technical risk.', a: 0, why: 'صح — الـ project size من مصادر الـ risk.' },
+        { q: 'Using a methodology that incorporates experimentation can help reduce the risk of an unfamiliar technology.', a: 0, why: 'صح — من إجراءات الـ mitigation (مع training و consultants ووقت أكتر).' },
+        { q: 'The System Request has exactly three elements: Sponsor, Need and Value.', a: 1, why: 'عنده <b>خمسة</b>: Sponsor, Need, Requirements, Value, Special Issues.' }
+      ]
+    },
+
+    /* ---------- MCQ ---------- */
+    mcq: {
+      cols: 1, shuffleOpts: true,
+      cards: [
+        { q: 'Which System Request element describes the business-related reason for starting the project?', opts: ['Business Need', 'Business Requirements', 'Business Value', 'Special Issues or Constraints'], a: 0, why: '<b>Need</b> = السبب (ليه؟). Requirements = الإمكانيات (إيه؟).' },
+        { q: '“Capture customer demographic information” and “Produce performance reports” are examples of:', opts: ['Business Need', 'Business Requirements', 'Business Value', 'Special Issues'], a: 1, why: 'إمكانيات جديدة للنظام = <b>Business Requirements</b>.' },
+        { q: 'The Project Sponsor is:', opts: ['A person or group on the business side who initiates the project and is its primary point of contact', 'The lead programmer who writes the code', 'The vendor who supplies the hardware', 'The tester who approves the final system'], a: 0, why: 'الـ sponsor من الـ business، وهو اللي بيبدأ المشروع.' },
+        { q: 'An analyst checks whether the team has used the planned technology before and how new it is. This is part of:', opts: ['Technical feasibility', 'Economic feasibility', 'Organizational feasibility', 'Business value estimation'], a: 0, why: 'الـ familiarity with technology = <b>Technical feasibility</b>.' },
+        { q: 'Which of the following is an intangible benefit?', opts: ['Reductions in staff', 'Increased sales', 'Improved customer service', 'Reductions in inventory'], a: 2, why: 'الباقيين tangible (بيتحسبوا بالفلوس).' },
+        { q: 'PV of total benefits = $2,500,000 and PV of total costs = $2,350,000. The NPV is:', opts: ['+$150,000', '−$150,000', '$4,850,000', '1.06'], a: 0, why: 'NPV = 2,500,000 − 2,350,000 = <b>+150,000</b> ← موجب ← مجدي.' },
+        { q: 'The questions “Should we build it?” and “If we build it, will they come?” belong to, respectively:', opts: ['Economic and Organizational feasibility', 'Technical and Economic feasibility', 'Organizational and Technical feasibility', 'Economic and Technical feasibility'], a: 0, why: 'Should we = <b>Economic</b>. Will they come = <b>Organizational</b>.' },
+        { q: 'Estimates: High (30%) = $800,000 · Medium (50%) = $500,000 · Low (20%) = $200,000. The weighted average is:', opts: ['$530,000', '$500,000', '$1,500,000', '$440,000'], a: 0, why: '240,000 + 250,000 + 40,000 = <b>530,000</b>. (500,000 = المتوسط العادي.)' },
+        { q: 'Which of these is NOT a source of technical risk?', opts: ['Project size', 'Lack of familiarity with the technology', 'Strategic alignment with the business strategy', 'Compatibility with existing systems'], a: 2, why: 'الـ strategic alignment من <b>Organizational</b> feasibility.' },
+        { q: 'The feasibility assessment of a project should be:', opts: ['Reviewed and revised continuously throughout the project', 'Done once, before the System Request', 'Done only at the end of the project', 'Done only if the NPV is negative'], a: 0, why: 'مهم نراجعها باستمرار: الـ risks القديمة والجديدة.' }
+      ]
+    }
+  },
+
+  /* ---------- flashcards ---------- */
+  flash: {
+    main: [
+      { f: 'الـ <span class="en">System Request</span> ده إيه وليه بنكتبه؟', b: 'ورقة رسمية بتوضح <b>الأسباب الـ business</b> للمشروع وقيمته المتوقعة.<br>① تجبر الـ sponsor يترجم فكرته ② إطار لجمع المعلومات الأولية ③ توحّد المعلومات للـ <span class="en">steering committee</span>.' },
+      { f: 'الـ 5 elements بتاعة الـ <span class="en">System Request</span>', b: '<span class="en">Project Sponsor · Business Need · Business Requirements · Business Value · Special Issues or Constraints</span><br>مين؟ ليه؟ إيه؟ بكام؟ قيود؟' },
+      { f: 'مين هو الـ <span class="en">Project Sponsor</span>؟', b: 'شخص أو مجموعة من جانب الـ business بيبدأ المشروع وهو نقطة الاتصال الأساسية. مش لازم يكون technical (<span class="en">VP of marketing, CIO, CEO</span>).' },
+      { f: 'الفرق بين <span class="en">Business Need</span> و <span class="en">Business Requirements</span>', b: '<b>Need</b> = السبب (ليه؟) — decrease product defects.<br><b>Requirements</b> = إمكانيات النظام (إيه؟) — produce performance reports.' },
+      { f: '<span class="en">Business Value</span>', b: 'الفوايد اللي هتعود على المنظمة (tangible + intangible)، مثال: 3% increase in sales، $200,000 cost savings، reduction in headcount by 5 FTEs.' },
+      { f: '<span class="en">Special Issues or Constraints</span>', b: 'حاجات بتخص قرار الـ approval committee. مثال: government-mandated deadline، system needed before the holiday season، security clearance للفريق.' },
+      { f: 'مصادر الـ <span class="en">Business Value</span> (4)', b: '<span class="en">Increased sales · Decreased costs · Reduced headcount · Lower turnover</span>' },
+      { f: 'إزاي بنحسب الـ <span class="en">Weighted average expected revenue</span>؟', b: 'لكل سيناريو (High / Medium / Low): <span class="en">Estimate × Probability</span> وبعدين نجمع.<br>مثال: 500,000×25% + 350,000×60% + 150,000×15% = <b>357,500</b>' },
+      { f: 'الـ 3 أنواع من <span class="en">Feasibility</span> وأسئلتها', b: '<b class="en">Technical</b> — Can we build it?<br><b class="en">Economic</b> — Should we build it?<br><b class="en">Organizational</b> — If we build it, will they come?' },
+      { f: 'مصادر الـ <span class="en">Technical Risk</span> (4)', b: '① مجال التطبيق ② التكنولوجيا ③ حجم المشروع (people, time, features) ④ التوافق مع الأنظمة الموجودة (degree of integration)' },
+      { f: 'إزاي نقلل خطر تكنولوجيا غير مألوفة؟', b: 'ميزانية <b>training</b> · ميزانية <b>consultants</b> · وقت أكتر في الجدول (learning curve) · methodology فيها <b>experimentation</b>' },
+      { f: 'خطوات الـ <span class="en">Economic Feasibility</span> (4)', b: '① Identify costs &amp; benefits ② Assign values ③ Determine cash flow ④ Assess financial viability (<span class="en">ROI · Break-even · NPV</span>)' },
+      { f: '<span class="en">Development</span> vs <span class="en">Operational</span> costs', b: '<b>Development</b>: مرة واحدة (salaries, consultants, hardware &amp; software, vendor installation, data conversion).<br><b>Operational</b>: متكررة (upgrades, licensing, cloud fees, operational salaries, communications).' },
+      { f: '<span class="en">Tangible</span> vs <span class="en">Intangible</span> benefits', b: '<b>Tangible</b>: بتتقاس بالفلوس (increased sales, staff / inventory / IT reductions, better supplier prices).<br><b>Intangible</b>: صعب تتحسب (market share, brand, quality, customer service, supplier relations).' },
+      { f: 'قانون الـ <span class="en">Present Value</span>', b: '<span class="en">PV = Amount / (1 + r)<sup>n</sup></span><br>r = discount rate · n = رقم السنة (Year 0 ← من غير خصم).' },
+      { f: 'قانون الـ <span class="en">NPV</span> والقرار', b: '<span class="en">NPV = PV of total benefits − PV of total costs</span><br>موجب ← مجدي ماليّاً · سالب ← مش مجدي.' },
+      { f: 'ليه الـ <span class="en">NPV</span> أحسن من الـ payback البسيط؟', b: 'عشان بياخد في الاعتبار <b>القيمة الزمنية للفلوس</b> (<span class="en">time value of money</span>) — بيخصم الـ cash flows المستقبلية (<span class="en">discounted cash flow</span>).' },
+      { f: '<span class="en">ROI</span> و <span class="en">Break-even point</span>', b: '<b>ROI</b> = (benefits − costs) ÷ costs.<br><b>Break-even</b> = اللحظة اللي الفوايد المتراكمة بتغطي فيها التكاليف المتراكمة.<br>(الـ NPV هو المفضّل في المحاضرة.)' },
+      { f: 'مثال المحاضرة: أرقام الـ <span class="en">cost-benefit</span>', b: 'rate = 6% · Development costs = <b>1,632,295</b> (Year 0)<br>PV benefits = <b>2,364,978</b> · PV costs = <b>2,296,686</b><br>NPV = <b>+68,292</b>' },
+      { f: '<span class="en">Organizational Feasibility</span> بتسأل عن إيه؟', b: '<b>Strategic alignment</b> (المشروع متماشي مع الـ strategy؟) + الـ <b>stakeholders</b>: <span class="en">project champion</span> · <span class="en">management support</span> · المستخدمين (receptive ولا resistant؟).' },
+      { f: 'إزاي نأثّر على الـ stakeholders؟ (4)', b: '<span class="en">Presentations</span> بتشرح الفوايد · نركّز على الفوايد الشخصية وكمان فوايد المنظمة · <span class="en">Prototypes</span> تثبت الفكرة · إشراك حقيقي للـ users طول المشروع' },
+      { f: 'ليه بنراجع الـ feasibility طول المشروع؟', b: 'كل المشاريع فيها risks. بنسأل: ① الـ risks القديمة بتتدار كويس ولا محتاجة اهتمام؟ ② ظهرت risks جديدة؟ وأثرها على الميزانية والجدول؟' },
+      { f: 'مين بيستخدم الـ <span class="en">System Request</span> والـ <span class="en">Feasibility Study</span>؟', b: 'الـ <span class="en">steering (approval) committee</span> — بتاخد منهم قرار الموافقة على المشروع ولا لأ.' },
+      { f: 'مثال <span class="en">DrnTeq</span> في المحاضرة', b: 'الـ sponsor: Carmella Herrera (General Manager, Client Services).<br>Business Value: <b>$357,500</b> (pilot contracts + drone leases) + <b>$565,000</b> (flight service + data analysis).' }
+    ]
+  },
+
+  /* ---------- essay model answers ---------- */
+  essays: {
+    e1: {
+      model:
+        '<p dir="ltr" style="margin:0 0 8px">The <b>System Request</b> describes the business reasons for a project and its expected value, and it has five elements:</p>' +
+        '<table class="tbl" style="margin:0"><tr><th>Element</th><th>Meaning</th><th>Example</th></tr>' +
+        '<tr><td class="en">Project Sponsor</td><td class="en plain">Person who initiates the project; primary business contact</td><td class="en plain">Vice president of marketing</td></tr>' +
+        '<tr><td class="en">Business Need</td><td class="en plain">Business-related reason for the project</td><td class="en plain">Decrease product defects</td></tr>' +
+        '<tr><td class="en">Business Requirements</td><td class="en plain">New or enhanced capabilities the system provides</td><td class="en plain">Produce performance reports</td></tr>' +
+        '<tr><td class="en">Business Value</td><td class="en plain">Benefits the system creates for the organization</td><td class="en plain">3% increase in sales</td></tr>' +
+        '<tr><td class="en">Special Issues / Constraints</td><td class="en plain">Issues relevant to the approval committee decision</td><td class="en plain">Government-mandated deadline</td></tr></table>',
+      points: [
+        'Project Sponsor — who initiates, business-side contact — example',
+        'Business Need — why (the business reason) — example',
+        'Business Requirements — what capabilities — example',
+        'Business Value — tangible / intangible benefits — example',
+        'Special Issues or Constraints — deadlines / conditions affecting the committee decision — example'
+      ]
+    },
+    e2: {
+      model:
+        '<p dir="ltr" style="margin:0 0 8px"><b>Technical feasibility</b> — <i>Can we build it?</i> Assesses technical risk and capability.</p>' +
+        '<p dir="ltr" style="margin:0 0 8px"><b>Economic feasibility</b> — <i>Should we build it?</i> Identifies costs and benefits, assigns values, determines cash flow and assesses financial viability (ROI, break-even, NPV).</p>' +
+        '<p dir="ltr" style="margin:0 0 8px"><b>Organizational feasibility</b> — <i>If we build it, will they come?</i> Looks at strategic alignment and stakeholders: project champion, management support, user acceptance.</p>' +
+        '<p dir="ltr" style="margin:0"><b>Sources of technical risk:</b> (1) familiarity with the application area, (2) familiarity with the technology, (3) project size, (4) compatibility with existing systems.</p>',
+      points: [
+        'Technical — Can we build it?',
+        'Economic — Should we build it? (costs/benefits, NPV...)',
+        'Organizational — will they accept/use it? (alignment, champion, management, users)',
+        'Technical risks: application area, technology, project size, compatibility'
+      ]
+    },
+    e3: {
+      model:
+        '<div dir="ltr" style="line-height:1.9">' +
+        '<b>PV of Benefits</b> = 770 / 1.10 + 968 / 1.21 = 700 + 800 = <b>1,500</b><br>' +
+        '<b>PV of Costs</b> = 1,400 (Year 0) + 110 / 1.10 + 121 / 1.21 = 1,400 + 100 + 100 = <b>1,600</b><br>' +
+        '<b>NPV</b> = 1,500 − 1,600 = <b>−100</b><br>' +
+        '<b>Recommendation:</b> NPV is negative, so the project is not financially viable (the PV of the costs exceeds the PV of the benefits).</div>',
+      points: [
+        'PV of benefits = 700 + 800 = 1,500',
+        'PV of costs includes the operational costs: 1,400 + 100 + 100 = 1,600',
+        'NPV = 1,500 − 1,600 = −100',
+        'Recommendation: negative NPV, not financially viable'
+      ]
+    }
+  }
+};
+</script>
+<script>
+/* ==========================================================
+   IS202 study pages — shared interactive engine
+   Reads window.DATA = { decks:{}, flash:{}, essays:{} }
+   ========================================================== */
+(function () {
+  'use strict';
+
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const shuffle = (a) => {
+    a = a.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+
+  const DATA = window.DATA || {};
+  const KEY = 'is202:' + (document.body.dataset.lecture || 'x');
+  let S = {};
+  try { S = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { S = {}; }
+  S.done = S.done || {}; S.best = S.best || {}; S.fc = S.fc || {}; S.essay = S.essay || {};
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+
+  /* ---------- theme ---------- */
+  const TK = 'is202:theme';
+  let theme = 'dark';
+  try { theme = localStorage.getItem(TK) || 'dark'; } catch (e) {}
+  const themeBtn = $('#themeBtn');
+  function applyTheme(t) {
+    theme = t;
+    document.documentElement.setAttribute('data-theme', t);
+    if (themeBtn) themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
+    try { localStorage.setItem(TK, t); } catch (e) {}
+  }
+  applyTheme(theme);
+  if (themeBtn) themeBtn.addEventListener('click', () => applyTheme(theme === 'dark' ? 'light' : 'dark'));
+
+  /* ---------- stations ---------- */
+  const stations = $$('.station');
+  const nav = $('#nav');
+  const navBtns = [];
+  let cur = -1;
+
+  stations.forEach((st, i) => {
+    if (nav) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.innerHTML = `<span class="num">${i + 1}</span><span class="lbl">${st.dataset.icon || ''} ${st.dataset.title || ''}</span><span class="tick">✓</span>`;
+      b.addEventListener('click', () => go(i));
+      nav.appendChild(b);
+      navBtns.push(b);
+    }
+    const last = i === stations.length - 1;
+    const f = document.createElement('div');
+    f.className = 'station-foot noprint';
+    f.innerHTML =
+      `<button type="button" class="btn ghost" data-prev${i === 0 ? ' style="visibility:hidden"' : ''}>→ السابق</button>` +
+      (last
+        ? `<a class="btn primary" href="index.html" data-finish>خلّصت المحاضرة 🏁</a>`
+        : `<button type="button" class="btn primary" data-next>التالي ←</button>`);
+    st.appendChild(f);
+    const p = $('[data-prev]', f), n = $('[data-next]', f), fin = $('[data-finish]', f);
+    if (p) p.addEventListener('click', () => go(i - 1));
+    if (n) n.addEventListener('click', () => go(i + 1));
+    if (fin) fin.addEventListener('click', () => { S.done[i] = true; save(); });
+  });
+
+  function refresh() {
+    navBtns.forEach((b, k) => {
+      b.classList.toggle('on', k === cur);
+      b.classList.toggle('done', !!S.done[k]);
+    });
+    const n = stations.filter((_, k) => S.done[k]).length;
+    const pb = $('#progBar'), pt = $('#progTxt');
+    if (pb) pb.style.width = (n / stations.length * 100) + '%';
+    if (pt) pt.textContent = n + '/' + stations.length;
+  }
+
+  function go(i, init) {
+    i = Math.max(0, Math.min(stations.length - 1, i));
+    if (!init && cur >= 0 && i > cur) S.done[cur] = true;
+    cur = i;
+    stations.forEach((s, k) => s.classList.toggle('on', k === i));
+    S.last = i; save(); refresh();
+    try { history.replaceState(null, '', '#' + (i + 1)); } catch (e) {}
+    if (!init) window.scrollTo({ top: 0, behavior: 'smooth' });
+    const nb = navBtns[i];
+    if (nb && nav && nav.scrollWidth > nav.clientWidth) nb.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }
+
+  $$('[data-go]').forEach((e) => e.addEventListener('click', () => go(parseInt(e.dataset.go, 10) - 1)));
+
+  /* ---------- flip cards ---------- */
+  $$('.flip').forEach((el) => {
+    const f = $('.f', el), b = $('.b', el);
+    if (!f || !b) return;
+    const inn = document.createElement('div');
+    inn.className = 'flip-in';
+    f.className = 'face front'; b.className = 'face back';
+    inn.append(f, b); el.append(inn);
+    el.tabIndex = 0;
+    el.addEventListener('click', () => el.classList.toggle('open'));
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.classList.toggle('open'); }
+    });
+  });
+
+  /* ---------- tabs ---------- */
+  $$('[data-tabs]').forEach((root) => {
+    const btns = $$('[data-tab]', root), panes = $$('[data-pane]', root);
+    const set = (id) => {
+      btns.forEach((b) => b.classList.toggle('on', b.dataset.tab === id));
+      panes.forEach((p) => p.classList.toggle('on', p.dataset.pane === id));
+    };
+    btns.forEach((b) => b.addEventListener('click', () => set(b.dataset.tab)));
+    set(root.dataset.tabs || (btns[0] && btns[0].dataset.tab));
+  });
+
+  /* ---------- deck (quiz / sorting / true-false) ---------- */
+  function Deck(root, cfg) {
+    let cards = shuffle(cfg.cards), i = 0, score = 0, locked = false, order = [];
+    root.classList.add('deck');
+    root.innerHTML =
+      `<div class="deck-head"><span class="cnt"></span><div class="deck-bar"><i></i></div><span class="sc"></span></div><div class="deck-body"></div>`;
+    const body = $('.deck-body', root), cnt = $('.cnt', root), bar = $('.deck-bar i', root), sc = $('.sc', root);
+
+    function render() {
+      if (i >= cards.length) return end();
+      const c = cards[i];
+      locked = false;
+      cnt.textContent = (i + 1) + ' / ' + cards.length;
+      bar.style.width = (i / cards.length * 100) + '%';
+      sc.textContent = '⭐ ' + score;
+      const opts = c.opts || cfg.opts;
+      const cols = cfg.cols ? ' c' + cfg.cols : '';
+      body.innerHTML = `<div class="deck-q" dir="auto">${c.q}</div><div class="opts${cols}"></div><div class="fbwrap"></div>`;
+      const wrap = $('.opts', body);
+      // cfg.shuffleOpts: mix the answer order of per-card MCQ options so position never gives the answer away
+      order = opts.map((_, k) => k);
+      if (cfg.shuffleOpts && c.opts) order = shuffle(order);
+      order.forEach((oi, k) => {
+        const o = opts[oi];
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'opt' + (typeof o === 'object' && o.cls ? ' ' + o.cls : '');
+        b.setAttribute('dir', 'auto');
+        b.innerHTML = typeof o === 'string' ? o : o.t;
+        b.addEventListener('click', () => pick(k));
+        wrap.appendChild(b);
+      });
+    }
+
+    function pick(k) {
+      if (locked) return;
+      locked = true;
+      const c = cards[i], ok = order[k] === c.a;
+      if (ok) score++;
+      $$('.opt', body).forEach((b, j) => {
+        b.disabled = true;
+        if (order[j] === c.a) b.classList.add('right');
+        else if (j === k) b.classList.add('wrong');
+      });
+      sc.textContent = '⭐ ' + score;
+      const fb = $('.fbwrap', body);
+      fb.innerHTML =
+        `<div class="fb ${ok ? 'ok' : 'no'}"><b>${ok ? '✔ تمام!' : '✘ لأ — راجع الشرح'}</b><div dir="auto">${c.why || ''}</div>` +
+        `<button type="button" class="btn primary nxt">${i === cards.length - 1 ? 'شوف النتيجة' : 'التالي ←'}</button></div>`;
+      const nx = $('.nxt', fb);
+      nx.addEventListener('click', () => { i++; render(); });
+      nx.focus({ preventScroll: true });
+    }
+
+    function end() {
+      bar.style.width = '100%';
+      const pct = Math.round(score / cards.length * 100);
+      const best = Math.max(S.best[cfg.id] || 0, pct);
+      S.best[cfg.id] = best; save();
+      const msg = pct === 100 ? 'ممتاز! 🔥 الجزء ده تمام' : pct >= 70 ? 'كويس جداً 👏 راجع الغلطات بس' : 'لسه محتاج مراجعة — ارجع للشرح وجرّب تاني 💪';
+      sc.textContent = '⭐ ' + score;
+      cnt.textContent = 'خلصت';
+      body.innerHTML =
+        `<div class="deck-end"><div class="big">${pct}%</div><p>${score} من ${cards.length} — ${msg}</p>` +
+        `<p class="muted">أحسن نتيجة ليك: ${best}%</p><button type="button" class="btn primary again">🔁 العب تاني</button></div>`;
+      $('.again', body).addEventListener('click', () => { cards = shuffle(cfg.cards); i = 0; score = 0; render(); });
+      if (cfg.onDone) cfg.onDone(pct);
+    }
+    render();
+  }
+
+  /* ---------- flashcards ---------- */
+  function Flash(root, cards, id) {
+    let mode = 'all', pos = 0, list = [], timer;
+    root.classList.add('fc');
+    root.innerHTML =
+      `<div class="fc-top"><div class="seg"><button type="button" data-m="all" class="on">كل الكروت</button><button type="button" data-m="review">اللي لسه مش حافظها</button></div><span class="fc-count muted"></span></div>` +
+      `<div class="fc-card" tabindex="0"><div class="fc-in"><div class="face front"></div><div class="face back"></div></div></div>` +
+      `<div class="fc-actions"><button type="button" class="btn" data-a="prev">→ اللي قبلها</button><button type="button" class="btn bad" data-a="r">🔁 لسه مش حافظها</button><button type="button" class="btn good" data-a="k">✅ عرفتها</button><button type="button" class="btn" data-a="next">اللي بعدها ←</button></div>` +
+      `<div class="deck-bar"><i></i></div><p class="fc-stat muted"></p>`;
+    const card = $('.fc-card', root), front = $('.front', root), back = $('.back', root);
+    const cnt = $('.fc-count', root), bar = $('.deck-bar i', root), stat = $('.fc-stat', root);
+    const key = (n) => id + ':' + n;
+
+    function stats() {
+      const k = cards.filter((_, n) => S.fc[key(n)] === 'k').length;
+      stat.textContent = 'عرفت ' + k + ' من ' + cards.length;
+      bar.style.width = (k / cards.length * 100) + '%';
+    }
+    function show() {
+      list = cards.map((_, n) => n).filter((n) => mode === 'all' || S.fc[key(n)] !== 'k');
+      stats();
+      clearTimeout(timer);
+      if (!list.length) {
+        card.classList.remove('open');
+        front.innerHTML = '<div dir="auto">🎉 خلصت كل الكروت!</div><small>ارجع لـ "كل الكروت" لو عايز تراجع تاني</small>';
+        back.innerHTML = '';
+        cnt.textContent = '0 / 0';
+        return;
+      }
+      pos = ((pos % list.length) + list.length) % list.length;
+      const c = cards[list[pos]];
+      const fill = () => {
+        front.innerHTML = `<small>السؤال</small><div dir="auto">${c.f}</div><small>👆 اضغط عشان تقلب الكارت</small>`;
+        back.innerHTML = `<small>الإجابة</small><div dir="auto">${c.b}</div>`;
+      };
+      if (card.classList.contains('open')) { card.classList.remove('open'); timer = setTimeout(fill, 230); } else fill();
+      cnt.textContent = (pos + 1) + ' / ' + list.length;
+    }
+
+    root.addEventListener('click', (e) => {
+      const a = e.target.closest('[data-a]');
+      if (a) {
+        const act = a.dataset.a;
+        if (act === 'next') pos++;
+        else if (act === 'prev') pos--;
+        else {
+          S.fc[key(list[pos])] = act; save();
+          if (!(mode === 'review' && act === 'k')) pos++;
+        }
+        show();
+        return;
+      }
+      const m = e.target.closest('[data-m]');
+      if (m) {
+        mode = m.dataset.m; pos = 0;
+        $$('[data-m]', root).forEach((x) => x.classList.toggle('on', x === m));
+        show();
+        return;
+      }
+      if (e.target.closest('.fc-card')) card.classList.toggle('open');
+    });
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.classList.toggle('open'); }
+    });
+    show();
+  }
+
+  /* ---------- essay ---------- */
+  $$('.essay').forEach((el) => {
+    const id = el.dataset.essay, d = (DATA.essays || {})[id];
+    if (!d) return;
+    const ta = $('textarea', el), btn = $('[data-show]', el), box = $('.model', el);
+    ta.value = S.essay[id] || '';
+    ta.addEventListener('input', () => { S.essay[id] = ta.value; save(); });
+    $('.mdl', box).innerHTML = d.model;
+    const pts = $('.pts', box);
+    pts.innerHTML =
+      '<h4>✅ علّم على النقط اللي غطّيتها في إجابتك:</h4>' +
+      d.points.map((p) => `<label class="chk"><input type="checkbox"> <span dir="auto">${p}</span></label>`).join('') +
+      '<div class="pts-sc"></div>';
+    const sc = $('.pts-sc', pts);
+    const upd = () => {
+      const n = $$('input:checked', pts).length;
+      sc.textContent = 'غطّيت ' + n + ' من ' + d.points.length + (n === d.points.length ? ' 🔥' : '');
+    };
+    pts.addEventListener('change', upd); upd();
+    btn.addEventListener('click', () => {
+      box.hidden = !box.hidden;
+      btn.textContent = box.hidden ? '📖 اعرض الإجابة النموذجية' : '🙈 اخفي الإجابة';
+    });
+  });
+
+  /* ---------- keyboard for flashcards ---------- */
+  document.addEventListener('keydown', (e) => {
+    if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    const st = stations[cur];
+    const fc = st && $('.fc', st);
+    if (!fc) return;
+    if (e.key === 'ArrowLeft') $('[data-a="next"]', fc).click();
+    else if (e.key === 'ArrowRight') $('[data-a="prev"]', fc).click();
+    else if (e.key === ' ' && e.target.tagName !== 'BUTTON') { e.preventDefault(); $('.fc-card', fc).classList.toggle('open'); }
+  });
+
+  /* ---------- init decks / flashcards ---------- */
+  const markDone = (el) => {
+    const i = stations.indexOf(el.closest('.station'));
+    if (i >= 0) { S.done[i] = true; save(); refresh(); }
+  };
+  $$('[data-deck]').forEach((el) => {
+    const c = (DATA.decks || {})[el.dataset.deck];
+    if (c) Deck(el, Object.assign({}, c, { id: el.dataset.deck, onDone: () => markDone(el) }));
+  });
+  $$('[data-flash]').forEach((el) => {
+    const c = (DATA.flash || {})[el.dataset.flash];
+    if (c) Flash(el, c, el.dataset.flash);
+  });
+
+  /* ---------- share disclaimer: ONE place, shows at the bottom of every page (index.src.html has its own copy) ---------- */
+  (function () {
+    const f = document.createElement('footer');
+    f.className = 'disclaimer';
+    f.innerHTML =
+      '<div dir="rtl"><b>⚠️ تنبيه مهم قبل ما تعتمد على الصفحات دي:</b> دي ملخصات ومراجعة شخصية من إعداد طالب لمساعدة زمايله، وهي <b>مش مادة رسمية</b> ومش معتمدة من الدكتور ولا من الكلية. ممكن يكون فيها أخطاء أو نقص، والأسئلة اللي فيها مش بالضرورة شبه الامتحان الحقيقي. ' +
+      '<b>ومبتغنيش أبداً عن الكتاب والمحاضرات (المصدر الأساسي)</b> — ذاكر منهم الأول، وارجع لهم عشان تتأكد من أي معلومة. أي اعتماد مباشر على الصفحات دي بيكون على مسئولية المستخدم نفسه، ومُعِدّ الملخص غير مسئول عن أي نتيجة أو خسارة درجات. ' +
+      '<span class="muted">المصادر: كتاب المادة <span class="en">Systems Analysis and Design</span> (د. أسماء سعد) وسلايدات المحاضرات (مبنية على <span class="en">Dennis, Wixom &amp; Roth</span>).</span>' +
+      '<div class="d-en"><b>Disclaimer:</b> Unofficial, student-made study notes shared to help classmates — not official course material and not endorsed by the instructor or the university. They may contain mistakes or omissions, and the practice questions may differ from the real exam. ' +
+      'These pages are <b>NOT a substitute for the textbook and the lectures</b> (the primary source): study those first and use them to verify anything written here. Anyone relying on these pages directly does so at their own risk; the author accepts no responsibility for any result or loss of marks. Sources: the course textbook “Systems Analysis and Design” (Dr. Asmaa Saad) and the lecture slides (based on Dennis, Wixom &amp; Roth).</div></div>';
+    document.body.appendChild(f);
+  })();
+
+  /* ---------- start ---------- */
+  let start = parseInt((location.hash || '').slice(1), 10) - 1;
+  if (!(start >= 0 && start < stations.length)) start = Math.min(S.last || 0, stations.length - 1);
+  go(start, true);
+
+  window.Study = { go };
+})();
+
+</script>
+<script>
+/* ---------- helpers ---------- */
+function num(e) { var v = parseFloat(e.value); return isNaN(v) ? 0 : v; }
+function fmtInt(x) { return (x < 0 ? '−' : '') + Math.abs(Math.round(x)).toLocaleString('en-US'); }
+
+/* ---------- Weighted-average calculator ---------- */
+(function () {
+  var root = document.getElementById('evCalc');
+  if (!root) return;
+  var P = [].slice.call(root.querySelectorAll('[data-p]'));
+  var A = [].slice.call(root.querySelectorAll('[data-a]'));
+  var B = [].slice.call(root.querySelectorAll('[data-b]'));
+  function calc() {
+    var sp = 0, ea = 0, eb = 0, i;
+    for (i = 0; i < P.length; i++) {
+      var p = num(P[i]);
+      sp += p; ea += num(A[i]) * p / 100; eb += num(B[i]) * p / 100;
+    }
+    document.getElementById('evP').textContent = (Math.round(sp * 100) / 100) + '%';
+    document.getElementById('evA').textContent = '$' + fmtInt(ea);
+    document.getElementById('evB').textContent = '$' + fmtInt(eb);
+    var m = document.getElementById('evMsg');
+    if (Math.abs(sp - 100) > 0.001) {
+      m.className = 'verdict neg';
+      m.textContent = '⚠️ مجموع الاحتمالات = ' + (Math.round(sp * 100) / 100) + '% — لازم يبقى 100%';
+    } else {
+      m.className = 'verdict pos';
+      m.textContent = '✅ مجموع الاحتمالات = 100% — الأرقام دي هي الـ Weighted average.';
+    }
+  }
+  root.addEventListener('input', calc);
+  calc();
+})();
+
+/* ---------- Technical risk meter ---------- */
+(function () {
+  var root = document.getElementById('riskCard');
+  if (!root) return;
+  var boxes = [].slice.call(root.querySelectorAll('input[type=checkbox]'));
+  var L = [
+    { p: 6, t: 'منخفض جداً', c: 'ok', m: '✅ مفيش مصادر risk ظاهرة — الـ technical feasibility كويسة.' },
+    { p: 30, t: 'منخفض', c: 'ok', m: '🙂 مصدر risk واحد بس — راقبه وحاول تقلله.' },
+    { p: 55, t: 'متوسط', c: 'warn', m: '⚠️ اتنين مجتمعين — خطّط لـ training ووقت زيادة في الجدول.' },
+    { p: 80, t: 'عالي', c: 'bad', m: '🚨 تلاتة! محتاج mitigation قوي: training + consultants + methodology فيها experimentation.' },
+    { p: 100, t: 'عالي جداً', c: 'bad', m: '🔥 الأربعة كلهم! ده مش معناه نرفض المشروع — لو قيمته الاستراتيجية كبيرة، قلل الخطر بالـ training والـ consultants والـ prototyping.' }
+  ];
+  function upd() {
+    var n = boxes.filter(function (b) { return b.checked; }).length, o = L[n];
+    document.getElementById('riskBar').style.width = (100 - o.p) + '%';
+    document.getElementById('riskTxt').textContent = o.t;
+    var msg = document.getElementById('riskMsg');
+    msg.textContent = o.m;
+    msg.className = 'note ' + o.c;
+  }
+  root.addEventListener('change', upd);
+  upd();
+})();
+
+/* ---------- NPV calculator ---------- */
+(function () {
+  var root = document.getElementById('npvCalc');
+  if (!root) return;
+  var YEARS = 5;
+  var PRE = {
+    lec: { r: 6, B: [0, 638000, 668000, 699800, 733508], C: [1632295, 185000, 189600, 194384, 199359] },
+    simple: { r: 10, B: [0, 1100, 1210, 0, 0], C: [1800, 0, 0, 0, 0] },
+    blank: { r: 6, B: [0, 0, 0, 0, 0], C: [0, 0, 0, 0, 0] }
+  };
+  var tbl = document.getElementById('npvTbl');
+  var html = '<tr><th>Year</th><th>Benefits</th><th>Costs</th><th>Factor 1/(1+r)ⁿ</th><th>PV Benefits</th><th>PV Costs</th><th>Cumulative PV net</th></tr>';
+  for (var n = 0; n < YEARS; n++) {
+    html += '<tr><td>Year ' + n + '</td><td><input type="number" data-b="' + n + '" placeholder="0"></td><td><input type="number" data-c="' + n + '" placeholder="0"></td>' +
+      '<td class="fac"></td><td class="pvb"></td><td class="pvc"></td><td class="cum"></td></tr>';
+  }
+  html += '<tr class="tot"><td>Total</td><td id="tB"></td><td id="tC"></td><td></td><td id="tPB"></td><td id="tPC"></td><td></td></tr>';
+  tbl.innerHTML = html;
+
+  var rate = document.getElementById('npvRate'), range = document.getElementById('npvRange');
+  var Bi = [].slice.call(tbl.querySelectorAll('[data-b]')), Ci = [].slice.call(tbl.querySelectorAll('[data-c]'));
+  var rows = [].slice.call(tbl.querySelectorAll('tr')).slice(1, 1 + YEARS);
+  var $ = function (id) { return document.getElementById(id); };
+
+  function calc() {
+    var r = num(rate) / 100, sb = 0, sc = 0, pb = 0, pc = 0, cum = 0, be = null;
+    for (var i = 0; i < YEARS; i++) {
+      var b = num(Bi[i]), c = num(Ci[i]);
+      var d = Math.pow(1 + r, i);
+      var vb = Math.round(b / d), vc = Math.round(c / d);
+      sb += b; sc += c; pb += vb; pc += vc; cum += vb - vc;
+      if (be === null && cum >= 0 && (pc > 0 || pb > 0)) be = i;
+      var tds = rows[i].children;
+      tds[3].textContent = (1 / d).toFixed(4);
+      tds[4].textContent = fmtInt(vb);
+      tds[5].textContent = fmtInt(vc);
+      tds[6].textContent = fmtInt(cum);
+      tds[6].className = 'cum ' + (cum < 0 ? 'neg' : 'pos');
+    }
+    $('tB').textContent = fmtInt(sb); $('tC').textContent = fmtInt(sc);
+    $('tPB').textContent = fmtInt(pb); $('tPC').textContent = fmtInt(pc);
+    var npv = pb - pc;
+    $('rB').querySelector('b').textContent = fmtInt(pb);
+    $('rC').querySelector('b').textContent = fmtInt(pc);
+    $('rN').querySelector('b').textContent = (npv > 0 ? '+' : '') + fmtInt(npv);
+    $('rN').className = 'res ' + (npv > 0 ? 'pos' : npv < 0 ? 'neg' : '');
+    var roi = pc > 0 ? npv / pc * 100 : 0;
+    $('rR').querySelector('b').textContent = pc > 0 ? (roi > 0 ? '+' : roi < 0 ? '−' : '') + Math.abs(roi).toFixed(1) + '%' : '—';
+    $('rBE').querySelector('b').textContent = (pc > 0 || pb > 0) ? (be === null ? 'مش في ' + (YEARS - 1) + ' سنين' : 'Year ' + be) : '—';
+    var v = $('npvV');
+    if (pb === 0 && pc === 0) { v.className = 'verdict'; v.textContent = '✍️ اكتب أرقامك فوق وشوف النتيجة.'; }
+    else if (npv > 0) { v.className = 'verdict pos'; v.textContent = '✅ NPV موجب ← الـ benefits أكبر من الـ costs بعد الخصم ← المشروع مجدي ماليّاً (financially viable).'; }
+    else if (npv < 0) { v.className = 'verdict neg'; v.textContent = '❌ NPV سالب ← الـ costs أكبر من الـ benefits بعد الخصم ← مش مجدي ماليّاً.'; }
+    else { v.className = 'verdict'; v.textContent = '➖ NPV = 0 ← متعادل.'; }
+  }
+
+  function load(name) {
+    var p = PRE[name];
+    rate.value = p.r; range.value = p.r;
+    for (var i = 0; i < YEARS; i++) {
+      Bi[i].value = name === 'blank' ? '' : p.B[i];
+      Ci[i].value = name === 'blank' ? '' : p.C[i];
+    }
+    [].slice.call(document.querySelectorAll('#npvPre button')).forEach(function (b) { b.classList.toggle('on', b.dataset.p === name); });
+    calc();
+  }
+
+  document.getElementById('npvPre').addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (b) load(b.dataset.p);
+  });
+  rate.addEventListener('input', function () { range.value = rate.value; calc(); });
+  range.addEventListener('input', function () { rate.value = range.value; calc(); });
+  tbl.addEventListener('input', calc);
+  load('lec');
+})();
+</script>
+</body>
+</html>

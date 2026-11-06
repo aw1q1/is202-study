@@ -1,0 +1,1869 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IS202 · Lecture 4 — Project Management &amp; Estimation</title>
+<style>
+/* ==========================================================
+   IS202 study pages — shared design system
+   ========================================================== */
+:root{
+  --bg:#0d1220; --card:#172038; --card2:#1d2848; --line:#2a3862;
+  --text:#eaf0ff; --muted:#9fb0d8;
+  --accent:#7aa8ff; --accent-rgb:122,168,255; --on-accent:#0a1226;
+  --ok:#4ade80; --ok-rgb:74,222,128;
+  --bad:#ff7b8c; --bad-rgb:255,123,140;
+  --warn:#fbbf24; --warn-rgb:251,191,36;
+  --c-plan:#4cc9f0; --c-plan-rgb:76,201,240;
+  --c-ana:#fbbf24;  --c-ana-rgb:251,191,36;
+  --c-des:#b69cff;  --c-des-rgb:182,156,255;
+  --c-imp:#4ade80;  --c-imp-rgb:74,222,128;
+  --shadow:0 12px 32px rgba(0,0,0,.35);
+  --radius:18px;
+}
+[data-theme="light"]{
+  --bg:#f5f2ea; --card:#ffffff; --card2:#f6f3ec; --line:#ddd6c3;
+  --text:#1b2336; --muted:#5a6684;
+  --accent:#2f66e0; --accent-rgb:47,102,224; --on-accent:#ffffff;
+  --ok:#15803d; --ok-rgb:21,128,61;
+  --bad:#c0263d; --bad-rgb:192,38,61;
+  --warn:#a85d00; --warn-rgb:168,93,0;
+  --c-plan:#0b84a8; --c-plan-rgb:11,132,168;
+  --c-ana:#b86e00;  --c-ana-rgb:184,110,0;
+  --c-des:#6b44e0;  --c-des-rgb:107,68,224;
+  --c-imp:#17803d;  --c-imp-rgb:23,128,61;
+  --shadow:0 10px 26px rgba(70,55,20,.12);
+}
+
+/* colour helpers: put on any element, children read --c / --c-rgb */
+.ph-plan{--c:var(--c-plan);--c-rgb:var(--c-plan-rgb)}
+.ph-ana{--c:var(--c-ana);--c-rgb:var(--c-ana-rgb)}
+.ph-des{--c:var(--c-des);--c-rgb:var(--c-des-rgb)}
+.ph-imp{--c:var(--c-imp);--c-rgb:var(--c-imp-rgb)}
+.t-ok{--c:var(--ok);--c-rgb:var(--ok-rgb)}
+.t-warn{--c:var(--warn);--c-rgb:var(--warn-rgb)}
+.t-bad{--c:var(--bad);--c-rgb:var(--bad-rgb)}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+body{
+  margin:0;min-height:100vh;color:var(--text);
+  font:17px/1.85 "Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;
+  background:
+    radial-gradient(900px 480px at 85% -8%,rgba(var(--accent-rgb),.14),transparent 62%),
+    radial-gradient(700px 420px at 5% 14%,rgba(var(--c-des-rgb),.08),transparent 60%),
+    var(--bg);
+  background-attachment:fixed;
+}
+b,strong{font-weight:700}
+button{font-family:inherit}
+h2{font-size:32px;line-height:1.35;margin:0 0 6px}
+h3{font-size:20px;margin:0 0 10px}
+h4{font-size:17px;margin:0 0 8px}
+.sec{margin:30px 0 12px;font-size:21px}
+.sec small{color:var(--muted);font-weight:400;font-size:14px}
+.lead{color:var(--muted);margin:0 0 18px;font-size:18px}
+.muted{color:var(--muted)}
+.en{direction:ltr;unicode-bidi:isolate;font-family:"Segoe UI",system-ui,sans-serif;font-weight:600}
+.en.plain{font-weight:400}
+
+/* ---------- top bar ---------- */
+.topbar{
+  position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;
+  padding:10px clamp(12px,3vw,28px);
+  background:var(--bg);
+  background:color-mix(in srgb,var(--bg) 84%,transparent);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--line);
+}
+.home,.icon-btn{
+  width:40px;height:40px;display:grid;place-items:center;border-radius:12px;
+  border:1px solid var(--line);background:var(--card);color:var(--text);
+  text-decoration:none;font-size:18px;cursor:pointer;flex:none;
+}
+.home:hover,.icon-btn:hover{border-color:var(--accent)}
+.ttl{display:flex;flex-direction:column;line-height:1.3}
+.ttl small{color:var(--muted);font-size:13px}
+.prog{margin-inline-start:auto;display:flex;align-items:center;gap:10px;min-width:150px;color:var(--muted);font-size:14px}
+.bar{flex:1;height:9px;border-radius:99px;background:rgba(var(--accent-rgb),.16);overflow:hidden;min-width:90px}
+.bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--c-imp));transition:width .5s}
+
+/* ---------- layout + nav ---------- */
+.layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:26px;max-width:1160px;margin:0 auto;padding:24px clamp(12px,3vw,24px) 70px;align-items:start}
+.nav{position:sticky;top:78px;display:flex;flex-direction:column;gap:6px}
+.nav button{
+  display:flex;align-items:center;gap:10px;text-align:start;width:100%;
+  background:transparent;border:1px solid transparent;color:var(--muted);
+  padding:9px 12px;border-radius:14px;cursor:pointer;font-size:15px;transition:.18s;
+}
+.nav button:hover{background:rgba(var(--accent-rgb),.08);color:var(--text)}
+.nav .num{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;background:var(--card2);border:1px solid var(--line)}
+.nav .lbl{flex:1}
+.nav .tick{opacity:0;color:var(--ok);font-weight:800}
+.nav button.on{background:var(--card);border-color:var(--line);color:var(--text);box-shadow:var(--shadow)}
+.nav button.on .num{background:var(--accent);color:var(--on-accent);border-color:transparent}
+.nav button.done .tick{opacity:1}
+
+/* ---------- stations ---------- */
+.station{display:none}
+.station.on{display:block;animation:rise .45s ease}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.station-foot{display:flex;justify-content:space-between;gap:12px;margin-top:34px;padding-top:18px;border-top:1px dashed var(--line)}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow);margin:16px 0}
+.card.tint{border-top:4px solid var(--c)}
+.card.tint h4{color:var(--c)}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border-radius:14px;
+  border:1px solid var(--line);background:var(--card);color:var(--text);font-size:16px;font-weight:600;
+  cursor:pointer;transition:.18s;text-decoration:none;
+}
+.btn:hover{transform:translateY(-1px);border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--on-accent);border-color:transparent}
+.btn.good{background:rgba(var(--ok-rgb),.16);border-color:rgba(var(--ok-rgb),.55)}
+.btn.bad{background:rgba(var(--bad-rgb),.14);border-color:rgba(var(--bad-rgb),.5)}
+.btn.ghost{background:transparent}
+
+.chip{
+  display:inline-flex;align-items:center;gap:6px;padding:4px 14px;margin:4px;border-radius:999px;font-size:15px;line-height:1.7;
+  background:rgba(var(--c-rgb,var(--accent-rgb)),.14);border:1px solid rgba(var(--c-rgb,var(--accent-rgb)),.45);
+}
+.chip.en{font-weight:600}
+.note{margin:14px 0;padding:12px 16px;border-radius:14px;background:rgba(var(--c-rgb,var(--accent-rgb)),.1);border:1px solid rgba(var(--c-rgb,var(--accent-rgb)),.38)}
+.note.warn{--c-rgb:var(--warn-rgb)}
+.note.ok{--c-rgb:var(--ok-rgb)}
+.note.bad{--c-rgb:var(--bad-rgb)}
+
+/* ---------- tabs / panes / segmented ---------- */
+.pane{display:none}
+.pane.on{display:block;animation:rise .35s ease}
+.seg{display:inline-flex;gap:6px;padding:5px;border-radius:16px;background:var(--card2);border:1px solid var(--line);flex-wrap:wrap;margin-bottom:14px}
+.seg button{border:0;background:transparent;color:var(--muted);padding:9px 18px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;transition:.18s}
+.seg button.on{background:rgba(var(--c-rgb,var(--accent-rgb)),.2);color:var(--text);box-shadow:inset 0 0 0 1.5px rgba(var(--c-rgb,var(--accent-rgb)),.7)}
+
+/* ---------- big picture ---------- */
+.story{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap}
+.beat{flex:1;min-width:150px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;padding:14px;border-radius:16px;background:rgba(var(--bad-rgb),.1);border:1px solid rgba(var(--bad-rgb),.4)}
+.beat.ok{background:rgba(var(--ok-rgb),.12);border-color:rgba(var(--ok-rgb),.5)}
+.beat .emo{font-size:30px;line-height:1.3}
+.arrow{align-self:center;font-size:22px;color:var(--muted)}
+.punch{text-align:center;font-size:20px;font-weight:700;margin:16px 0 12px}
+.tile{
+  display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:start;padding:18px;border-radius:18px;
+  border:1px solid rgba(var(--c-rgb),.45);background:linear-gradient(155deg,rgba(var(--c-rgb),.2),var(--card) 72%);
+  color:var(--text);cursor:pointer;transition:.2s;font-size:17px;
+}
+.tile:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.tile .emo{font-size:30px;line-height:1.3}
+.tile small{color:var(--muted);font-size:14.5px}
+
+/* ---------- translator diagram ---------- */
+.trans{display:flex;align-items:center;justify-content:center;gap:8px;direction:ltr;flex-wrap:wrap;margin-bottom:16px}
+.trans>*{direction:rtl}
+.tnode{
+  display:flex;flex-direction:column;align-items:center;gap:0;min-width:160px;padding:14px 18px;border-radius:18px;
+  border:1.5px solid rgba(var(--c-rgb),.4);background:rgba(var(--c-rgb),.1);color:var(--text);cursor:pointer;transition:.2s;font-size:16px;
+}
+.tnode .emo{font-size:30px;line-height:1.3}
+.tnode.on{background:rgba(var(--c-rgb),.24);border-color:var(--c);transform:translateY(-3px);box-shadow:0 8px 22px rgba(var(--c-rgb),.25)}
+.tlink{font-size:26px;color:var(--muted)}
+.bigq{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.bigq .chip{font:800 20px/1.5 "Segoe UI",sans-serif;padding:6px 20px}
+
+/* ---------- flip cards (roles) ---------- */
+.flip{perspective:1000px;cursor:pointer;outline:none}
+.flip-in{display:grid;min-height:170px;transition:transform .55s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
+.flip.open .flip-in{transform:rotateY(180deg)}
+.flip .face{
+  grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:18px;padding:16px 18px;
+  display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:4px;
+  border:1px solid rgba(var(--c-rgb,var(--accent-rgb)),.5);
+  background:linear-gradient(155deg,rgba(var(--c-rgb,var(--accent-rgb)),.2),var(--card) 75%);
+}
+.flip .front .emo{font-size:32px;line-height:1.3}
+.flip .front b{font-size:18px}
+.flip .front small{color:var(--muted)}
+.flip .back{transform:rotateY(180deg);background:var(--card2);font-size:16px;line-height:1.75}
+.flip:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:18px}
+.hint{color:var(--muted);font-size:13px}
+
+/* ---------- SDLC path ---------- */
+.path{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;direction:ltr;margin:6px 0 18px}
+.node{
+  position:relative;direction:rtl;display:flex;flex-direction:column;align-items:center;gap:2px;padding:16px 10px;border-radius:20px;
+  border:1.5px solid rgba(var(--c-rgb),.4);background:rgba(var(--c-rgb),.09);color:var(--text);cursor:pointer;transition:.22s;text-align:center;font-size:15px;
+}
+.node i{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font:800 24px/1 "Segoe UI",sans-serif;font-style:normal;background:rgba(var(--c-rgb),.25);color:var(--c);margin-bottom:4px;transition:.22s}
+.node b{font-size:18px;font-family:"Segoe UI",sans-serif}
+.node small{color:var(--muted);font-size:13.5px;line-height:1.4}
+.node:not(:last-child)::after{content:"➜";position:absolute;right:-22px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:18px}
+.node.on{background:rgba(var(--c-rgb),.22);border-color:var(--c);transform:translateY(-4px);box-shadow:0 12px 26px rgba(var(--c-rgb),.28)}
+.node.on i{background:var(--c);color:var(--bg)}
+.node b,.node small,.ph-head .q,.tile b.en{direction:ltr;unicode-bidi:isolate}
+.mnemo{text-align:center;font-size:19px;margin:0 0 14px;color:var(--muted)}
+.mnemo b{color:var(--text)}
+.panel{background:var(--card);border:1px solid rgba(var(--c-rgb),.5);border-top:5px solid var(--c);border-radius:18px;padding:20px 22px;box-shadow:var(--shadow)}
+.ph-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.ph-head .q{font:800 24px/1.3 "Segoe UI",sans-serif;color:var(--c);padding:4px 16px;border-radius:12px;background:rgba(var(--c-rgb),.15)}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0}
+.steps li{counter-increment:s;position:relative;padding:6px 0;padding-inline-start:50px;margin:6px 0}
+.steps li::before{content:counter(s);position:absolute;inset-inline-start:0;top:6px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:rgba(var(--c-rgb),.2);color:var(--c)}
+.deliv{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+
+/* ---------- BPM ---------- */
+.cycle{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;direction:ltr}
+.cycle>div{direction:rtl;padding:14px;border-radius:16px;background:var(--card2);border:1px solid var(--line);font-size:15.5px;line-height:1.65}
+.cycle .n{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-weight:800;margin-bottom:6px}
+.loopnote{text-align:center;color:var(--muted);margin:10px 0 0}
+.range-wrap{direction:ltr;padding:6px 6px 0}
+.range-wrap input{width:100%;height:10px;accent-color:var(--accent);cursor:pointer}
+.ticks{display:flex;justify-content:space-between;direction:ltr;font:800 16px "Segoe UI",sans-serif;margin-top:8px}
+.ticks span{cursor:pointer;padding:4px 14px;border-radius:10px;color:var(--muted);transition:.18s}
+.ticks span.on{background:rgba(var(--c-rgb),.22);color:var(--text)}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:16px 0 8px}
+.metric small{display:flex;justify-content:space-between;color:var(--muted);margin-bottom:4px}
+.meter{direction:ltr;position:relative;height:12px;border-radius:99px;background:linear-gradient(90deg,var(--ok),var(--warn),var(--bad));overflow:hidden}
+.meter i{position:absolute;top:0;bottom:0;right:0;width:100%;background:var(--card2);transition:width .55s cubic-bezier(.2,.8,.2,1)}
+
+/* ---------- decks (games / quiz) ---------- */
+.deck{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px 22px;box-shadow:var(--shadow);margin:14px 0}
+.deck-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;color:var(--muted);font-size:15px}
+.cnt,.fc-count{direction:ltr;unicode-bidi:isolate}
+.deck-bar{flex:1;height:8px;border-radius:99px;background:rgba(var(--accent-rgb),.16);overflow:hidden}
+.deck-bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--c-imp));transition:width .4s}
+.deck-q{font-size:21px;font-weight:600;line-height:1.7;margin:4px 0 16px;min-height:56px}
+.opts{display:grid;gap:10px}
+.opts.c2{grid-template-columns:repeat(2,1fr)}
+.opts.c3{grid-template-columns:repeat(3,1fr)}
+.opt{
+  text-align:start;padding:13px 16px;border-radius:14px;border:1.5px solid var(--line);background:var(--card2);
+  color:var(--text);font-size:17px;cursor:pointer;transition:.18s;line-height:1.6;
+}
+.opt.ph-plan,.opt.ph-ana,.opt.ph-des,.opt.ph-imp,.opt.t-ok,.opt.t-warn,.opt.t-bad{border-color:rgba(var(--c-rgb),.55);background:rgba(var(--c-rgb),.1);font-weight:600}
+.opt:hover:not(:disabled){border-color:var(--accent);transform:translateY(-1px)}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--ok);background:rgba(var(--ok-rgb),.2)}
+.opt.wrong{border-color:var(--bad);background:rgba(var(--bad-rgb),.2)}
+.fb{margin-top:16px;padding:14px 16px;border-radius:14px;animation:rise .3s ease}
+.fb.ok{background:rgba(var(--ok-rgb),.13);border:1px solid rgba(var(--ok-rgb),.5)}
+.fb.no{background:rgba(var(--bad-rgb),.12);border:1px solid rgba(var(--bad-rgb),.5)}
+.fb .btn{margin-top:10px}
+.deck-end{text-align:center;padding:12px 0}
+.deck-end .big{font:800 56px/1.2 "Segoe UI",sans-serif;color:var(--accent)}
+
+/* ---------- flashcards ---------- */
+.fc{background:transparent}
+.fc-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.fc-top .seg{margin:0}
+.fc-card{perspective:1200px;cursor:pointer;outline:none;margin:10px 0 14px}
+.fc-in{display:grid;min-height:270px;transition:transform .6s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
+.fc-card.open .fc-in{transform:rotateY(180deg)}
+.fc-in .face{
+  grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:24px;padding:28px;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:12px;
+  border:1px solid var(--line);font-size:23px;line-height:1.7;box-shadow:var(--shadow);
+}
+.fc-in .front{background:linear-gradient(160deg,rgba(var(--accent-rgb),.22),var(--card))}
+.fc-in .back{background:linear-gradient(160deg,rgba(var(--ok-rgb),.18),var(--card));transform:rotateY(180deg);font-size:19.5px}
+.fc-in small{color:var(--muted);font-size:13.5px}
+.fc-card:focus-visible .fc-in .front{outline:2px solid var(--accent)}
+.fc-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+.fc-stat{text-align:center;margin:8px 0 0}
+
+/* ---------- essay ---------- */
+.essay textarea{width:100%;min-height:110px;resize:vertical;padding:12px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--card2);color:var(--text);font:16px/1.7 "Segoe UI",sans-serif;margin:8px 0 12px}
+.essay textarea:focus{outline:none;border-color:var(--accent)}
+.model{margin-top:14px;animation:rise .3s ease}
+.mdl{padding:14px 16px;border-radius:14px;background:rgba(var(--ok-rgb),.1);border:1px solid rgba(var(--ok-rgb),.4);margin-bottom:12px}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:6px 0;cursor:pointer}
+.chk input{width:20px;height:20px;margin-top:5px;accent-color:var(--ok);flex:none}
+.pts-sc{font-weight:700;margin-top:6px;color:var(--ok)}
+
+/* ---------- tables (summary) ---------- */
+.tbl{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:14px;border:1px solid var(--line);font-size:15.5px;line-height:1.65;margin:8px 0 18px}
+.tbl th,.tbl td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:start;vertical-align:top}
+.tbl tr:last-child td{border-bottom:0}
+.tbl th{background:var(--card2);font-size:14.5px;color:var(--muted)}
+.tbl td:first-child{font-weight:700;white-space:nowrap}
+.tbl .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);margin-inline-end:8px}
+
+/* ---------- calculators / inputs ---------- */
+.calc-top{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.calc-top label{display:inline-flex;align-items:center;gap:8px;font-weight:600}
+.calc input[type=number]{width:100%;max-width:132px;padding:7px 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--card2);color:var(--text);font:600 16px "Segoe UI",sans-serif;direction:ltr;text-align:right}
+.calc input[type=number]:focus{outline:none;border-color:var(--accent)}
+.calc-top input[type=number]{max-width:90px}
+.calc input[type=range]{accent-color:var(--accent);cursor:pointer;direction:ltr;width:170px}
+main{min-width:0}
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:4px 0;direction:ltr}
+.ctbl{min-width:680px;direction:ltr;margin:0}
+.ctbl th,.ctbl td{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ctbl th:first-child,.ctbl td:first-child{text-align:left}
+.ctbl input[type=number]{min-width:112px}
+.tbl.ctbl td:first-child{white-space:nowrap}
+.ctbl.sm{min-width:0}
+.ctbl.sm input[type=number]{min-width:0}
+.ctbl.sm th,.ctbl.sm td{white-space:normal}
+.tbl.ctbl.sm td:first-child{white-space:nowrap}
+.ctbl .neg{color:var(--bad)}
+.ctbl .pos{color:var(--ok)}
+.ctbl tr.tot td{background:var(--card2);font-weight:700}
+.res-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:14px}
+.res{padding:12px 14px;border-radius:14px;background:var(--card2);border:1px solid var(--line)}
+.res small{display:block;color:var(--muted);font-size:14px}
+.res b{display:block;font:800 22px/1.5 "Segoe UI",sans-serif;direction:ltr;unicode-bidi:isolate;text-align:start}
+.res.pos{border-color:rgba(var(--ok-rgb),.6);background:rgba(var(--ok-rgb),.12)}
+.res.neg{border-color:rgba(var(--bad-rgb),.6);background:rgba(var(--bad-rgb),.12)}
+.verdict{margin-top:14px;padding:12px 16px;border-radius:14px;font-weight:700;font-size:18px;background:var(--card2);border:1px solid var(--line)}
+.verdict.pos{background:rgba(var(--ok-rgb),.14);border-color:rgba(var(--ok-rgb),.55)}
+.verdict.neg{background:rgba(var(--bad-rgb),.13);border-color:rgba(var(--bad-rgb),.55)}
+.checks{display:grid;gap:4px;margin-bottom:10px}
+.checks .chk{padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card2);margin:0}
+.checks .chk:hover{border-color:var(--accent)}
+.formula{direction:ltr;unicode-bidi:isolate;text-align:center;font:700 19px/1.9 "Segoe UI",sans-serif;padding:12px 16px;border-radius:14px;background:rgba(var(--accent-rgb),.1);border:1px solid rgba(var(--accent-rgb),.4);margin:12px 0}
+.formula small{display:block;font:400 14px "Segoe UI",sans-serif;color:var(--muted)}
+
+/* ---------- share disclaimer (footer injected by core.js) ---------- */
+.disclaimer{max-width:1160px;margin:0 auto;padding:0 clamp(12px,3vw,24px) 46px}
+.disclaimer>div{padding:14px 18px;border-radius:16px;border:1px solid rgba(var(--warn-rgb),.5);background:rgba(var(--warn-rgb),.08);font-size:14.5px;line-height:1.85;color:var(--muted)}
+.disclaimer b{color:var(--text)}
+.disclaimer .d-en{direction:ltr;text-align:left;margin-top:10px;padding-top:10px;border-top:1px dashed rgba(var(--warn-rgb),.4);font-family:"Segoe UI",system-ui,sans-serif;font-size:13.5px;line-height:1.7}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;gap:12px;padding-top:12px}
+  .nav{position:sticky;top:60px;z-index:20;flex-direction:row;overflow-x:auto;gap:6px;padding:8px 2px;background:var(--bg)}
+  .nav{scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav button{width:auto;flex:none;padding:6px 10px}
+  .nav button:not(.on) .lbl{display:none}
+  .nav .tick{display:none}
+  .nav button.done .num{background:var(--ok);color:#06210f;border-color:transparent}
+  .ttl small{display:none}
+}
+@media (max-width:700px){
+  body{font-size:16px}
+  h2{font-size:26px}
+  .path{grid-template-columns:repeat(2,1fr);gap:12px}
+  .node::after{display:none!important}
+  .cycle{grid-template-columns:repeat(2,1fr)}
+  .opts.c3{grid-template-columns:1fr}
+  .metrics{grid-template-columns:1fr}
+  .prog{min-width:0}
+  .tbl{font-size:14px}
+  .tbl th,.tbl td{padding:8px 7px}
+  .tbl td:first-child{white-space:normal}
+  .prog .bar{min-width:50px}
+  .card.calc{padding:16px 10px}
+  .calc input[type=number]{padding:6px 4px;font-size:15px}
+  .ctbl.sm th,.ctbl.sm td{padding:8px 4px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* ---------- print: only the summary station ---------- */
+@media print{
+  :root,[data-theme="dark"],[data-theme="light"]{--bg:#fff;--card:#fff;--card2:#f3f3f3;--line:#ccc;--text:#111;--muted:#444;--shadow:none}
+  body{background:#fff!important;font-size:12pt;line-height:1.55}
+  .topbar,.nav,.station-foot,.noprint{display:none!important}
+  .layout{display:block;padding:0}
+  .station{display:none!important}
+  .station.summary{display:block!important}
+  .card,.panel{box-shadow:none;break-inside:avoid}
+  .tbl{break-inside:avoid}
+}
+
+</style>
+<style>
+/* ---------- Lecture 4 only: triangle, stacked bar, bars, WBS tree, network ---------- */
+.sw ul{margin:0;padding-inline-start:20px;line-height:1.9}
+
+/* flows (same as L3) */
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px;margin:10px 0}
+.flow>div{flex:1;min-width:118px;padding:10px 12px;border-radius:14px;text-align:center;border:1.5px solid rgba(var(--c-rgb,var(--accent-rgb)),.5);background:rgba(var(--c-rgb,var(--accent-rgb)),.12);font-size:15px;line-height:1.55}
+.flow>.ar{flex:0 0 auto;min-width:0;border:0;background:transparent;align-self:center;color:var(--muted);font-size:20px;padding:0}
+.flow small{display:block;color:var(--muted);font-size:13px}
+
+/* project-management triangle */
+.tri-svg{width:100%;max-width:340px;display:block;margin:0 auto;direction:ltr}
+.tri-svg .poly{fill:rgba(var(--accent-rgb),.07);stroke:var(--line);stroke-width:2}
+.tri-svg text{fill:var(--text);font:700 15px "Segoe UI",sans-serif;text-anchor:middle}
+.tri-svg .sub{fill:var(--muted);font:400 11.5px "Segoe UI",sans-serif}
+.tri-svg .v circle{fill:var(--card2);stroke:var(--line);stroke-width:2.5;transition:.25s}
+.tri-svg .v .ar{font-size:19px}
+.tri-svg .v.chg circle{stroke:var(--accent);fill:rgba(var(--accent-rgb),.4)}
+.tri-svg .v.must circle{stroke:var(--warn);fill:rgba(var(--warn-rgb),.32)}
+.tri-svg .v.free circle{stroke:var(--ok);fill:rgba(var(--ok-rgb),.3)}
+.tri-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:4px 0 8px}
+.tri-row>b{min-width:120px}
+.give{margin:8px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+.give li{padding:10px 14px;border-radius:12px;background:var(--card2);border:1px solid var(--line)}
+.give li b.ar{display:inline-block;min-width:28px;font-size:18px}
+
+/* stacked bar of phase percentages */
+.stack{display:flex;height:52px;border-radius:14px;overflow:hidden;direction:ltr;border:1px solid var(--line);margin:12px 0}
+.stack>div{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.2;font:700 12.5px "Segoe UI",sans-serif;background:rgba(var(--c-rgb),.28);border-inline-end:2px solid var(--bg);min-width:0;overflow:hidden;white-space:nowrap;transition:.3s}
+.stack>div small{font-weight:400;font-size:11.5px;color:var(--muted)}
+.stack>div.known{background:rgba(var(--c-rgb),.62);box-shadow:inset 0 0 0 2px var(--c)}
+.stack>div.known small{color:var(--text)}
+
+/* margin-of-error bars */
+.moe{display:grid;gap:10px;direction:ltr}
+.moe-h,.moe .r{display:grid;grid-template-columns:200px 1fr 1fr;gap:10px;align-items:center}
+.moe-h{font:700 13px "Segoe UI",sans-serif;color:var(--muted)}
+.moe .lb{font:700 14px/1.35 "Segoe UI",sans-serif}
+.moe .lb small{display:block;color:var(--muted);font-weight:400;font-size:12px}
+.moe .b{position:relative;height:28px;border-radius:9px;background:rgba(var(--c-rgb),.1);overflow:hidden}
+.moe .b i{position:absolute;top:0;bottom:0;left:0;border-radius:9px;background:rgba(var(--c-rgb),.5)}
+.moe .b em{position:relative;display:block;font:800 14px/28px "Segoe UI",sans-serif;font-style:normal;padding:0 10px}
+
+/* WBS tree */
+details.tree{border:1px solid var(--line);border-radius:14px;background:var(--card2);padding:4px 12px;margin:6px 0;direction:ltr;text-align:left}
+details.tree>summary{cursor:pointer;font:600 15.5px/1.6 "Segoe UI",sans-serif;padding:5px 0;list-style:none}
+details.tree>summary::-webkit-details-marker{display:none}
+details.tree>summary::before{content:"▸";display:inline-block;margin-right:8px;transition:.2s;color:var(--accent)}
+details.tree[open]>summary::before{transform:rotate(90deg)}
+details.tree .kids{padding:2px 0 6px 14px}
+.tree-leaf{padding:5px 0 5px 22px;font:400 15.5px/1.6 "Segoe UI",sans-serif;direction:ltr;text-align:left}
+.dep{display:inline-block;margin-left:8px;padding:0 10px;border-radius:99px;font:700 12.5px "Segoe UI",sans-serif;background:rgba(var(--warn-rgb),.2);border:1px solid rgba(var(--warn-rgb),.6);color:var(--warn)}
+.lvl{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 0}
+
+/* communication network */
+.br-svg{width:100%;max-width:260px;display:block;margin:0 auto;direction:ltr}
+.br-svg line{stroke:var(--accent);stroke-opacity:.5;stroke-width:1.2}
+.br-svg circle{fill:var(--c-imp);stroke:var(--bg);stroke-width:2}
+
+@media (max-width:700px){
+  .moe-h,.moe .r{grid-template-columns:1fr 1fr}
+  .moe-h span:first-child{display:none}
+  .moe .lb{grid-column:1/-1}
+  .tri-row>b{min-width:100%}
+}
+</style>
+</head>
+<body data-lecture="l4">
+
+<header class="topbar">
+  <a class="home" href="index.html" title="القائمة الرئيسية">🏠</a>
+  <div class="ttl"><b>IS202 · Lecture 4</b><small class="en plain">Project Management &amp; Estimation</small></div>
+  <div class="prog"><div class="bar"><i id="progBar"></i></div><span id="progTxt">0/11</span></div>
+  <button id="themeBtn" class="icon-btn" type="button" title="فاتح / داكن">☀️</button>
+</header>
+
+<div class="layout">
+<nav class="nav" id="nav" aria-label="محطات المحاضرة"></nav>
+<main>
+
+<!-- =====================================================  1 · BIG PICTURE -->
+<section class="station" data-icon="🗺️" data-title="الصورة الكبيرة">
+  <h2>الصورة الكبيرة 🗺️</h2>
+  <p class="lead">المشروع اتوافق عليه والـ <span class="en">methodology</span> اتحددت (Lecture 3). دلوقتي الـ <b class="en">Project Manager</b> بيجهّز المشروع للإطلاق: <span class="en">Preparing to launch the project</span>.</p>
+
+  <div class="card">
+    <h4>الـ PM بيعمل 4 حاجات بعد الموافقة <small class="muted">(من Lecture 3)</small></h4>
+    <ol class="steps ph-plan" style="margin:0">
+      <li><span class="en">Select the best project methodology</span> — خلصناها في Lecture 3 ✅</li>
+      <li><b class="en">Develop a project work plan</b> — المحاضرة دي ⭐ (تقدير + tasks + WBS)</li>
+      <li><b class="en">Establish a staffing plan</b> — المحاضرة دي ⭐</li>
+      <li><b class="en">Create ways to coordinate and control the project</b> — المحاضرة دي ⭐ (motivation، scope، timeboxing)</li>
+    </ol>
+  </div>
+
+  <h3 class="sec">خريطة المحاضرة <small>(اضغط على أي مربع تروحله)</small></h3>
+  <div class="grid g3">
+    <button type="button" class="tile ph-plan" data-go="2"><span class="emo">⚖️</span><b class="en">Balancing Act</b><small>Size · Cost · Time</small></button>
+    <button type="button" class="tile ph-ana" data-go="3"><span class="emo">🔢</span><b class="en">Estimation</b><small>15/20/35/30 + هامش الخطأ — فيه حسابات ⭐</small></button>
+    <button type="button" class="tile ph-des" data-go="4"><span class="emo">🗂️</span><b class="en">Tasks · WBS · Work plan</b><small>نقسّم الشغل ونتابعه</small></button>
+    <button type="button" class="tile ph-imp" data-go="5"><span class="emo">👥</span><b class="en">Staffing</b><small>ومعاه Brooks’ Law</small></button>
+    <button type="button" class="tile ph-plan" data-go="6"><span class="emo">💪</span><b class="en">Motivation &amp; Group performance</b><small>intrinsic vs monetary + de-motivators</small></button>
+    <button type="button" class="tile ph-ana" data-go="7"><span class="emo">🛡️</span><b class="en">Scope creep · Timeboxing</b><small>ولما التاريخ يفوتك</small></button>
+  </div>
+
+  <div class="note ok">📖 <b>الكتاب هو المصدر الأهم</b> (قال الدكتور: الكتاب الأول وبعدين المحاضرات). في كل محطة هتلاقي علامة 📖 على اللي الكتاب بيضيفه أو بيختلف فيه عن السلايدز، وفي آخر الملخص جدول «الكتاب ضد السلايدز».</div>
+
+  <details class="card" style="padding:14px 18px">
+    <summary style="cursor:pointer;font-weight:700">📖 الـ 7 Learning Outcomes بتوع الكتاب (اللي بيتسألوا منها) — اضغط تفتح</summary>
+    <ol style="margin:10px 0 0;line-height:1.95">
+      <li>تحليل الـ <b class="en">trade-off triangle</b>: Project Size, Cost, Time.</li>
+      <li>تطبيق الـ <b class="en">industry standard percentages</b> لتقدير مدد مراحل الـ SDLC.</li>
+      <li>فهم دور الـ <b class="en">Function Point estimation</b> في حساب lines of code والـ effort.</li>
+      <li>تفكيك الـ deliverables لـ <b class="en">WBS</b> بالـ top-down.</li>
+      <li>بناء <b class="en">Project Work Plan</b>: dependencies، durations، milestones.</li>
+      <li>استراتيجيات الـ <b class="en">staffing</b> وتقييم <b class="en">intrinsic vs extrinsic</b> motivators.</li>
+      <li>تطبيق <b class="en">formal change control</b> ضد scope creep، وتقنية <b class="en">timeboxing</b>.</li>
+    </ol>
+  </details>
+
+  <div class="note">ℹ️ <b>ملحوظة:</b> غلاف سلايدات المحاضرة مكتوب عليه «Chapter 2» وأهدافها فيها حاجات من Lecture 3. ما تتلخبطش — المحتوى الفعلي هنا هو <b>Chapter 4</b> في الكتاب.</div>
+</section>
+
+<!-- =====================================================  2 · BALANCING ACT -->
+<section class="station" data-icon="⚖️" data-title="الـ Balancing Act">
+  <h2>الـ <span class="en">Balancing Act</span> ⚖️</h2>
+  <p class="lead">إدارة المشروع = <b>موازنات (trade-offs)</b>. تعديل عنصر واحد <b>لازم</b> يتعدّل معاه عنصر تاني.</p>
+
+  <div class="grid g3">
+    <div class="card tint ph-plan" style="margin:0"><h4>📏 <span class="en">Project Size</span></h4><p style="margin:0">حجم الـ scope والـ <b>functionality</b> (الـ features).</p></div>
+    <div class="card tint ph-ana" style="margin:0"><h4>💵 <span class="en">Project Cost</span></h4><p style="margin:0">الـ <b>budget</b> والفلوس والموارد.</p></div>
+    <div class="card tint ph-des" style="margin:0"><h4>⏱️ <span class="en">Project Time</span></h4><p style="margin:0">الـ <b>schedule</b> والـ milestones.</p></div>
+  </div>
+  <div class="note ok" style="margin-top:14px">📖 <b>الكتاب</b> بيسميها <span class="en">“triple constraints” / “project management triangle”</span> وبيعرّف كل ضلع زي فوق. السلايد بيقول بس: <span class="en">Modifying one element requires adjusting the others</span>.</div>
+
+  <h3 class="sec">🎮 جرّب: الإدارة قررت حاجة… إيه اللي لازم يتغيّر؟</h3>
+  <div class="card" id="triSim">
+    <div class="tri-row"><b>🔒 ضغط على المشروع:</b>
+      <div class="seg" style="margin:0">
+        <button type="button" class="t-warn" data-k="T-">⏩ وقت أقل</button>
+        <button type="button" class="t-warn" data-k="S+">➕ features أكتر</button>
+        <button type="button" class="t-warn" data-k="C-">✂️ ميزانية أقل</button>
+      </div>
+    </div>
+    <div class="tri-row"><b>🔓 مرونة للمشروع:</b>
+      <div class="seg" style="margin:0">
+        <button type="button" class="t-ok" data-k="T+">⏳ وقت أطول</button>
+        <button type="button" class="t-ok" data-k="S-">➖ features أقل</button>
+        <button type="button" class="t-ok" data-k="C+">💰 ميزانية أكبر</button>
+      </div>
+    </div>
+    <div class="grid g2" style="align-items:center;margin-top:8px">
+      <svg id="triSvg" class="tri-svg" viewBox="0 0 320 246" role="img" aria-label="Project management triangle">
+        <polygon class="poly" points="160,62 44,192 276,192"/>
+        <g class="v" data-v="S" transform="translate(160,62)"><circle r="21"/><text class="ar" y="7"></text></g>
+        <g class="v" data-v="C" transform="translate(44,192)"><circle r="21"/><text class="ar" y="7"></text></g>
+        <g class="v" data-v="T" transform="translate(276,192)"><circle r="21"/><text class="ar" y="7"></text></g>
+        <text x="160" y="16">Size</text><text class="sub" x="160" y="31">scope &amp; functionality</text>
+        <text x="44" y="226">Cost</text><text class="sub" x="44" y="241">budget</text>
+        <text x="276" y="226">Time</text><text class="sub" x="276" y="241">schedule</text>
+      </svg>
+      <div id="triOut"><div class="note" style="margin:0">👆 اضغط على قرار من فوق.</div></div>
+    </div>
+  </div>
+  <p class="hint">🟦 الضلع اللي اتغيّر · 🟨 لازم نعدّل · 🟩 بقى عندنا مرونة.</p>
+
+  <div class="note warn">🧠 <b>القاعدة:</b> أي قرار على ضلع بيضغط على <b>واحد على الأقل</b> من الضلعين التانيين. المدير مش بيقدر يقصّر الوقت ويزوّد الـ features ويقلّل الفلوس كلهم مع بعض!</div>
+
+  <h3 class="sec">🎯 تدريب</h3>
+  <div data-deck="tri"></div>
+</section>
+
+<!-- =====================================================  3 · ESTIMATION -->
+<section class="station" data-icon="🔢" data-title="التقدير (Estimation)">
+  <h2>التقدير <span class="en">Estimation</span> 🔢</h2>
+  <p class="lead"><b class="en">Project estimation = assigning projected values for time and effort.</b> يعني نحط رقم متوقع للوقت والمجهود.</p>
+
+  <h3 class="sec">من فين بنجيب الـ estimates؟ <small>(5 مصادر)</small></h3>
+  <div class="card">
+    <span class="chip en ph-plan">Methodology in use</span><span class="chip en ph-plan">Actual previous projects</span><span class="chip en ph-plan">Experienced developers</span><span class="chip en ph-plan">Industry standards</span><span class="chip en ph-plan">Function point estimation</span>
+    <div class="note warn" style="margin-bottom:0">⭐ <b>جملة مهمة:</b> <span class="en">Estimates begin as a range and become more specific as the project progresses.</span> يعني بتبدأ <b>نطاق (range)</b> وبتتحدد أكتر مع التقدّم.</div>
+  </div>
+  <div class="note ok">📖 <b>الـ Function Point</b> (الكتاب في Learning Outcome 3): طريقة لقياس <b>حجم النظام</b> نفسه (بوحدات function points من مكوناته: inputs/outputs/files…)، وبعدين نحوّله لـ <b class="en">lines of code</b> ومنها للـ <b class="en">effort</b>. السلايد بيحيل لـ «Appendix» مش موجود في ملفاتك، فركّز على المعنى العام <span class="muted">(الشرح التفصيلي من فهمي العام مش من الملفات)</span>.</div>
+
+  <h3 class="sec">⭐ الـ Industry Standard Percentages</h3>
+  <p>للـ business applications، الوقت بيتوزع على الـ SDLC بالنسب دي:</p>
+  <div class="stack" aria-hidden="true">
+    <div class="ph-plan" style="flex-basis:15%">Plan<small>15%</small></div>
+    <div class="ph-ana" style="flex-basis:20%">Analysis<small>20%</small></div>
+    <div class="ph-des" style="flex-basis:35%">Design<small>35%</small></div>
+    <div class="ph-imp" style="flex-basis:30%">Impl.<small>30%</small></div>
+  </div>
+  <div class="note ok">🧠 <b>احفظها:</b> <span class="en">15 – 20 – 35 – 30</span> (Planning – Analysis – Design – Implementation). <b>الـ Design هو الأكبر (35%)</b>، مش الـ Implementation.</div>
+
+  <div class="formula">X = Actual ÷ Phase %<small>X = طول المشروع كله · Actual = مدة المرحلة اللي خلصت فعلاً</small></div>
+  <ol class="steps ph-ana">
+    <li>حدّد المرحلة اللي <b>خلصت فعلاً</b> ومدتها (Actual).</li>
+    <li>الطول الكلي <b class="en">X = Actual ÷ نسبة المرحلة دي</b>.</li>
+    <li>باقي المراحل = <b class="en">X × نسبة كل مرحلة</b>.</li>
+    <li>اتأكد إن المجموع = X.</li>
+  </ol>
+  <div class="card">
+    <h4>📘 مثال السلايد</h4>
+    <p style="margin:0" class="en plain">Planning actual = 4 months → X = 4 ÷ 0.15 = <b>26.67</b> months → Analysis 5.33 · Design 9.33 · Implementation 8.00</p>
+    <p class="muted" style="margin:6px 0 0">السلايد كتب 26.66 (قطع الكسر)، والرياضي 26.67 — الاتنين مقبولين بس خد بالك من التقريب.</p>
+    <p class="muted" style="margin:6px 0 0">📖 الكتاب بيسمّي الوحدة <span class="en">person-months</span> والسلايد <span class="en">months</span> — الحساب واحد.</p>
+  </div>
+
+  <h3 class="sec">🧮 الـ Calculator <small>(اختار المرحلة اللي عارف مدتها)</small></h3>
+  <div class="card calc" id="estCalc">
+    <div class="seg" id="estPh" style="margin:0 0 12px">
+      <button type="button" class="en ph-plan on" data-i="0">Planning 15%</button>
+      <button type="button" class="en ph-ana" data-i="1">Analysis 20%</button>
+      <button type="button" class="en ph-des" data-i="2">Design 35%</button>
+      <button type="button" class="en ph-imp" data-i="3">Impl. 30%</button>
+    </div>
+    <div class="calc-top">
+      <label>المدة الفعلية: <input type="number" id="estVal" value="4" min="0" step="0.5"> شهر</label>
+      <div class="seg" id="estPre" style="margin:0">
+        <button type="button" data-ph="0" data-v="4">مثال السلايد</button>
+        <button type="button" data-ph="1" data-v="7">Analysis = 7</button>
+        <button type="button" data-ph="3" data-v="18">Impl. = 18</button>
+        <button type="button" data-ph="-1" data-v="">فاضي</button>
+      </div>
+    </div>
+    <div class="formula" id="estFormula" style="margin-top:0"></div>
+    <div class="stack" id="estStack"></div>
+    <div class="tscroll"><table class="tbl ctbl sm" id="estTbl"></table></div>
+    <div class="verdict" id="estMsg"></div>
+  </div>
+  <p class="hint">الأرقام المعروضة مقرّبة لرقمين عشريين، فمجموع المعروض ممكن يفرق 0.01 عن الإجمالي.</p>
+
+  <h3 class="sec">🎯 تدريب حسابي</h3>
+  <div data-deck="est"></div>
+
+  <h3 class="sec">📉 التقدير محتاج تحسين مع الوقت <small>(Margins of Error)</small></h3>
+  <p>حتى التقدير «الكويس» فيه هامش خطأ كبير في الأول، وبيضيق كل ما نتقدم. <span class="muted">(مصدره أبحاث <b class="en">Barry Boehm — COCOMO 2.0</b>)</span></p>
+  <div class="card">
+    <div class="moe">
+      <div class="moe-h"><span></span><span>Cost margin of error (%)</span><span>Schedule margin of error (%)</span></div>
+      <div class="r ph-plan"><span class="lb">Planning · System request<small>أول ما المشروع يتقدّم</small></span><span class="b"><i style="width:100%"></i><em>400</em></span><span class="b"><i style="width:100%"></i><em>60</em></span></div>
+      <div class="r ph-plan"><span class="lb">Planning · Project plan</span><span class="b"><i style="width:25%"></i><em>100</em></span><span class="b"><i style="width:41.7%"></i><em>25</em></span></div>
+      <div class="r ph-ana"><span class="lb">Analysis · System proposal</span><span class="b"><i style="width:12.5%"></i><em>50</em></span><span class="b"><i style="width:25%"></i><em>15</em></span></div>
+      <div class="r ph-des"><span class="lb">Design · System specifications<small>أدق تقدير</small></span><span class="b"><i style="width:6.25%"></i><em>25</em></span><span class="b"><i style="width:16.7%"></i><em>10</em></span></div>
+    </div>
+  </div>
+  <div class="note ok">📖 <b>الكتاب</b> بيذكر الطرفين بس: في الـ planning بدري ممكن توصل <b>400% للـ cost و 60% للـ schedule</b>، وعند الـ design بتضيق لـ <b>25% و 10%</b>. الجدول الكامل (4 صفوف) من السلايد.</div>
+  <div class="note warn">ℹ️ السلايد بيدمج الخانات (الـ Planning فيها deliverable‑ين: System request و Project plan). ترتيب الصفوف في الجدول ده من Dennis، والمضمون ثابت: <b>الهامش بيقل كل ما نمشي في الـ SDLC</b>.</div>
+  <div class="card tint ph-des"><h4>🧠 مثال توضيحي <span class="muted">(مش من الملفات)</span></h4><p style="margin:0">لو قدّرت المشروع <b>10 شهور</b> وإنت لسه عند الـ system request، هامش الـ schedule (60%) معناه إن المدة الحقيقية ممكن تيجي حوالي <b>4 لـ 16 شهر</b>. عند الـ design بيبقى حوالي 9 لـ 11 شهر.</p></div>
+  <p><b>الخلاصة:</b> <span class="en">Even projects with high-quality estimates will need refinement</span> — والـ PM لازم <b>يعدّل الوقت المقدّر طول المشروع</b>.</p>
+
+  <div data-deck="marg"></div>
+</section>
+
+<!-- =====================================================  4 · TASKS / WBS / WORK PLAN -->
+<section class="station" data-icon="🗂️" data-title="Tasks · WBS · Work plan">
+  <h2><span class="en">Tasks · WBS · Work Plan</span> 🗂️</h2>
+  <p class="lead">بعد التقدير، بنحدد <b>الشغل نفسه</b> في tasks، وبنكتبه في <b>خطة عمل</b> نتابع بيها المشروع.</p>
+
+  <div class="card" data-tabs="tk">
+    <div class="seg">
+      <button type="button" class="en ph-plan" data-tab="tk">Identifying Tasks</button>
+      <button type="button" class="en ph-ana" data-tab="wbs">WBS ⭐</button>
+      <button type="button" class="en ph-des" data-tab="wp">Work Plan</button>
+    </div>
+
+    <!-- tasks -->
+    <div class="pane" data-pane="tk">
+      <p style="margin-top:0">إزاي نعرف الـ tasks اللي المشروع محتاجها؟ <b>4 طرق</b> (السلايد):</p>
+      <div class="grid g2">
+        <div class="card tint ph-plan" style="margin:0"><h4><span class="en">Use established guidelines</span></h4><p style="margin:0">نستخدم الـ <b>methodology الموجودة</b> — هي أصلاً بتحدد tasks و deliverables لكل phase.</p></div>
+        <div class="card tint ph-ana" style="margin:0"><h4><span class="en">Use analogies</span></h4><p style="margin:0">نعمل <b>model على قوايم tasks لمشاريع سابقة</b> مشابهة.</p></div>
+        <div class="card tint ph-des" style="margin:0"><h4><span class="en">Top-down approach</span></h4><p style="margin:0">نبدأ بـ high-level tasks ونفتتها لـ tasks أصغر وأدق.</p></div>
+        <div class="card tint ph-imp" style="margin:0"><h4><span class="en">Organize into a WBS</span></h4><p style="margin:0">نرتّب كل ده في <b class="en">Work Breakdown Structure</b> (الـ tab اللي جاي).</p></div>
+      </div>
+      <div class="note ok" style="margin-bottom:0">📖 الكتاب بيركز على الطريقة الأخيرة بس (<span class="en">top-down + WBS</span>). الـ guidelines والـ analogies من السلايد.</div>
+    </div>
+
+    <!-- WBS -->
+    <div class="pane" data-pane="wbs">
+      <p style="margin:0 0 6px" class="en" dir="ltr">WBS = hierarchical decomposition of the total scope of work.</p>
+      <p style="margin-top:0">يعني تفكيك هرمي للشغل كله، وبنمشي فيه <b>top-down</b>: <span class="en">phases › sub-tasks › work packages</span> (والـ work package قطعة شغل محددة وتتسند لحد).</p>
+      <button type="button" class="btn" id="wbsAll" style="margin-bottom:8px">📂 افتح / اقفل الكل</button>
+      <h4 style="margin:12px 0 4px">📘 مثال السلايد</h4>
+      <div id="wbs1"></div>
+      <h4 style="margin:14px 0 4px">📖 مثال الكتاب <small class="muted">(Database Component)</small></h4>
+      <div id="wbs2"></div>
+      <div class="lvl noprint">
+        <span class="chip en ph-plan">1.0 = Phase</span><span class="chip en ph-ana">1.1 = Sub-task / Document</span><span class="chip en ph-des">1.1.1 = Work package</span>
+      </div>
+      <div class="note warn" style="margin-bottom:0">🔗 في مثال الكتاب <b>1.2.1</b> و <b>1.3.1</b> بيعتمدوا على <b>1.1.1</b> و <b>1.1.2</b> — دي <b class="en">predecessor dependencies</b>. لازم تتسجل في الـ work plan عشان نعرف ترتيب التنفيذ.</div>
+    </div>
+
+    <!-- Work plan -->
+    <div class="pane" data-pane="wp">
+      <p style="margin-top:0">الـ <b class="en">Work Plan</b> هو الأداة اللي الـ PM بيتابع بيها تنفيذ الـ tasks <span class="muted">(الكتاب: «operational mechanism to track task execution»)</span>.</p>
+      <div class="tscroll"><table class="tbl ctbl sm">
+        <tr><th>Field</th><th>مثال السلايد</th><th>📖 الكتاب</th></tr>
+        <tr class="ph-plan"><td>Name of the task</td><td>Perform economic feasibility</td><td>✔ Task ID + Task Name</td></tr>
+        <tr class="ph-plan"><td>Dates</td><td>Start: Jan 5, 2019<br>Completion: Jan 19, 2019</td><td>✔ Target start/finish + <b>Actual</b> start/finish</td></tr>
+        <tr class="ph-plan"><td>Person assigned</td><td>Project sponsor Mary Smith</td><td>✔ Assigned personnel</td></tr>
+        <tr class="ph-plan"><td>Deliverable(s)</td><td>Cost–benefit analysis</td><td>—</td></tr>
+        <tr class="ph-plan"><td>Completion status</td><td>Complete</td><td>✔ Open · In-Progress · Complete</td></tr>
+        <tr class="ph-plan"><td>Priority</td><td>High</td><td>—</td></tr>
+        <tr class="ph-plan"><td>Resources needed</td><td>Spreadsheet software</td><td>—</td></tr>
+        <tr class="ph-plan"><td>Estimated time</td><td>16 hours</td><td>✔ Estimated duration</td></tr>
+        <tr class="ph-plan"><td>Actual time</td><td>14.5 hours</td><td>(actual dates)</td></tr>
+        <tr class="ph-des"><td>Variance</td><td>—</td><td>✔ <b>جديد في الكتاب</b></td></tr>
+        <tr class="ph-des"><td>Predecessor dependencies</td><td>—</td><td>✔ <b>جديد في الكتاب</b></td></tr>
+      </table></div>
+      <div class="note" style="margin-top:12px">📝 الـ work plan <b>بيتحدّث</b> طول المشروع: بنقارن <b>الفعلي بالمقدّر</b> وبنعدّل التقديرات (ده ربط مع هامش الخطأ اللي فات). الكتاب كمان بيقول الـ plan بيدير <b>dependencies · durations · milestones</b>.</div>
+
+      <h4>🧮 جرّب: الفرق بين المقدّر والفعلي</h4>
+      <div class="card calc" id="wpCalc" style="margin:8px 0 0">
+        <div class="calc-top">
+          <label>Estimated: <input type="number" id="wpE" value="16" min="0" step="0.5"> hours</label>
+          <label>Actual: <input type="number" id="wpA" value="14.5" min="0" step="0.5"> hours</label>
+        </div>
+        <div class="res-row">
+          <div class="res" id="wpR1"><small>Variance (Actual − Estimated)</small><b></b></div>
+          <div class="res" id="wpR2"><small>% من التقدير</small><b></b></div>
+        </div>
+        <div class="verdict" id="wpMsg"></div>
+      </div>
+      <p class="hint">القيم الافتراضية = مثال السلايد (16 مقدّر، 14.5 فعلي). تعريف الـ variance كـ «الفعلي − المقدّر» فهم عام، الكتاب بيذكرها كعمود بس.</p>
+    </div>
+  </div>
+
+  <h3 class="sec">🎯 لعبة 1: إزاي حددنا الـ tasks؟</h3>
+  <div data-deck="tasks"></div>
+
+  <h3 class="sec">🎯 لعبة 2: الـ WBS</h3>
+  <div data-deck="wbs"></div>
+
+  <h3 class="sec">🎯 لعبة 3: الخانة دي في الـ Work Plan اسمها إيه؟</h3>
+  <div data-deck="wp"></div>
+</section>
+
+<!-- =====================================================  5 · STAFFING -->
+<section class="station" data-icon="👥" data-title="الـ Staffing">
+  <h2>الـ <span class="en">Staffing</span> 👥</h2>
+  <p class="lead">مين هيشتغل على المشروع؟ <b>5 اعتبارات</b> (السلايد):</p>
+
+  <div class="grid g2">
+    <div class="card tint ph-plan" style="margin:0"><h4>① <span class="en">Match skills to project needs</span></h4><p style="margin:0">وزّع الناس على اللي يناسب مهاراتهم قدر الإمكان.</p></div>
+    <div class="card tint ph-ana" style="margin:0"><h4>② <span class="en">Technical + interpersonal skills</span></h4><p style="margin:0">كل شغل الـ IS بيتعمل في <b>teams</b> — المهارة التقنية لوحدها <b>مش كفاية</b>، لازم يعرف يشتغل مع الناس.</p></div>
+    <div class="card tint ph-des" style="margin:0"><h4>③ <span class="en">Training &amp; outside sources</span></h4><p style="margin:0">لو المهارة مش موجودة: تدريب أو مصادر خارجية (<b>consultants</b>، <b>vendor support</b>).</p></div>
+    <div class="card tint ph-imp" style="margin:0"><h4>④ <span class="en">Staffing levels change</span></h4><p style="margin:0">عدد الناس <b>بيتغير</b> على مدار عمر المشروع.</p></div>
+  </div>
+  <div class="card tint t-bad" style="margin-top:14px"><h4>⑤ <span class="en">Adding staff adds overhead</span></h4><p style="margin:0">زيادة الناس <b>بتضيف overhead</b> وده <b>مش دايماً</b> بيزوّد الإنتاجية.</p></div>
+
+  <h3 class="sec">📖 Brooks’ Law ⭐</h3>
+  <div class="card">
+    <p class="en plain" style="margin:0;font-size:18px;direction:ltr;text-align:left">“Adding personnel to a late project often makes it later.”</p>
+    <p style="margin:8px 0 0"><b>السبب (الكتاب):</b> الـ <b>communication</b> والـ <b>training overhead</b> لتشغيل الناس الجدد بيستهلك وقت كبير من اللي شغالين أصلاً. <span class="muted">السلايد بيقول نفس الفكرة من غير ما يسمّيها.</span></p>
+  </div>
+
+  <h3 class="sec">🧪 فهم الفكرة: قنوات التواصل بتزيد أسرع من عدد الناس</h3>
+  <div class="card calc" id="brooks">
+    <div class="grid g2" style="align-items:center">
+      <svg id="brSvg" class="br-svg" viewBox="0 0 220 220" role="img" aria-label="communication network"></svg>
+      <div>
+        <div class="calc-top"><label>حجم الفريق <input type="range" id="brRange" min="2" max="16" value="4"></label></div>
+        <div class="res-row">
+          <div class="res"><small>Team size</small><b id="brN"></b></div>
+          <div class="res"><small>Communication channels</small><b id="brC"></b></div>
+        </div>
+        <div class="formula" style="font-size:17px">channels = n(n − 1) / 2</div>
+        <div class="note" id="brMsg" style="margin-bottom:0"></div>
+      </div>
+    </div>
+  </div>
+  <p class="hint">المعادلة والرسم توضيح إضافي مني للفهم (مش في السلايدز ولا الكتاب) — اللي بيتسأل عنه هو الفكرة: <b>ناس أكتر ← overhead أكتر</b>.</p>
+
+  <h3 class="sec">🎯 تدريب</h3>
+  <div data-deck="staff"></div>
+</section>
+
+<!-- =====================================================  6 · MOTIVATION & GROUP -->
+<section class="station" data-icon="💪" data-title="Motivation & Group">
+  <h2><span class="en">Motivation</span> &amp; <span class="en">Group Performance</span> 💪</h2>
+  <p class="lead">إزاي نخلي الفريق يشتغل كويس؟ المكافآت الداخلية أهم من الفلوس.</p>
+
+  <div class="grid g2">
+    <div class="card tint t-ok" style="margin:0">
+      <h4>✅ <span class="en">Intrinsic rewards</span> <small class="muted">(استخدمها)</small></h4>
+      <span class="chip en t-ok">Recognition</span><span class="chip en t-ok">Achievement</span><span class="chip en t-ok">The work itself</span><span class="chip en t-ok">Responsibility</span><span class="chip en t-ok">Advancement</span><span class="chip en t-ok">Chance to learn new skills</span>
+    </div>
+    <div class="card tint t-warn" style="margin:0">
+      <h4>⚠️ <span class="en">Monetary rewards</span> <small class="muted">(بحذر)</small></h4>
+      <p style="margin:0">«Use monetary rewards cautiously».</p>
+      <p style="margin:8px 0 0">📖 <b>الكتاب:</b> الـ <span class="en">extrinsic motivators</span> (زي <b>unexpected cash bonuses</b>) بتدّي <b>طفرة أداء قصيرة العمر</b> بس. الفرق الناجحة بتتحرك أساساً بالـ <span class="en">intrinsic</span>: peer recognition، intellectual achievement، personal responsibility، professional advancement، والفخر بإتقان تحديات تقنية حديثة.</p>
+    </div>
+  </div>
+
+  <h3 class="sec">🚫 الـ De-motivators <small>(السلايد — الكتاب مفيهوش القايمة دي)</small></h3>
+  <div class="card tint t-bad">
+    <p style="margin-top:0"><b>متعملش:</b></p>
+    <div class="grid g2 sw" style="gap:0">
+      <ul><li><span class="en">Assign unrealistic deadlines</span></li><li><span class="en">Ignore good efforts</span></li><li><span class="en">Accept a low-quality product</span></li></ul>
+      <ul><li><span class="en">Give everyone on the project the same raise</span></li><li><span class="en">Make an important decision without the team’s input</span></li><li><span class="en">Maintain poor working conditions</span></li></ul>
+    </div>
+  </div>
+
+  <h3 class="sec">🎯 لعبة: Motivator ولا De-motivator؟</h3>
+  <div data-deck="mot"></div>
+
+  <h3 class="sec">🤝 تأكيد أداء المجموعة <small>(Assuring Group Performance — السلايد)</small></h3>
+  <div class="card">
+    <ol class="steps ph-plan" style="margin:0">
+      <li>تأكد إن الفريق <b>فاهم المشروع وأهدافه</b>.</li>
+      <li>حدد <b>إجراءات التشغيل</b> — <b class="en">Project Charter</b>: <span class="chip en ph-ana">Availability</span><span class="chip en ph-ana">Status reporting</span><span class="chip en ph-ana">Meetings</span></li>
+      <li>خلّي أعضاء الفريق <b>يتعرفوا على بعض</b>.</li>
+      <li>حدد <b>طرق للتعامل مع المشاكل</b> (<span class="en">Establish methods for dealing with problems</span>).</li>
+    </ol>
+  </div>
+  <div class="note ok">📖 الكتاب في الفصل ده مش بيذكر الـ <span class="en">project charter</span> بالاسم (هو موجود كاختيار غلط في سؤال WBS) — الموضوع من السلايد، فاحفظه من هنا.</div>
+
+  <details class="card" style="padding:14px 18px">
+    <summary style="cursor:pointer;font-weight:700">🧩 أهداف في الـ Objectives بس مفيش لها سلايد ولا فقرة: CASE tools · Standards · Risk <small class="muted">(فهم عام — اضغط)</small></summary>
+    <ul style="margin:10px 0 0;line-height:1.9">
+      <li><b class="en">CASE tools</b> (تنسيق المشروع): أدوات بتخزّن الـ diagrams والـ documents في مكان مركزي (<span class="en">repository</span>) فكل الفريق شغّال على نفس المعلومة.</li>
+      <li><b class="en">Standards</b>: قواعد متفق عليها (تسمية، documentation، إجراءات) بتخلي الشغل متسق والتواصل أسهل والناس الجداد يندمجوا أسرع.</li>
+      <li><b class="en">Risk management</b>: نحدد المخاطر ونقيّم احتمالها وتأثيرها ونجهز رد فعل (نفس منطق الـ risk في Lecture 2).</li>
+    </ul>
+  </details>
+
+  <div data-deck="grp"></div>
+</section>
+
+<!-- =====================================================  7 · SCOPE / TIMEBOX / MISSED -->
+<section class="station" data-icon="🛡️" data-title="Scope · Timeboxing">
+  <h2><span class="en">Scope Creep · Timeboxing</span> 🛡️</h2>
+
+  <h3 class="sec" style="margin-top:8px">① Scope Creep</h3>
+  <div class="card tint t-bad">
+    <p style="margin:0"><b class="en">Scope creep</b> = توسّع <b>غير مُتحكَّم فيه</b> في الـ requirements <b>من غير تعديل مقابل</b> في الميزانية أو الوقت أو الموارد.</p>
+    <p style="margin:8px 0 0">📖 الكتاب: «<b class="en">the primary killer of IT projects</b>».</p>
+  </div>
+
+  <h3 class="sec">إزاي نتحكم فيه؟</h3>
+  <div class="grid g2">
+    <div class="card tint ph-plan" style="margin:0"><h4>① <span class="en">JAD &amp; prototyping</span></h4><p style="margin:0">بيقلّلوا ضغط الإضافات لأن المتطلبات بتتفهم صح من الأول. <span class="muted">(السلايد)</span></p></div>
+    <div class="card tint ph-ana" style="margin:0"><h4>② <span class="en">Formal change approval process</span></h4><p style="margin:0">أي تعديل يعدّي على عملية رسمية. <span class="muted">(الاتنين)</span></p></div>
+    <div class="card tint ph-des" style="margin:0"><h4>③ <span class="en">Defer additional requirements</span></h4><p style="margin:0">نأجّل الإضافات كـ <b>future system enhancements</b>. <span class="muted">(الاتنين)</span></p></div>
+    <div class="card tint t-bad" style="margin:0"><h4>✖ مش بنعمل</h4><p style="margin:0">ننفّذ اقتراحات المستخدمين العفوية «في الطريق» من غير ما تعدّي على العملية.</p></div>
+  </div>
+
+  <div class="card">
+    <h4>📖 خطوات الـ Change Approval (الكتاب)</h4>
+    <div class="flow">
+      <div class="ph-plan">📝 Change request<small>مكتوب (in writing)</small></div><div class="ar">⬅</div>
+      <div class="ph-ana">🧮 Impact assessment<small>cost + schedule</small></div><div class="ar">⬅</div>
+      <div class="ph-des">🏛️ Steering committee<small>بتراجع وتقرر</small></div><div class="ar">⬅</div>
+      <div class="ph-imp">✅ موافق ← نعدّل الخطة<br>📂 مش موافق ← يتسجّل لـ future release</div>
+    </div>
+  </div>
+  <div data-deck="creep"></div>
+
+  <h3 class="sec">② Timeboxing ⏱️</h3>
+  <p><b class="en">Timeboxing</b> بنستخدمه لما التقدير يطلّع إن المشروع <b>محتاج وقت أكتر من المتاح</b>. نثبّت التاريخ ونقلّل الـ scope:</p>
+  <div class="card">
+    <div class="flow">
+      <div class="ph-plan">1️⃣ deadline <b>ضيق بس واقعي</b><small>ثابت وما بيتحركش</small></div><div class="ar">⬅</div>
+      <div class="ph-ana">2️⃣ نحدد الـ <b>core / essential</b> requirements</div><div class="ar">⬅</div>
+      <div class="ph-des">3️⃣ نركّز عليهم بس + <b>جودة عالية</b></div><div class="ar">⬅</div>
+      <div class="ph-imp">4️⃣ الباقي <b>بعدين</b> ونكرر</div>
+    </div>
+    <p class="muted" style="margin:6px 0 0">📖 الكتاب: «fixed, <b>immovable</b> deadline (e.g., 3 months)» والـ secondary features بتتأجّل لـ <b>subsequent timeboxes</b>.</p>
+  </div>
+
+  <h3 class="sec">🎮 جرّب: الـ timebox = 12 أسبوع</h3>
+  <p>اختار الـ features اللي هتدخل. <b>التاريخ ثابت</b> — مفيش تمديد!</p>
+  <div class="card" id="tbx">
+    <div class="checks">
+      <label class="chk"><input type="checkbox" data-w="2" data-core="1"><span><b>Login &amp; user accounts</b> — 2 أسابيع<br><small class="muted">من غيرها محدش يدخل النظام</small></span></label>
+      <label class="chk"><input type="checkbox" data-w="4" data-core="1"><span><b>Order entry</b> — 4 أسابيع<br><small class="muted">هي أساس شغل النظام</small></span></label>
+      <label class="chk"><input type="checkbox" data-w="3" data-core="1"><span><b>Payment processing</b> — 3 أسابيع<br><small class="muted">لازمة عشان الإيراد</small></span></label>
+      <label class="chk"><input type="checkbox" data-w="2" data-core="1"><span><b>Basic reports</b> — 2 أسابيع<br><small class="muted">تقارير أساسية لازمة للتشغيل</small></span></label>
+      <label class="chk"><input type="checkbox" data-w="3" data-core="0"><span><b>Fancy executive dashboard</b> — 3 أسابيع<br><small class="muted">شكل حلو بس مش ضروري للتشغيل</small></span></label>
+      <label class="chk"><input type="checkbox" data-w="5" data-core="0"><span><b>Mobile app</b> — 5 أسابيع<br><small class="muted">إضافة نقدر نعملها بعدين</small></span></label>
+    </div>
+    <div class="metric"><small><span>الـ timebox المستخدم</span><b id="tbxTxt" dir="ltr"></b></small><div class="meter"><i id="tbxBar"></i></div></div>
+    <div class="note" id="tbxMsg"></div>
+  </div>
+
+  <h3 class="sec">③ لما التاريخ يفوتك <small>(Target date missed)</small></h3>
+  <div class="card tint t-warn">
+    <ul style="margin:0;padding-inline-start:20px;line-height:1.95">
+      <li><b>متفترضش إنك هتلحق</b> <span class="en">(Don’t assume you can catch up)</span>.</li>
+      <li>الحالة <b>الوحيدة</b> اللي تقدر تعوّض فيها وقت: لو الباقي من المشروع <b>أبسط من الجزء اللي اتأخرت فيه</b> <b>و</b> <b>أبسط مما كنت متوقع</b> وقت التقدير الأصلي.</li>
+      <li>قيّم <b>تعقيد الباقي</b> وحدد التعديل الصح في الـ schedule.</li>
+      <li><b>إضافة ناس مش دايماً الحل</b> (رجوع لـ Brooks’ Law).</li>
+    </ul>
+  </div>
+  <p class="hint">📖 الكتاب بيذكر الفكرة دي في الـ assessment بس: «re-evaluate complexity of remaining tasks and adjust schedule/scope».</p>
+  <div class="card" id="catchUp">
+    <p style="margin-top:0"><b>🧪 هل نقدر نعوّض الوقت؟</b> علّم اللي ينطبق:</p>
+    <div class="checks">
+      <label class="chk"><input type="checkbox"><span>الباقي من المشروع <b>أبسط</b> من الجزء اللي اتأخرنا فيه</span></label>
+      <label class="chk"><input type="checkbox"><span>الباقي <b>أبسط</b> مما كنا متوقعينه وقت التقدير الأصلي</span></label>
+    </div>
+    <div class="note" id="catchMsg" style="margin-bottom:0"></div>
+  </div>
+
+  <div data-deck="late"></div>
+</section>
+
+<!-- =====================================================  8 · TRAPS -->
+<section class="station" data-icon="⚠️" data-title="فخاخ الامتحان">
+  <h2>فخاخ الامتحان ⚠️</h2>
+  <p class="lead">الجمل دي بالظبط هي اللي بتتعمل منها <span class="en">True/False</span>. قرر: صح ولا غلط؟</p>
+  <div data-deck="traps"></div>
+</section>
+
+<!-- =====================================================  9 · FLASHCARDS -->
+<section class="station" data-icon="🧠" data-title="Flashcards">
+  <h2>Flashcards 🧠</h2>
+  <p class="lead">فكّر في الإجابة الأول، وبعدين اقلب الكارت. علّم اللي عرفته ✅ واللي لسه 🔁 — وراجع الأخير بس.</p>
+  <div data-flash="main"></div>
+  <p class="hint" style="text-align:center;margin-top:10px">⌨️ مسطرة (Space) تقلب · الأسهم تنقل بين الكروت</p>
+</section>
+
+<!-- =====================================================  10 · QUIZ -->
+<section class="station" data-icon="📝" data-title="الكويز النهائي">
+  <h2>الكويز النهائي 📝</h2>
+  <p class="lead">10 أسئلة <span class="en">MCQ</span> (فيهم حسابات) بتصحيح فوري، وبعدها 3 أسئلة <span class="en">Essay</span> (واحد منهم case).</p>
+
+  <h3 class="sec">① MCQ</h3>
+  <div data-deck="mcq"></div>
+
+  <h3 class="sec">② Essay</h3>
+  <div class="card essay" data-essay="e1">
+    <h3>سؤال 1 — حساب 🔢</h3>
+    <p dir="auto" class="en plain" style="font-weight:600">A company has just finished the Analysis phase of a business-application project, and it took 10 months. Using the industry-standard percentages, estimate the total length of the project and the length of every phase. Show your work.</p>
+    <textarea placeholder="اكتب إجابتك هنا (بتتحفظ في المتصفح بس)…"></textarea>
+    <button type="button" class="btn" data-show>📖 اعرض الإجابة النموذجية</button>
+    <div class="model" hidden><div class="mdl"></div><div class="pts"></div></div>
+  </div>
+  <div class="card essay" data-essay="e2">
+    <h3>سؤال 2</h3>
+    <p dir="auto" class="en plain" style="font-weight:600">Explain the project manager’s balancing act among project size, cost and time. Then define scope creep and explain how a project manager can control it.</p>
+    <textarea placeholder="اكتب إجابتك هنا…"></textarea>
+    <button type="button" class="btn" data-show>📖 اعرض الإجابة النموذجية</button>
+    <div class="model" hidden><div class="mdl"></div><div class="pts"></div></div>
+  </div>
+  <div class="card essay" data-essay="e3">
+    <h3>سؤال 3 — Case 🧩</h3>
+    <p dir="auto" class="en plain" style="font-weight:600">A hospital information-system project finished its Planning phase in 5 months. (a) Using the industry-standard percentages, calculate the total project duration and the duration of each phase. (b) During the Design phase the sponsor asks for four new features, the go-live date cannot move, and the team is already one month behind. A manager suggests adding eight new developers immediately. Advise the project manager.</p>
+    <textarea placeholder="اكتب إجابتك هنا…"></textarea>
+    <button type="button" class="btn" data-show>📖 اعرض الإجابة النموذجية</button>
+    <div class="model" hidden><div class="mdl"></div><div class="pts"></div></div>
+  </div>
+</section>
+
+<!-- =====================================================  11 · SUMMARY -->
+<section class="station summary" data-icon="⚡" data-title="ملخص المراجعة">
+  <h2>ملخص المراجعة ⚡ <span class="en plain" style="font-size:18px">Lecture 4</span></h2>
+  <p class="lead noprint">ده اللي تراجعه الليلة اللي قبل الامتحان. <button type="button" class="btn" onclick="window.print()">🖨️ اطبع / احفظ PDF</button></p>
+
+  <h3 class="sec">⚖️ الـ Balancing Act</h3>
+  <p><span class="en"><b>Size</b> (scope &amp; functionality) · <b>Cost</b> (budget) · <b>Time</b> (schedule)</span> — تعديل واحد يضغط على الباقيين. وقت أقل ← size أقل أو cost أعلى · features أكتر ← time أو cost أعلى.</p>
+
+  <h3 class="sec">🔢 التقدير</h3>
+  <table class="tbl">
+    <tr><th>Phase</th><th>Planning</th><th>Analysis</th><th>Design</th><th>Implementation</th></tr>
+    <tr><td>%</td><td>15</td><td>20</td><td>35</td><td>30</td></tr>
+    <tr><td>مثال (Planning = 4)</td><td>4</td><td>5.33</td><td>9.33</td><td>8</td></tr>
+  </table>
+  <div class="grid g2">
+    <div class="card"><h4>المعادلة</h4><p style="margin:0" class="en plain">X = Actual ÷ Phase %. مثال: 4 ÷ 0.15 = 26.67 months. باقي المراحل = X × %.</p></div>
+    <div class="card"><h4>مصادر الـ estimates</h4><p style="margin:0" class="en plain">Methodology in use · previous projects · experienced developers · industry standards · function points</p></div>
+  </div>
+  <table class="tbl">
+    <tr><th>Deliverable</th><th>Cost error</th><th>Schedule error</th></tr>
+    <tr><td>System request</td><td>400%</td><td>60%</td></tr>
+    <tr><td>Project plan</td><td>100%</td><td>25%</td></tr>
+    <tr><td>System proposal</td><td>50%</td><td>15%</td></tr>
+    <tr><td>System specifications</td><td>25%</td><td>10%</td></tr>
+  </table>
+
+  <h3 class="sec">🗂️ Tasks · WBS · Work plan</h3>
+  <div class="grid g2">
+    <div class="card"><h4>تحديد الـ tasks</h4><p style="margin:0" class="en plain">Established guidelines (methodology) · analogies (previous projects) · top-down · organize into a WBS</p></div>
+    <div class="card"><h4>WBS</h4><p style="margin:0" class="en plain">Hierarchical, top-down decomposition: phase → sub-tasks → work packages (1.0 → 1.1 → 1.1.1). Dependencies are recorded (1.2.1 depends on 1.1.1, 1.1.2).</p></div>
+  </div>
+  <p><b>Work plan entry (السلايد):</b> <span class="en">task name · start/completion dates · person assigned · deliverable(s) · status · priority · resources · estimated time · actual time</span><br><b>📖 الكتاب:</b> <span class="en">Task ID · name · assigned personnel · estimated duration · target &amp; actual start/finish · variance · predecessor dependencies · status (Open / In-Progress / Complete)</span></p>
+
+  <h3 class="sec">👥 Staffing &amp; 💪 Motivation</h3>
+  <div class="grid g2">
+    <div class="card"><h4>Staffing</h4><p style="margin:0" class="en plain">Match skills · technical + interpersonal · training / consultants / vendor support · staffing levels change · adding staff adds overhead (Brooks’ Law: adding people to a late project makes it later).</p></div>
+    <div class="card"><h4>Motivation</h4><p style="margin:0" class="en plain">Intrinsic: recognition, achievement, the work itself, responsibility, advancement, learning new skills. Monetary: cautiously (short-lived). Group: charter (availability, status reporting, meetings), team knows goals and each other, methods for problems.</p></div>
+  </div>
+  <div class="note bad">🚫 <b>De-motivators:</b> <span class="en">unrealistic deadlines · ignoring good efforts · accepting low quality · same raise for everyone · decisions without team input · poor working conditions</span></div>
+
+  <h3 class="sec">🛡️ Scope · Timeboxing · Missed dates</h3>
+  <div class="grid g2">
+    <div class="card"><h4>Scope creep</h4><p style="margin:0" class="en plain">Uncontrolled growth of requirements with no matching change in budget/time/resources. Control: JAD + prototyping · formal change approval (written → impact on cost/schedule → steering committee) · defer to future enhancements/releases.</p></div>
+    <div class="card"><h4>Timeboxing</h4><p style="margin:0" class="en plain">Fixed, tight but realistic deadline · identify core functions · focus on them with high quality · add other functions later · repeat for enhancements.</p></div>
+  </div>
+  <div class="note">⏰ <b>لو التاريخ فات:</b> متفترضش إنك هتلحق · تقدر تعوّض بس لو الباقي أبسط من اللي فاتك ومن التقدير الأصلي · قيّم تعقيد الباقي وعدّل الـ schedule · إضافة ناس مش دايماً الحل.</div>
+
+  <h3 class="sec">📖 الكتاب ضد السلايدز</h3>
+  <table class="tbl">
+    <tr><th>الموضوع</th><th>السلايدز</th><th>📖 الكتاب</th></tr>
+    <tr><td>الوحدة</td><td><span class="en plain">months</span></td><td><span class="en plain">person-months</span> (نفس الحساب)</td></tr>
+    <tr><td>هامش الخطأ</td><td>جدول 4 صفوف:<br><span class="en plain" style="white-space:nowrap">400/100/50/25</span><br><span class="en plain" style="white-space:nowrap">60/25/15/10</span></td><td>الطرفين بس:<br><span class="en plain" style="white-space:nowrap">400% / 60%</span> ثم <span class="en plain" style="white-space:nowrap">25% / 10%</span><br>(<span class="en plain">Boehm, COCOMO</span>)</td></tr>
+    <tr><td>الـ trade-off</td><td>صورة + جملة</td><td>تعريف <span class="en plain">Size / Cost / Time</span> + الاتجاهين بالتفصيل (<span class="en plain">triple constraints</span>)</td></tr>
+    <tr><td>مصادر الـ estimates</td><td>5 مصادر</td><td><span class="en plain">Function Point</span> في الـ outcomes فقط</td></tr>
+    <tr><td>تحديد الـ tasks</td><td>4 طرق: <span class="en plain">guidelines, analogies, top-down, WBS</span></td><td><span class="en plain">top-down + WBS</span> فقط</td></tr>
+    <tr><td>مثال الـ WBS</td><td><span class="en plain">Grade programming assignments</span></td><td><span class="en plain">Database Component</span> مع dependencies</td></tr>
+    <tr><td>الـ work plan</td><td>مثال entry بـ 10 خانات</td><td>قايمة حقول فيها <span class="en plain">Task ID · variance · predecessor dependencies · status</span></td></tr>
+    <tr><td>Brooks’ Law</td><td><span class="en plain">“adding staff adds overhead”</span></td><td>مسمّاة بالاسم + السبب</td></tr>
+    <tr><td>الـ motivation</td><td><span class="en plain">intrinsic (6) + de-motivators (6)</span></td><td><span class="en plain">intrinsic vs extrinsic</span> + «unexpected cash bonuses» = قصيرة العمر</td></tr>
+    <tr><td>الـ charter</td><td>موجود</td><td>غير مذكور في الفصل</td></tr>
+    <tr><td>Scope creep</td><td><span class="en plain">JAD + prototyping + formal approval + defer</span></td><td>طلب مكتوب، بعدين تقييم التأثير، بعدين <span class="en plain">steering committee</span>، وغير الموافق عليه يتسجّل · <span class="en plain">“primary killer of IT projects”</span></td></tr>
+    <tr><td>Timeboxing</td><td>5 نقاط</td><td><span class="en plain">“immovable deadline (e.g., 3 months)”</span> + <span class="en plain">subsequent timeboxes</span></td></tr>
+    <tr><td>التاريخ اللي فات</td><td>القاعدة بتفصيلها</td><td>في الـ assessment فقط</td></tr>
+    <tr><td><span class="en plain">CASE · Standards · Risk</span></td><td>في الـ objectives بدون سلايد</td><td>غير مذكورة في الفصل</td></tr>
+  </table>
+
+  <h3 class="sec">⚠️ الفخاخ</h3>
+  <div class="note bad">
+    ❌ الـ Implementation أكبر مرحلة (الـ Design 35%) &nbsp;·&nbsp; ❌ X = Actual × % (الصح ÷) &nbsp;·&nbsp; ❌ التقدير أدق ما يكون في الأول (العكس) &nbsp;·&nbsp; ❌ زوّد ناس عشان تلحق (Brooks) &nbsp;·&nbsp; ❌ نفس الزيادة لكل الفريق ممكن تحفّز (de-motivator) &nbsp;·&nbsp; ❌ Timeboxing يعني نأجّل التاريخ (التاريخ ثابت) &nbsp;·&nbsp; ❌ نلبّي طلبات المستخدمين العفوية (formal approval) &nbsp;·&nbsp; ❌ مهارات تقنية بس تكفي (لازم interpersonal)
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+window.DATA = {
+  decks: {
+    /* ---------- triangle ---------- */
+    tri: {
+      cols: 1, shuffleOpts: true,
+      cards: [
+        { q: 'The sponsor demands that the project be finished earlier (Time ↓). Which response is consistent with the project management triangle?', opts: ['Reduce the functionality (Size) or increase the resources (Cost)', 'Keep the same size and the same cost — the schedule will adjust itself', 'Increase the size and reduce the cost', 'Nothing needs to change'], a: 0, why: 'تقصير الـ Time بيفرض: ↓Size (features أقل) أو ↑Cost (consultants، modules جاهزة).' },
+        { q: 'The sponsor asks for many additional features (Size ↑). The project manager must negotiate:', opts: ['A longer schedule (Time ↑) and/or a bigger budget (Cost ↑)', 'A shorter schedule', 'Lower cost with fewer staff', 'A smaller scope'], a: 0, why: 'زيادة الـ Size بتفرض زيادة في الـ Time أو الـ Cost (أو الاتنين).' },
+        { q: 'The three variables of the project manager’s “balancing act” are:', opts: ['Size, cost and time', 'Risk, quality and people', 'Planning, design and implementation', 'Scope, risk and technology'], a: 0, why: '<b>Size · Cost · Time</b> (triple constraints).' },
+        { q: 'Hiring consultants and buying ready-made commercial modules in order to finish sooner mainly affects which element?', opts: ['Project Cost (it goes up)', 'Project Size (it goes down)', 'Project Time (it goes up)', 'None of them'], a: 0, why: 'ده الـ ↑Cost اللي بيعوّض ↓Time (الكتاب).' },
+        { q: 'In the project management triangle, modifying one element:', opts: ['Puts pressure on (requires adjusting) the other two', 'Has no effect on the others', 'Only affects the schedule', 'Only matters at the end of the project'], a: 0, why: '«Modifying one element requires adjusting the others».' },
+        { q: 'In the book, “Project Size” refers to:', opts: ['Scope and functionality', 'Budget and capital', 'Schedule and milestones', 'The number of users'], a: 0, why: 'Size = scope &amp; functionality · Cost = budget &amp; capital · Time = schedule &amp; milestones.' }
+      ]
+    },
+
+    /* ---------- estimation calc ---------- */
+    est: {
+      cols: 1, shuffleOpts: true,
+      cards: [
+        { q: 'Planning actually took 9 months. Using the industry-standard percentages (Planning = 15%), the whole project is estimated at:', opts: ['60 months', '135 months', '30 months', '1.35 months'], a: 0, why: 'X = 9 ÷ 0.15 = <b>60</b>. (135 = ضربت بدل ما تقسم · 30 = استخدمت 30% · 1.35 = 9 × 0.15)' },
+        { q: 'The Design phase took 21 months (Design = 35%). The estimated total project length is:', opts: ['60 months', '70 months', '7.35 months', '105 months'], a: 0, why: 'X = 21 ÷ 0.35 = <b>60</b>. (70 = 30% · 105 = 20% · 7.35 = ضرب)' },
+        { q: 'The total estimated project length is 80 months. How long is the Implementation phase (30%)?', opts: ['24 months', '28 months', '16 months', '12 months'], a: 0, why: '80 × 0.30 = <b>24</b>. (28 = 35% · 16 = 20% · 12 = 15%)' },
+        { q: 'Implementation took 15 months (30%). What is the estimated length of the Planning phase (15%)?', opts: ['7.5 months', '10 months', '17.5 months', '5 months'], a: 0, why: 'X = 15 ÷ 0.30 = 50 ← Planning = 50 × 0.15 = <b>7.5</b>.' },
+        { q: 'Which phase takes the biggest share of effort in a typical business application project?', opts: ['Design (35%)', 'Implementation (30%)', 'Analysis (20%)', 'Planning (15%)'], a: 0, why: 'الـ <b>Design 35%</b> هو الأكبر.' },
+        { q: 'The industry-standard percentages, in order (Planning – Analysis – Design – Implementation), are:', opts: ['15 – 20 – 35 – 30', '20 – 15 – 30 – 35', '15 – 30 – 35 – 20', '10 – 20 – 40 – 30'], a: 0, why: '<b>15 – 20 – 35 – 30</b> (مجموعها 100).' },
+        { q: 'Which of the following is NOT one of the listed sources of estimates?', opts: ['The sponsor’s wish for the deadline', 'Actual previous projects', 'Experienced developers', 'Industry standards'], a: 0, why: 'المصادر: methodology in use · previous projects · experienced developers · industry standards · function points.' }
+      ]
+    },
+
+    /* ---------- margins ---------- */
+    marg: {
+      cols: 1, shuffleOpts: true,
+      cards: [
+        { q: 'According to the margin-of-error table, which estimate is the LEAST accurate?', opts: ['The estimate at the start of planning (system request): cost up to 400%, schedule up to 60%', 'The estimate at the design phase (system specifications)', 'The estimate at the analysis phase (system proposal)', 'All estimates have the same accuracy'], a: 0, why: 'أول المشروع هو الأقل دقة: 400% / 60%.' },
+        { q: 'At the design phase, the typical margin of error for a well-prepared estimate is about:', opts: ['25% for cost and 10% for schedule', '50% for cost and 15% for schedule', '100% for cost and 25% for schedule', '400% for cost and 60% for schedule'], a: 0, why: 'عند الـ design (system specifications): <b>25% و 10%</b>.' },
+        { q: 'Why do project managers keep adjusting the estimated time throughout the project?', opts: ['Because even high-quality estimates need refinement as more is learned', 'Because the first estimate is always correct', 'Because estimation is forbidden after planning', 'Because the sponsor must be replaced'], a: 0, why: '«Even projects with high-quality estimates will need refinement».' },
+        { q: 'Estimates begin as a ______ and become more specific as the project progresses.', opts: ['range', 'single exact figure', 'contract', 'user story'], a: 0, why: 'بتبدأ <b>range</b> (نطاق).' },
+        { q: 'The research behind the margin-of-error figures (COCOMO) is credited to:', opts: ['Barry Boehm', 'Fred Brooks', 'Winston Royce', 'Kent Beck'], a: 0, why: '<b>Barry Boehm</b> (COCOMO 2.0). Brooks صاحب Brooks’ Law.' }
+      ]
+    },
+
+    /* ---------- identifying tasks ---------- */
+    tasks: {
+      cols: 1,
+      opts: [
+        { t: 'Established guidelines', cls: 'ph-plan' },
+        { t: 'Analogies', cls: 'ph-ana' },
+        { t: 'Top-down approach', cls: 'ph-des' }
+      ],
+      cards: [
+        { q: 'The team follows the task list and deliverables defined by its existing methodology.', a: 0, why: '<b>Established guidelines</b> — الـ methodology بتحدد tasks و deliverables.' },
+        { q: 'The PM copies and adapts the task list of a similar project completed last year.', a: 1, why: '<b>Analogies</b> — model previous projects’ task lists.' },
+        { q: 'Starting from “Develop the database component” and splitting it into design, build and test, then into smaller tasks.', a: 2, why: '<b>Top-down</b> — من high-level لـ detailed.' },
+        { q: 'Reusing task lists from earlier projects as a model.', a: 1, why: '<b>Analogies</b>.' },
+        { q: 'Breaking high-level tasks into smaller, more detailed tasks until each can be assigned.', a: 2, why: '<b>Top-down</b>.' },
+        { q: 'Using the steps and deliverables of a formal methodology as a checklist of tasks.', a: 0, why: '<b>Established guidelines</b>.' }
+      ]
+    },
+
+    /* ---------- WBS ---------- */
+    wbs: {
+      cols: 1, shuffleOpts: true,
+      cards: [
+        { q: 'In a WBS, the lowest-level items (such as 1.1.1) are the:', opts: ['Work packages — discrete, assignable pieces of work', 'Phases of the SDLC', 'Project sponsors', 'Milestones only'], a: 0, why: 'الكتاب: sub-tasks بتتقسم لـ <b>discrete, assignable work packages</b>.' },
+        { q: 'In the book’s example, task 1.2.1 “Rejects-Handling Engine Architecture” is dependent on 1.1.1 and 1.1.2. This means:', opts: ['It relies on the output of those tasks, so they come first (predecessor dependency)', 'It is the same task as 1.1.1', 'It has no deadline', 'It belongs to another project'], a: 0, why: 'ده <b>predecessor dependency</b> — بيتسجل في الـ work plan.' },
+        { q: 'Which direction of thinking does a WBS follow?', opts: ['Top-down: from high-level tasks to detailed ones', 'Bottom-up only', 'Random', 'From implementation back to planning'], a: 0, why: '<b>Top-down</b>.' },
+        { q: 'In the slide example “Grade programming assignments”, which is a top-level (level 1) task?', opts: ['Create grading plan', 'Develop grading rubric', 'Download submitted projects', 'Check performance'], a: 0, why: 'المستوى 1: Create grading plan · Prepare programming projects · For all projects… والباقي تحتها.' },
+        { q: 'The numbering 1.0 → 1.1 → 1.1.1 in the book’s sample WBS shows:', opts: ['The levels of decomposition', 'The order of importance', 'The cost of each task', 'The priority'], a: 0, why: 'الترقيم بيوضح <b>مستويات التفكيك</b>.' }
+      ]
+    },
+
+    /* ---------- work plan fields ---------- */
+    wp: {
+      cols: 2,
+      opts: [
+        { t: 'Name of the task', cls: 'ph-plan' },
+        { t: 'Person assigned', cls: 'ph-ana' },
+        { t: 'Deliverable(s)', cls: 'ph-des' },
+        { t: 'Completion status', cls: 'ph-imp' },
+        { t: 'Priority', cls: 'ph-plan' },
+        { t: 'Resources needed', cls: 'ph-ana' },
+        { t: 'Estimated time', cls: 'ph-des' },
+        { t: 'Actual time', cls: 'ph-imp' }
+      ],
+      cards: [
+        { q: '“Perform economic feasibility”', a: 0, why: '<b>Name of the task</b>.' },
+        { q: '“Project sponsor Mary Smith”', a: 1, why: '<b>Person assigned</b>.' },
+        { q: '“Cost–benefit analysis”', a: 2, why: '<b>Deliverable(s)</b>.' },
+        { q: '“Complete”', a: 3, why: '<b>Completion status</b>.' },
+        { q: '“High”', a: 4, why: '<b>Priority</b>.' },
+        { q: '“Spreadsheet software”', a: 5, why: '<b>Resources needed</b>.' },
+        { q: '“16 hours”', a: 6, why: '<b>Estimated time</b>.' },
+        { q: '“14.5 hours”', a: 7, why: '<b>Actual time</b>.' }
+      ]
+    },
+
+    /* ---------- staffing ---------- */
+    staff: {
+      cols: 1, shuffleOpts: true,
+      cards: [
+        { q: 'Which skills should be considered when staffing a project?', opts: ['Both technical and interpersonal skills', 'Technical skills only', 'Interpersonal skills only', 'Years of experience only'], a: 0, why: 'كل شغل الـ IS في teams ← الاتنين.' },
+        { q: 'What should the PM do when the required skills are not available in the team?', opts: ['Use training and outside sources such as consultants and vendor support', 'Cancel the project', 'Assign the work to anyone available', 'Ignore the skills gap'], a: 0, why: 'training + consultants + vendor support.' },
+        { q: 'Staffing levels over the lifetime of a project:', opts: ['Change as the project moves on', 'Stay constant', 'Are fixed at planning and never revised', 'Are always highest at the start'], a: 0, why: '«Staffing levels will change over a project’s lifetime».' },
+        { q: 'Why does adding staff to a late project often make it even later?', opts: ['Training and communication overhead consumes the existing team’s productive time', 'New staff always refuse to work', 'Salaries are too high', 'New staff are less intelligent'], a: 0, why: 'ده سبب <b>Brooks’ Law</b> (الكتاب).' },
+        { q: 'Which statement about adding staff is consistent with the slides?', opts: ['It adds overhead and is not always productive', 'It is always productive', 'It removes the need for planning', 'It reduces communication'], a: 0, why: '«Adding staff adds overhead; not always productive».' }
+      ]
+    },
+
+    /* ---------- motivation ---------- */
+    mot: {
+      cols: 3,
+      opts: [
+        { t: 'Intrinsic reward ✅', cls: 't-ok' },
+        { t: 'Monetary — cautiously ⚠️', cls: 't-warn' },
+        { t: 'De-motivator ❌', cls: 't-bad' }
+      ],
+      cards: [
+        { q: 'Recognition', a: 0, why: '<b>Intrinsic reward</b>.' },
+        { q: 'A chance to learn new skills', a: 0, why: '<b>Intrinsic reward</b>.' },
+        { q: 'An unexpected cash bonus', a: 1, why: '<b>Monetary/extrinsic</b> — طفرة أداء قصيرة العمر (الكتاب).' },
+        { q: 'Assigning unrealistic deadlines', a: 2, why: '<b>De-motivator</b>.' },
+        { q: 'Giving everyone on the project the same raise', a: 2, why: '<b>De-motivator</b>.' },
+        { q: 'The work itself', a: 0, why: '<b>Intrinsic reward</b>.' },
+        { q: 'Making an important decision without the team’s input', a: 2, why: '<b>De-motivator</b>.' },
+        { q: 'Ignoring good efforts', a: 2, why: '<b>De-motivator</b>.' },
+        { q: 'Advancement', a: 0, why: '<b>Intrinsic reward</b>.' },
+        { q: 'Accepting a low-quality product', a: 2, why: '<b>De-motivator</b>.' },
+        { q: 'Maintaining poor working conditions', a: 2, why: '<b>De-motivator</b>.' },
+        { q: 'Responsibility', a: 0, why: '<b>Intrinsic reward</b>.' },
+        { q: 'Achievement', a: 0, why: '<b>Intrinsic reward</b>.' }
+      ]
+    },
+
+    /* ---------- group performance ---------- */
+    grp: {
+      cols: 1, shuffleOpts: true,
+      cards: [
+        { q: 'The “project charter” in the slides is used to:', opts: ['Establish operating procedures such as availability, status reporting and meetings', 'List every programming task', 'Calculate NPV', 'Select the methodology'], a: 0, why: 'الـ charter = operating procedures للفريق.' },
+        { q: 'Which of the following is NOT part of assuring group performance?', opts: ['Hiding the project goals from the team to avoid distraction', 'Making sure the team understands the project and its goals', 'Helping team members get to know each other', 'Establishing methods for dealing with problems'], a: 0, why: 'الفريق لازم يفهم الأهداف.' },
+        { q: 'Which item belongs to the charter’s operating procedures?', opts: ['Status reporting', 'Programming language choice', 'Discount rate', 'Function points'], a: 0, why: 'Availability · <b>Status reporting</b> · Meetings.' },
+        { q: 'According to the book, high-performing software teams are driven primarily by:', opts: ['Intrinsic motivators', 'Cash bonuses', 'Penalties', 'Longer working hours'], a: 0, why: 'الكتاب: intrinsic (peer recognition، achievement، responsibility، advancement، pride).' }
+      ]
+    },
+
+    /* ---------- scope creep ---------- */
+    creep: {
+      cols: 1, shuffleOpts: true,
+      cards: [
+        { q: 'During a coffee break a user casually asks a developer to add a new report. The developer agrees and starts coding. This is:', opts: ['A classic cause of scope creep — it should go through formal change approval', 'Good practice that satisfies the customer', 'Timeboxing', 'Function point analysis'], a: 0, why: 'التغيير لازم يعدّي على الـ <b>formal change approval</b>.' },
+        { q: 'A user submits a written change request. What should happen next?', opts: ['Assess its cost/schedule impact and have the steering committee review it', 'Implement it immediately', 'Delete it', 'Ignore it until the system is finished'], a: 0, why: 'خطوات الكتاب: مكتوب ← تقييم تأثير ← steering committee.' },
+        { q: 'A change request is not approved but is still valuable. The best handling is to:', opts: ['Log it for consideration as a future system enhancement/release', 'Implement it secretly', 'Reject it permanently with no record', 'Add it and extend the deadline silently'], a: 0, why: 'بيتسجّل لـ <b>future release</b>.' },
+        { q: 'Which pair of techniques do the slides suggest to reduce scope-creep pressure?', opts: ['JAD and prototyping', 'Pair programming and refactoring', 'NPV and ROI', 'Waterfall and Parallel'], a: 0, why: '«Use JAD and prototyping to minimize scope creep pressure».' },
+        { q: 'Scope creep is best defined as:', opts: ['Uncontrolled expansion of requirements without matching adjustments to budget, time or resources', 'A reduction of the project scope', 'Approved changes after the formal process', 'Delivering the system early'], a: 0, why: 'تعريف الكتاب.' }
+      ]
+    },
+
+    /* ---------- timeboxing / missed dates ---------- */
+    late: {
+      cols: 1, shuffleOpts: true,
+      cards: [
+        { q: 'The project missed its first target date. Which assumption is the risky one?', opts: ['“We can catch up later without changing anything.”', '“We must re-check the complexity of the remaining work.”', '“We should adjust the schedule based on that.”', '“Adding people is not always the answer.”'], a: 0, why: '«Don’t assume you can catch up».' },
+        { q: 'When is it realistic to make up lost time?', opts: ['Only when the rest of the project is simpler than the part you fell behind on AND simpler than originally expected', 'Always', 'Never under any circumstance', 'Whenever management asks'], a: 0, why: 'الشرطين مع بعض.' },
+        { q: 'The team is six weeks behind and someone proposes doubling the team at once. According to the slides:', opts: ['Adding people is not always the right way to handle slippage', 'This always works', 'Adding people has no cost', 'It is the only option'], a: 0, why: 'ده Brooks’ Law.' },
+        { q: 'Timeboxing helps when:', opts: ['The estimates show the project needs more time than is available', 'The project has unlimited time', 'Requirements will never change', 'The team is too big'], a: 0, why: 'بيفيد لما المطلوب أكبر من الوقت المتاح.' },
+        { q: 'In a timebox, what happens to the non-essential functions?', opts: ['They are added later (in subsequent timeboxes)', 'They are squeezed in with lower quality', 'They are deleted forever with no record', 'They move the deadline'], a: 0, why: '«Other functions will be added later».' },
+        { q: 'Timeboxing stresses:', opts: ['High quality for the core functions', 'The maximum number of features', 'Flexible deadlines', 'Skipping testing'], a: 0, why: '«High quality is stressed».' }
+      ]
+    },
+
+    /* ---------- True / False traps ---------- */
+    traps: {
+      cols: 2,
+      opts: [{ t: 'صح ✔ (True)', cls: 't-ok' }, { t: 'غلط ✘ (False)', cls: 't-bad' }],
+      cards: [
+        { q: 'The project manager can change any one of size, cost or time without affecting the other two.', a: 1, why: 'غلط — تعديل واحد بيضغط على الباقيين.' },
+        { q: 'Shortening the schedule may require cutting functionality or spending more.', a: 0, why: 'صح — ↓Size أو ↑Cost.' },
+        { q: 'The industry-standard distribution is Planning 15%, Analysis 20%, Design 35%, Implementation 30%.', a: 0, why: 'صح.' },
+        { q: 'If Planning took 4 months, the whole project is estimated at 4 × 15 = 60 months.', a: 1, why: 'غلط — X = 4 ÷ 0.15 = 26.67.' },
+        { q: 'Implementation is the longest phase in the industry-standard percentages.', a: 1, why: 'غلط — الـ Design (35%) هو الأكبر.' },
+        { q: 'Estimates are at their most accurate at the very beginning of the project.', a: 1, why: 'غلط — الأقل دقة (400% / 60%) وبتتصقل مع الوقت.' },
+        { q: 'At the design phase, the typical margin of error is about 25% for cost and 10% for schedule.', a: 0, why: 'صح.' },
+        { q: 'Function point estimation is one of the sources of estimates.', a: 0, why: 'صح.' },
+        { q: 'A WBS is built bottom-up from random lists of tasks.', a: 1, why: 'غلط — top-down.' },
+        { q: 'A work plan entry can include the task name, assigned person, deliverable, priority, estimated time and actual time.', a: 0, why: 'صح (مثال السلايد).' },
+        { q: 'Technical skills alone are enough when staffing, since IS work is done individually.', a: 1, why: 'غلط — الشغل في teams ← لازم interpersonal كمان.' },
+        { q: 'Adding staff to a project always increases productivity.', a: 1, why: 'غلط — بيضيف overhead.' },
+        { q: 'Giving everyone on the project the same raise is a good way to motivate the team.', a: 1, why: 'غلط — ده de-motivator.' },
+        { q: 'Monetary rewards should be used cautiously, and intrinsic rewards matter more.', a: 0, why: 'صح.' },
+        { q: 'A formal change approval process helps control scope creep.', a: 0, why: 'صح.' },
+        { q: 'Timeboxing means moving the deadline every time a new feature is requested.', a: 1, why: 'غلط — التاريخ ثابت والـ core features الأول.' },
+        { q: 'If you miss a target date, you should assume you can catch up in the remaining phases.', a: 1, why: 'غلط — «Don’t assume you can catch up».' },
+        { q: 'JAD and prototyping help minimize scope-creep pressure.', a: 0, why: 'صح.' },
+        { q: 'In the book’s WBS example, task 1.2.1 depends on tasks 1.1.1 and 1.1.2.', a: 0, why: 'صح — predecessor dependencies.' },
+        { q: 'The project charter establishes operating procedures such as availability, status reporting and meetings.', a: 0, why: 'صح.' }
+      ]
+    },
+
+    /* ---------- MCQ ---------- */
+    mcq: {
+      cols: 1, shuffleOpts: true,
+      cards: [
+        { q: 'Planning took 12 months (15% of the project). Using the industry-standard percentages, the estimated total project length is:', opts: ['80 months', '180 months', '60 months', '1.8 months'], a: 0, why: 'X = 12 ÷ 0.15 = <b>80</b>.' },
+        { q: 'Analysis took 14 months (20%). What is the estimated length of the Design phase (35%)?', opts: ['24.5 months', '14 months', '21 months', '49 months'], a: 0, why: 'X = 14 ÷ 0.20 = 70 ← Design = 70 × 0.35 = <b>24.5</b>.' },
+        { q: 'A project is behind schedule and management adds ten new developers. The most likely immediate effect is:', opts: ['More communication and training overhead that slows the existing team', 'An immediate doubling of speed', 'Lower cost', 'No need for a work plan'], a: 0, why: 'Brooks’ Law.' },
+        { q: 'The sponsor wants a bigger scope but refuses to move the deadline or the budget. What does the balancing act imply?', opts: ['It cannot be done without compromising something, because size, cost and time are interdependent', 'The PM should simply accept', 'The PM should hide the extra scope', 'Time and cost are independent of size'], a: 0, why: 'الأضلاع الثلاثة مترابطة.' },
+        { q: 'Which of the following is a de-motivator?', opts: ['Assigning unrealistic deadlines', 'Recognition', 'A chance to learn new skills', 'Responsibility'], a: 0, why: 'الباقي intrinsic rewards.' },
+        { q: 'A team must deliver in 3 months but the estimates show 5 months of work. Which technique helps?', opts: ['Timeboxing — deliver the core functions within the fixed deadline and defer the rest', 'Letting scope creep happen', 'Adding unlimited features', 'Ignoring the estimate'], a: 0, why: 'Timeboxing.' },
+        { q: 'Which approach to identifying tasks takes the task list of a previous similar project as a model?', opts: ['Analogies', 'Top-down', 'Function points', 'Timeboxing'], a: 0, why: '<b>Analogies</b>.' },
+        { q: 'In a work plan, “variance” refers to:', opts: ['The difference between planned and actual values (such as estimated vs actual time)', 'The number of staff', 'The discount rate', 'The system size'], a: 0, why: 'تعريف عام (الكتاب بيذكرها كعمود في الـ work plan).' },
+        { q: 'Which statement about margins of error is correct?', opts: ['They shrink as the project moves from planning to design', 'They grow as the project advances', 'They are constant', 'They apply only to cost'], a: 0, why: '400/60 ← 25/10.' },
+        { q: 'Which describes the change approval process in the book?', opts: ['Written request → cost/schedule impact assessment → steering committee review; unapproved requests are logged for future releases', 'Verbal request → immediate coding', 'The developer decides alone', 'The sponsor edits the code'], a: 0, why: 'الخطوات من الكتاب.' }
+      ]
+    }
+  },
+
+  /* ---------- flashcards ---------- */
+  flash: {
+    main: [
+      { f: 'إيه الـ <span class="en">Balancing Act</span> بتاع الـ PM؟', b: 'موازنة بين <span class="en"><b>Size</b> (scope &amp; functionality) · <b>Cost</b> (budget) · <b>Time</b> (schedule)</span>. تعديل واحد يضغط على الباقيين.' },
+      { f: 'الـ sponsor عايز المشروع أسرع. إيه اللي يتغيّر؟', b: '<span class="en">↓ Size</span> (features أقل) <b>أو</b> <span class="en">↑ Cost</span> (consultants / commercial modules).' },
+      { f: 'الـ sponsor عايز features زيادة. إيه اللي يتغيّر؟', b: 'نتفاوض على <span class="en">↑ Time</span> و/أو <span class="en">↑ Cost</span>.' },
+      { f: '<span class="en">Project Estimation</span>', b: 'إدّي قيم متوقعة للوقت والمجهود. بتبدأ <b>range</b> وبتبقى أدق مع التقدّم.' },
+      { f: 'مصادر الـ estimates (5)', b: '<span class="en">Methodology in use · Actual previous projects · Experienced developers · Industry standards · Function point estimation</span>' },
+      { f: '<span class="en">Function Point</span> باختصار', b: 'طريقة لقياس حجم النظام بوحدات function points، نحوّلها لـ lines of code ثم effort (الكتاب LO3).' },
+      { f: 'النسب الصناعية لمراحل الـ SDLC', b: '<span class="en">Planning 15% · Analysis 20% · Design 35% · Implementation 30%</span><br>الـ Design هو الأكبر.' },
+      { f: 'مثال: Planning = 4 شهور. الإجمالي وباقي المراحل؟', b: 'X = 4 ÷ 0.15 = <b>26.67</b><br>Analysis 5.33 · Design 9.33 · Implementation 8.00' },
+      { f: 'إزاي أحسب الإجمالي من مرحلة معروفة؟', b: '<span class="en">X = Actual ÷ Phase %</span> وبعدين باقي المراحل = <span class="en">X × %</span>. وبتتأكد إن المجموع = X.' },
+      { f: 'هامش الخطأ للـ <b>cost</b> (4 مراحل)', b: '<span class="en">400% → 100% → 50% → 25%</span> (system request ← … ← system specifications)' },
+      { f: 'هامش الخطأ للـ <b>schedule</b> (4 مراحل)', b: '<span class="en">60% → 25% → 15% → 10%</span>' },
+      { f: 'مين صاحب أبحاث هامش الخطأ؟', b: '<span class="en">Barry Boehm — COCOMO 2.0</span>. (Brooks هو صاحب Brooks’ Law.)' },
+      { f: 'طرق تحديد الـ tasks (4)', b: '<span class="en">Established guidelines (methodologies) · Analogies (previous projects) · Top-down · Organize into a WBS</span>' },
+      { f: '<span class="en">WBS</span>', b: 'تفكيك هرمي top-down للشغل: phases ← sub-tasks ← <b>work packages</b> (قابلة للتسليم لحد). مثال الكتاب: 1.0 → 1.1 → 1.1.1.' },
+      { f: 'إيه الـ dependency في مثال الكتاب؟', b: '1.2.1 و 1.3.1 <b>معتمدين على</b> 1.1.1 و 1.1.2 ← <span class="en">predecessor dependencies</span>.' },
+      { f: 'خانات الـ work plan (السلايد)', b: '<span class="en">Task name · Start/Completion date · Person assigned · Deliverable(s) · Status · Priority · Resources · Estimated time · Actual time</span>' },
+      { f: 'خانات الـ work plan (الكتاب 📖)', b: '<span class="en">Task ID · Name · Assigned personnel · Estimated duration · Target start/finish · Actual start/finish · Variance · Predecessor dependencies · Status (Open / In-Progress / Complete)</span>' },
+      { f: 'اعتبارات الـ <span class="en">Staffing</span> (5)', b: 'Match skills · technical + interpersonal · training/consultants/vendor support · staffing levels change · adding staff adds overhead.' },
+      { f: '<span class="en">Brooks’ Law</span>', b: 'إضافة ناس لمشروع متأخر <b>بتأخّره أكتر</b> بسبب الـ communication والـ training overhead.' },
+      { f: 'الـ <span class="en">Intrinsic rewards</span> (السلايد)', b: '<span class="en">Recognition · Achievement · The work itself · Responsibility · Advancement · Chance to learn new skills</span>' },
+      { f: 'الفلوس كحافز؟', b: 'استخدمها <b>بحذر</b>. الكتاب: الـ extrinsic (زي unexpected cash bonuses) = طفرة قصيرة العمر.' },
+      { f: 'الـ <span class="en">De-motivators</span> (6)', b: 'Unrealistic deadlines · ignoring good efforts · accepting low quality · same raise for everyone · decisions without team input · poor working conditions' },
+      { f: 'تأكيد أداء المجموعة (4)', b: 'الفريق يفهم الأهداف · operating procedures (<b>Project Charter</b>) · يتعرفوا على بعض · طرق للتعامل مع المشاكل' },
+      { f: 'الـ <span class="en">Project Charter</span> فيه إيه؟', b: '<span class="en">Availability · Status reporting · Meetings</span>' },
+      { f: '<span class="en">Scope Creep</span>', b: 'توسّع غير مُتحكَّم فيه في الـ requirements من غير تعديل مقابل في الميزانية/الوقت/الموارد. الكتاب: <b>primary killer of IT projects</b>.' },
+      { f: 'إزاي نتحكم في الـ scope creep؟', b: '<span class="en">JAD + prototyping · formal change approval · defer additional requirements as future enhancements</span>' },
+      { f: 'خطوات الـ change approval (الكتاب 📖)', b: 'طلب مكتوب ← تقييم تأثير cost/schedule ← مراجعة الـ steering committee ← غير الموافق عليه يتسجّل لـ future release.' },
+      { f: '<span class="en">Timeboxing</span>', b: 'deadline ثابت وضيق بس واقعي ← نحدد الـ core ← نركّز عليه بجودة عالية ← الباقي بعدين ونكرر. الكتاب: «immovable deadline» و «subsequent timeboxes».' },
+      { f: 'لما التاريخ يفوتك؟', b: 'متفترضش إنك هتلحق. تعوّض بس لو الباقي أبسط من اللي فاتك ومن التقدير الأصلي. قيّم التعقيد وعدّل الـ schedule. إضافة ناس مش دايماً الحل.' },
+      { f: 'أهداف ليها objective بس مفيهاش سلايد', b: '<span class="en">CASE tools (coordination) · Standards · Risk management</span> — فهم عام: repository مركزي، قواعد متسقة، تحديد المخاطر وتقييمها.' },
+      { f: 'إزاي أكتب حل مسألة النسب في الامتحان؟', b: '① أحدد المرحلة المعروفة ونسبتها ② X = Actual ÷ % ③ باقي المراحل = X × % ④ أجمع وأتأكد = X ⑤ أكتب الوحدة (months / person-months).' }
+    ]
+  },
+
+  /* ---------- essay model answers ---------- */
+  essays: {
+    e1: {
+      model:
+        '<div dir="ltr" style="line-height:1.85">' +
+        '<b>Step 1:</b> Analysis = 20% of the project, and it took 10 months.<br>' +
+        '<b>Step 2:</b> Total length X = 10 ÷ 0.20 = <b>50 months</b>.<br>' +
+        '<b>Step 3:</b> Phases = X × percentage:<br>' +
+        '&nbsp;• Planning (15%): 50 × 0.15 = <b>7.5 months</b><br>' +
+        '&nbsp;• Analysis (20%): 50 × 0.20 = <b>10 months</b> (actual)<br>' +
+        '&nbsp;• Design (35%): 50 × 0.35 = <b>17.5 months</b><br>' +
+        '&nbsp;• Implementation (30%): 50 × 0.30 = <b>15 months</b><br>' +
+        '<b>Check:</b> 7.5 + 10 + 17.5 + 15 = 50 months ✔</div>',
+      points: [
+        'Used Analysis = 20% (not 15%)',
+        'Total X = 10 ÷ 0.20 = 50 months',
+        'Planning 7.5 and Design 17.5',
+        'Implementation 15, and checked that the sum equals 50'
+      ]
+    },
+    e2: {
+      model:
+        '<div dir="ltr" style="line-height:1.85">' +
+        '<b>Balancing act:</b> the project manager must balance <b>project size</b> (scope and functionality), <b>project cost</b> (budget) and <b>project time</b> (schedule). They are interdependent — modifying one element requires adjusting the others. Example: shortening the schedule means reducing size or increasing cost (consultants, ready-made modules); adding features means more time or more cost.<br>' +
+        '<b>Scope creep:</b> the uncontrolled expansion of requirements without matching adjustments to budget, time or resources; the book calls it the primary killer of IT projects.<br>' +
+        '<b>Control:</b> (1) a <b>formal change approval process</b> — changes submitted in writing, assessed for cost/schedule impact and reviewed by the steering committee; (2) use <b>JAD and prototyping</b> to reduce pressure for additions; (3) <b>defer</b> additional or unapproved requirements as future enhancements / releases.</div>',
+      points: [
+        'Named the three elements (size, cost, time) and said they are interdependent',
+        'Gave an example of a trade-off (e.g. shorter time → less size or more cost)',
+        'Defined scope creep (uncontrolled growth without adjusting budget/time/resources)',
+        'Formal change approval (written, impact assessment, steering committee) and/or JAD + prototyping',
+        'Defer extra requirements to future enhancements/releases'
+      ]
+    },
+    e3: {
+      model:
+        '<div dir="ltr" style="line-height:1.85">' +
+        '<b>(a)</b> Planning = 15% = 5 months → X = 5 ÷ 0.15 = <b>33.33 months</b>.<br>' +
+        '&nbsp;• Analysis (20%): 6.67 &nbsp;• Design (35%): 11.67 &nbsp;• Implementation (30%): 10.00 &nbsp;• Planning: 5.00 → total 33.33.<br>' +
+        '<b>(b) Advice:</b><br>' +
+        '1. <b>Don’t assume the team can catch up.</b> Re-evaluate the complexity of the remaining work and adjust the schedule/scope accordingly (re-estimate — estimates need refinement).<br>' +
+        '2. <b>Do not add eight developers immediately:</b> adding staff adds communication and training overhead and is not always productive (Brooks’ Law: it can make a late project later).<br>' +
+        '3. <b>Control scope creep:</b> the four new features must go through the formal change approval process — written request, cost/schedule impact assessment, steering committee review.<br>' +
+        '4. <b>Use timeboxing:</b> the go-live date is fixed, so deliver the core, essential functions with high quality and defer the new/non-essential features to a later timebox or future release.</div>',
+      points: [
+        'Total = 5 ÷ 0.15 = 33.33 months',
+        'Analysis 6.67, Design 11.67, Implementation 10.00',
+        'Don’t assume catch-up; re-evaluate remaining complexity and adjust schedule/scope',
+        'Adding eight developers adds overhead (Brooks’ Law) — not automatically the answer',
+        'Formal change approval for the four new features (scope creep)',
+        'Timeboxing: fixed date, core features first, defer the rest'
+      ]
+    }
+  }
+};
+</script>
+<script>
+/* ==========================================================
+   IS202 study pages — shared interactive engine
+   Reads window.DATA = { decks:{}, flash:{}, essays:{} }
+   ========================================================== */
+(function () {
+  'use strict';
+
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const shuffle = (a) => {
+    a = a.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+
+  const DATA = window.DATA || {};
+  const KEY = 'is202:' + (document.body.dataset.lecture || 'x');
+  let S = {};
+  try { S = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { S = {}; }
+  S.done = S.done || {}; S.best = S.best || {}; S.fc = S.fc || {}; S.essay = S.essay || {};
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+
+  /* ---------- theme ---------- */
+  const TK = 'is202:theme';
+  let theme = 'dark';
+  try { theme = localStorage.getItem(TK) || 'dark'; } catch (e) {}
+  const themeBtn = $('#themeBtn');
+  function applyTheme(t) {
+    theme = t;
+    document.documentElement.setAttribute('data-theme', t);
+    if (themeBtn) themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
+    try { localStorage.setItem(TK, t); } catch (e) {}
+  }
+  applyTheme(theme);
+  if (themeBtn) themeBtn.addEventListener('click', () => applyTheme(theme === 'dark' ? 'light' : 'dark'));
+
+  /* ---------- stations ---------- */
+  const stations = $$('.station');
+  const nav = $('#nav');
+  const navBtns = [];
+  let cur = -1;
+
+  stations.forEach((st, i) => {
+    if (nav) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.innerHTML = `<span class="num">${i + 1}</span><span class="lbl">${st.dataset.icon || ''} ${st.dataset.title || ''}</span><span class="tick">✓</span>`;
+      b.addEventListener('click', () => go(i));
+      nav.appendChild(b);
+      navBtns.push(b);
+    }
+    const last = i === stations.length - 1;
+    const f = document.createElement('div');
+    f.className = 'station-foot noprint';
+    f.innerHTML =
+      `<button type="button" class="btn ghost" data-prev${i === 0 ? ' style="visibility:hidden"' : ''}>→ السابق</button>` +
+      (last
+        ? `<a class="btn primary" href="index.html" data-finish>خلّصت المحاضرة 🏁</a>`
+        : `<button type="button" class="btn primary" data-next>التالي ←</button>`);
+    st.appendChild(f);
+    const p = $('[data-prev]', f), n = $('[data-next]', f), fin = $('[data-finish]', f);
+    if (p) p.addEventListener('click', () => go(i - 1));
+    if (n) n.addEventListener('click', () => go(i + 1));
+    if (fin) fin.addEventListener('click', () => { S.done[i] = true; save(); });
+  });
+
+  function refresh() {
+    navBtns.forEach((b, k) => {
+      b.classList.toggle('on', k === cur);
+      b.classList.toggle('done', !!S.done[k]);
+    });
+    const n = stations.filter((_, k) => S.done[k]).length;
+    const pb = $('#progBar'), pt = $('#progTxt');
+    if (pb) pb.style.width = (n / stations.length * 100) + '%';
+    if (pt) pt.textContent = n + '/' + stations.length;
+  }
+
+  function go(i, init) {
+    i = Math.max(0, Math.min(stations.length - 1, i));
+    if (!init && cur >= 0 && i > cur) S.done[cur] = true;
+    cur = i;
+    stations.forEach((s, k) => s.classList.toggle('on', k === i));
+    S.last = i; save(); refresh();
+    try { history.replaceState(null, '', '#' + (i + 1)); } catch (e) {}
+    if (!init) window.scrollTo({ top: 0, behavior: 'smooth' });
+    const nb = navBtns[i];
+    if (nb && nav && nav.scrollWidth > nav.clientWidth) nb.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }
+
+  $$('[data-go]').forEach((e) => e.addEventListener('click', () => go(parseInt(e.dataset.go, 10) - 1)));
+
+  /* ---------- flip cards ---------- */
+  $$('.flip').forEach((el) => {
+    const f = $('.f', el), b = $('.b', el);
+    if (!f || !b) return;
+    const inn = document.createElement('div');
+    inn.className = 'flip-in';
+    f.className = 'face front'; b.className = 'face back';
+    inn.append(f, b); el.append(inn);
+    el.tabIndex = 0;
+    el.addEventListener('click', () => el.classList.toggle('open'));
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.classList.toggle('open'); }
+    });
+  });
+
+  /* ---------- tabs ---------- */
+  $$('[data-tabs]').forEach((root) => {
+    const btns = $$('[data-tab]', root), panes = $$('[data-pane]', root);
+    const set = (id) => {
+      btns.forEach((b) => b.classList.toggle('on', b.dataset.tab === id));
+      panes.forEach((p) => p.classList.toggle('on', p.dataset.pane === id));
+    };
+    btns.forEach((b) => b.addEventListener('click', () => set(b.dataset.tab)));
+    set(root.dataset.tabs || (btns[0] && btns[0].dataset.tab));
+  });
+
+  /* ---------- deck (quiz / sorting / true-false) ---------- */
+  function Deck(root, cfg) {
+    let cards = shuffle(cfg.cards), i = 0, score = 0, locked = false, order = [];
+    root.classList.add('deck');
+    root.innerHTML =
+      `<div class="deck-head"><span class="cnt"></span><div class="deck-bar"><i></i></div><span class="sc"></span></div><div class="deck-body"></div>`;
+    const body = $('.deck-body', root), cnt = $('.cnt', root), bar = $('.deck-bar i', root), sc = $('.sc', root);
+
+    function render() {
+      if (i >= cards.length) return end();
+      const c = cards[i];
+      locked = false;
+      cnt.textContent = (i + 1) + ' / ' + cards.length;
+      bar.style.width = (i / cards.length * 100) + '%';
+      sc.textContent = '⭐ ' + score;
+      const opts = c.opts || cfg.opts;
+      const cols = cfg.cols ? ' c' + cfg.cols : '';
+      body.innerHTML = `<div class="deck-q" dir="auto">${c.q}</div><div class="opts${cols}"></div><div class="fbwrap"></div>`;
+      const wrap = $('.opts', body);
+      // cfg.shuffleOpts: mix the answer order of per-card MCQ options so position never gives the answer away
+      order = opts.map((_, k) => k);
+      if (cfg.shuffleOpts && c.opts) order = shuffle(order);
+      order.forEach((oi, k) => {
+        const o = opts[oi];
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'opt' + (typeof o === 'object' && o.cls ? ' ' + o.cls : '');
+        b.setAttribute('dir', 'auto');
+        b.innerHTML = typeof o === 'string' ? o : o.t;
+        b.addEventListener('click', () => pick(k));
+        wrap.appendChild(b);
+      });
+    }
+
+    function pick(k) {
+      if (locked) return;
+      locked = true;
+      const c = cards[i], ok = order[k] === c.a;
+      if (ok) score++;
+      $$('.opt', body).forEach((b, j) => {
+        b.disabled = true;
+        if (order[j] === c.a) b.classList.add('right');
+        else if (j === k) b.classList.add('wrong');
+      });
+      sc.textContent = '⭐ ' + score;
+      const fb = $('.fbwrap', body);
+      fb.innerHTML =
+        `<div class="fb ${ok ? 'ok' : 'no'}"><b>${ok ? '✔ تمام!' : '✘ لأ — راجع الشرح'}</b><div dir="auto">${c.why || ''}</div>` +
+        `<button type="button" class="btn primary nxt">${i === cards.length - 1 ? 'شوف النتيجة' : 'التالي ←'}</button></div>`;
+      const nx = $('.nxt', fb);
+      nx.addEventListener('click', () => { i++; render(); });
+      nx.focus({ preventScroll: true });
+    }
+
+    function end() {
+      bar.style.width = '100%';
+      const pct = Math.round(score / cards.length * 100);
+      const best = Math.max(S.best[cfg.id] || 0, pct);
+      S.best[cfg.id] = best; save();
+      const msg = pct === 100 ? 'ممتاز! 🔥 الجزء ده تمام' : pct >= 70 ? 'كويس جداً 👏 راجع الغلطات بس' : 'لسه محتاج مراجعة — ارجع للشرح وجرّب تاني 💪';
+      sc.textContent = '⭐ ' + score;
+      cnt.textContent = 'خلصت';
+      body.innerHTML =
+        `<div class="deck-end"><div class="big">${pct}%</div><p>${score} من ${cards.length} — ${msg}</p>` +
+        `<p class="muted">أحسن نتيجة ليك: ${best}%</p><button type="button" class="btn primary again">🔁 العب تاني</button></div>`;
+      $('.again', body).addEventListener('click', () => { cards = shuffle(cfg.cards); i = 0; score = 0; render(); });
+      if (cfg.onDone) cfg.onDone(pct);
+    }
+    render();
+  }
+
+  /* ---------- flashcards ---------- */
+  function Flash(root, cards, id) {
+    let mode = 'all', pos = 0, list = [], timer;
+    root.classList.add('fc');
+    root.innerHTML =
+      `<div class="fc-top"><div class="seg"><button type="button" data-m="all" class="on">كل الكروت</button><button type="button" data-m="review">اللي لسه مش حافظها</button></div><span class="fc-count muted"></span></div>` +
+      `<div class="fc-card" tabindex="0"><div class="fc-in"><div class="face front"></div><div class="face back"></div></div></div>` +
+      `<div class="fc-actions"><button type="button" class="btn" data-a="prev">→ اللي قبلها</button><button type="button" class="btn bad" data-a="r">🔁 لسه مش حافظها</button><button type="button" class="btn good" data-a="k">✅ عرفتها</button><button type="button" class="btn" data-a="next">اللي بعدها ←</button></div>` +
+      `<div class="deck-bar"><i></i></div><p class="fc-stat muted"></p>`;
+    const card = $('.fc-card', root), front = $('.front', root), back = $('.back', root);
+    const cnt = $('.fc-count', root), bar = $('.deck-bar i', root), stat = $('.fc-stat', root);
+    const key = (n) => id + ':' + n;
+
+    function stats() {
+      const k = cards.filter((_, n) => S.fc[key(n)] === 'k').length;
+      stat.textContent = 'عرفت ' + k + ' من ' + cards.length;
+      bar.style.width = (k / cards.length * 100) + '%';
+    }
+    function show() {
+      list = cards.map((_, n) => n).filter((n) => mode === 'all' || S.fc[key(n)] !== 'k');
+      stats();
+      clearTimeout(timer);
+      if (!list.length) {
+        card.classList.remove('open');
+        front.innerHTML = '<div dir="auto">🎉 خلصت كل الكروت!</div><small>ارجع لـ "كل الكروت" لو عايز تراجع تاني</small>';
+        back.innerHTML = '';
+        cnt.textContent = '0 / 0';
+        return;
+      }
+      pos = ((pos % list.length) + list.length) % list.length;
+      const c = cards[list[pos]];
+      const fill = () => {
+        front.innerHTML = `<small>السؤال</small><div dir="auto">${c.f}</div><small>👆 اضغط عشان تقلب الكارت</small>`;
+        back.innerHTML = `<small>الإجابة</small><div dir="auto">${c.b}</div>`;
+      };
+      if (card.classList.contains('open')) { card.classList.remove('open'); timer = setTimeout(fill, 230); } else fill();
+      cnt.textContent = (pos + 1) + ' / ' + list.length;
+    }
+
+    root.addEventListener('click', (e) => {
+      const a = e.target.closest('[data-a]');
+      if (a) {
+        const act = a.dataset.a;
+        if (act === 'next') pos++;
+        else if (act === 'prev') pos--;
+        else {
+          S.fc[key(list[pos])] = act; save();
+          if (!(mode === 'review' && act === 'k')) pos++;
+        }
+        show();
+        return;
+      }
+      const m = e.target.closest('[data-m]');
+      if (m) {
+        mode = m.dataset.m; pos = 0;
+        $$('[data-m]', root).forEach((x) => x.classList.toggle('on', x === m));
+        show();
+        return;
+      }
+      if (e.target.closest('.fc-card')) card.classList.toggle('open');
+    });
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.classList.toggle('open'); }
+    });
+    show();
+  }
+
+  /* ---------- essay ---------- */
+  $$('.essay').forEach((el) => {
+    const id = el.dataset.essay, d = (DATA.essays || {})[id];
+    if (!d) return;
+    const ta = $('textarea', el), btn = $('[data-show]', el), box = $('.model', el);
+    ta.value = S.essay[id] || '';
+    ta.addEventListener('input', () => { S.essay[id] = ta.value; save(); });
+    $('.mdl', box).innerHTML = d.model;
+    const pts = $('.pts', box);
+    pts.innerHTML =
+      '<h4>✅ علّم على النقط اللي غطّيتها في إجابتك:</h4>' +
+      d.points.map((p) => `<label class="chk"><input type="checkbox"> <span dir="auto">${p}</span></label>`).join('') +
+      '<div class="pts-sc"></div>';
+    const sc = $('.pts-sc', pts);
+    const upd = () => {
+      const n = $$('input:checked', pts).length;
+      sc.textContent = 'غطّيت ' + n + ' من ' + d.points.length + (n === d.points.length ? ' 🔥' : '');
+    };
+    pts.addEventListener('change', upd); upd();
+    btn.addEventListener('click', () => {
+      box.hidden = !box.hidden;
+      btn.textContent = box.hidden ? '📖 اعرض الإجابة النموذجية' : '🙈 اخفي الإجابة';
+    });
+  });
+
+  /* ---------- keyboard for flashcards ---------- */
+  document.addEventListener('keydown', (e) => {
+    if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    const st = stations[cur];
+    const fc = st && $('.fc', st);
+    if (!fc) return;
+    if (e.key === 'ArrowLeft') $('[data-a="next"]', fc).click();
+    else if (e.key === 'ArrowRight') $('[data-a="prev"]', fc).click();
+    else if (e.key === ' ' && e.target.tagName !== 'BUTTON') { e.preventDefault(); $('.fc-card', fc).classList.toggle('open'); }
+  });
+
+  /* ---------- init decks / flashcards ---------- */
+  const markDone = (el) => {
+    const i = stations.indexOf(el.closest('.station'));
+    if (i >= 0) { S.done[i] = true; save(); refresh(); }
+  };
+  $$('[data-deck]').forEach((el) => {
+    const c = (DATA.decks || {})[el.dataset.deck];
+    if (c) Deck(el, Object.assign({}, c, { id: el.dataset.deck, onDone: () => markDone(el) }));
+  });
+  $$('[data-flash]').forEach((el) => {
+    const c = (DATA.flash || {})[el.dataset.flash];
+    if (c) Flash(el, c, el.dataset.flash);
+  });
+
+  /* ---------- share disclaimer: ONE place, shows at the bottom of every page (index.src.html has its own copy) ---------- */
+  (function () {
+    const f = document.createElement('footer');
+    f.className = 'disclaimer';
+    f.innerHTML =
+      '<div dir="rtl"><b>⚠️ تنبيه مهم قبل ما تعتمد على الصفحات دي:</b> دي ملخصات ومراجعة شخصية من إعداد طالب لمساعدة زمايله، وهي <b>مش مادة رسمية</b> ومش معتمدة من الدكتور ولا من الكلية. ممكن يكون فيها أخطاء أو نقص، والأسئلة اللي فيها مش بالضرورة شبه الامتحان الحقيقي. ' +
+      '<b>ومبتغنيش أبداً عن الكتاب والمحاضرات (المصدر الأساسي)</b> — ذاكر منهم الأول، وارجع لهم عشان تتأكد من أي معلومة. أي اعتماد مباشر على الصفحات دي بيكون على مسئولية المستخدم نفسه، ومُعِدّ الملخص غير مسئول عن أي نتيجة أو خسارة درجات. ' +
+      '<span class="muted">المصادر: كتاب المادة <span class="en">Systems Analysis and Design</span> (د. أسماء سعد) وسلايدات المحاضرات (مبنية على <span class="en">Dennis, Wixom &amp; Roth</span>).</span>' +
+      '<div class="d-en"><b>Disclaimer:</b> Unofficial, student-made study notes shared to help classmates — not official course material and not endorsed by the instructor or the university. They may contain mistakes or omissions, and the practice questions may differ from the real exam. ' +
+      'These pages are <b>NOT a substitute for the textbook and the lectures</b> (the primary source): study those first and use them to verify anything written here. Anyone relying on these pages directly does so at their own risk; the author accepts no responsibility for any result or loss of marks. Sources: the course textbook “Systems Analysis and Design” (Dr. Asmaa Saad) and the lecture slides (based on Dennis, Wixom &amp; Roth).</div></div>';
+    document.body.appendChild(f);
+  })();
+
+  /* ---------- start ---------- */
+  let start = parseInt((location.hash || '').slice(1), 10) - 1;
+  if (!(start >= 0 && start < stations.length)) start = Math.min(S.last || 0, stations.length - 1);
+  go(start, true);
+
+  window.Study = { go };
+})();
+
+</script>
+<script>
+var $i = function (id) { return document.getElementById(id); };
+var MINUS = '−';
+function r2(x) { return (Math.round(x * 100) / 100).toFixed(2); }
+
+/* ---------- trade-off triangle ---------- */
+(function () {
+  var root = $i('triSim');
+  if (!root) return;
+  var NAMES = { S: 'Size', C: 'Cost', T: 'Time' };
+  var TRI = {
+    'T-': { v: 'T', a: '▼', tight: 1, head: 'الـ sponsor عايز المشروع يخلص <b>أسرع</b> <span class="en">(Time ↓)</span>', give: [['S', '▼', 'خفّض الـ features (scope أقل)'], ['C', '▲', 'زوّد الفلوس: consultants أو commercial modules جاهزة']] },
+    'S+': { v: 'S', a: '▲', tight: 1, head: 'الـ sponsor عايز <b>features زيادة</b> <span class="en">(Size ↑)</span>', give: [['T', '▲', 'مدّ الـ schedule (وقت أطول)'], ['C', '▲', 'زوّد الميزانية: ناس وموارد أكتر']] },
+    'C-': { v: 'C', a: '▼', tight: 1, head: 'الميزانية <b>اتقلّصت</b> <span class="en">(Cost ↓)</span>', give: [['S', '▼', 'خفّض الـ features'], ['T', '▲', 'مدّ الـ schedule (موارد أقل محتاجة وقت أطول)']] },
+    'T+': { v: 'T', a: '▲', head: 'الوقت <b>اتمدّ</b> <span class="en">(Time ↑)</span>', give: [['C', '▼', 'تقدر تقلّل الميزانية'], ['S', '▲', 'أو تزوّد الـ features']] },
+    'S-': { v: 'S', a: '▼', head: 'الـ scope <b>اتقلّل</b> <span class="en">(Size ↓)</span>', give: [['T', '▼', 'تقدر تقصّر الـ schedule'], ['C', '▼', 'أو تقلّل الميزانية']] },
+    'C+': { v: 'C', a: '▲', head: 'الميزانية <b>زادت</b> <span class="en">(Cost ↑)</span>', give: [['T', '▼', 'تقدر تقصّر الـ schedule'], ['S', '▲', 'أو تزوّد الـ features']] }
+  };
+  var vs = {};
+  [].slice.call(root.querySelectorAll('.v')).forEach(function (g) { vs[g.getAttribute('data-v')] = g; });
+  var btns = [].slice.call(root.querySelectorAll('button[data-k]'));
+  var out = $i('triOut');
+  function sel(k) {
+    var d = TRI[k];
+    btns.forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-k') === k); });
+    Object.keys(vs).forEach(function (x) { vs[x].setAttribute('class', 'v'); vs[x].querySelector('.ar').textContent = ''; });
+    vs[d.v].setAttribute('class', 'v chg'); vs[d.v].querySelector('.ar').textContent = d.a;
+    d.give.forEach(function (g) {
+      vs[g[0]].setAttribute('class', 'v ' + (d.tight ? 'must' : 'free'));
+      vs[g[0]].querySelector('.ar').textContent = g[1];
+    });
+    out.innerHTML = '<div>' + d.head + '</div><p style="margin:8px 0 0" class="muted">' +
+      (d.tight ? 'لازم تختار <b>واحد على الأقل</b> من دول:' : 'ده بيدّيك مرونة تستغلها في:') + '</p>' +
+      '<ul class="give">' + d.give.map(function (g) {
+        return '<li><b class="ar">' + g[1] + '</b> <b class="en">' + NAMES[g[0]] + '</b> — ' + g[2] + '</li>';
+      }).join('') + '</ul>';
+  }
+  btns.forEach(function (b) { b.addEventListener('click', function () { sel(b.getAttribute('data-k')); }); });
+})();
+
+/* ---------- industry-percentage calculator ---------- */
+(function () {
+  var root = $i('estCalc');
+  if (!root) return;
+  var PH = [
+    { n: 'Planning', s: 'Plan', p: 15, c: 'ph-plan' },
+    { n: 'Analysis', s: 'Analysis', p: 20, c: 'ph-ana' },
+    { n: 'Design', s: 'Design', p: 35, c: 'ph-des' },
+    { n: 'Implementation', s: 'Impl.', p: 30, c: 'ph-imp' }
+  ];
+  var sel = 0;
+  var inp = $i('estVal'), fm = $i('estFormula'), stk = $i('estStack'), tbl = $i('estTbl'), msg = $i('estMsg');
+  var phBtns = [].slice.call($i('estPh').querySelectorAll('button'));
+  function stackHtml(known) {
+    return PH.map(function (p, i) {
+      return '<div class="' + p.c + (i === known ? ' known' : '') + '" style="flex-basis:' + p.p + '%">' + p.s + '<small>' + p.p + '%</small></div>';
+    }).join('');
+  }
+  function upd() {
+    phBtns.forEach(function (b, i) { b.classList.toggle('on', i === sel); });
+    var v = parseFloat(inp.value);
+    if (!(v > 0)) {
+      fm.innerHTML = 'X = ?';
+      stk.innerHTML = stackHtml(sel);
+      tbl.innerHTML = '';
+      msg.className = 'verdict'; msg.textContent = '✍️ اكتب مدة المرحلة الفعلية (أكبر من صفر) وشوف النتيجة.';
+      return;
+    }
+    var X = v / (PH[sel].p / 100);
+    fm.innerHTML = 'X = ' + r2(v) + ' ÷ ' + PH[sel].p + '% = ' + r2(X) + ' months<small>' + PH[sel].n + ' (actual) = ' + r2(v) + ' months · ' + PH[sel].p + '% of the project</small>';
+    stk.innerHTML = stackHtml(sel);
+    var rows = '<tr><th>Phase</th><th>%</th><th>Months</th></tr>';
+    PH.forEach(function (p, i) {
+      rows += '<tr class="' + p.c + '"><td><span class="dot"></span>' + p.n + (i === sel ? ' ✓' : '') + '</td><td>' + p.p + '%</td><td>' + (i === sel ? r2(v) : r2(X * p.p / 100)) + (i === sel ? ' (actual)' : '') + '</td></tr>';
+    });
+    rows += '<tr class="tot"><td>Total (X)</td><td>100%</td><td>' + r2(X) + '</td></tr>';
+    tbl.innerHTML = rows;
+    msg.className = 'verdict pos';
+    msg.innerHTML = '✅ المشروع كله ≈ <span class="en">' + r2(X) + '</span> شهر. أكبر مرحلة هي الـ <span class="en">Design</span> = <span class="en">' + r2(X * 0.35) + '</span> شهر <span class="en plain">(35%)</span>.';
+  }
+  phBtns.forEach(function (b, i) { b.addEventListener('click', function () { sel = i; upd(); }); });
+  inp.addEventListener('input', upd);
+  [].slice.call($i('estPre').querySelectorAll('button')).forEach(function (b) {
+    b.addEventListener('click', function () {
+      var ph = parseInt(b.getAttribute('data-ph'), 10);
+      if (ph >= 0) sel = ph;
+      inp.value = b.getAttribute('data-v');
+      upd();
+    });
+  });
+  upd();
+})();
+
+/* ---------- WBS trees ---------- */
+(function () {
+  function build(n, open) {
+    var lab = n[0], kids = n[1], dep = n[2];
+    var d = dep ? ' <span class="dep">' + dep + '</span>' : '';
+    if (!kids) return '<div class="tree-leaf">• ' + lab + d + '</div>';
+    return '<details class="tree"' + (open ? ' open' : '') + '><summary>' + lab + d + '</summary><div class="kids">' +
+      kids.map(function (k) { return build(k, false); }).join('') + '</div></details>';
+  }
+  var W1 = ['Grade programming assignments', [
+    ['1. Create grading plan', [['A. Develop grading rubric'], ['B. Develop test plan, test data, and check figures']]],
+    ['2. Prepare programming projects for grading', [['A. Download submitted projects'], ['B. For all projects, extract zipped files']]],
+    ['3. For all projects,', [['A. Administer test plan', [['Check performance'], ['Verify results']]], ['B. Check code for required elements and standards'], ['C. Apply rubric and determine final score']]]
+  ]];
+  var W2 = ['1.0 Design Phase', [
+    ['1.1 Develop Database Design Document', [['1.1.1 Staging Database Design — schema, indexes, storage allocation'], ['1.1.2 Suspense Database Design — error logging and staging validation']]],
+    ['1.2 Develop Rejects-Handling Design Document', [['1.2.1 Rejects-Handling Engine Architecture', null, 'depends on 1.1.1, 1.1.2']]],
+    ['1.3 Develop OLAP Analytical Design Document', [['1.3.1 Multidimensional Data Cube Design', null, 'depends on 1.1.1, 1.1.2']]]
+  ]];
+  var a = $i('wbs1'), b = $i('wbs2'), btn = $i('wbsAll');
+  if (!a || !b) return;
+  a.innerHTML = build(W1, true);
+  b.innerHTML = build(W2, true);
+  var openAll = false;
+  btn.addEventListener('click', function () {
+    openAll = !openAll;
+    [].slice.call(document.querySelectorAll('#wbs1 details, #wbs2 details')).forEach(function (d) { d.open = openAll; });
+  });
+})();
+
+/* ---------- work plan variance ---------- */
+(function () {
+  var e = $i('wpE'), a = $i('wpA');
+  if (!e || !a) return;
+  var r1 = $i('wpR1'), r2el = $i('wpR2'), m = $i('wpMsg');
+  function f1(x) { var s = (Math.round(Math.abs(x) * 10) / 10).toString(); return (x < 0 ? MINUS : (x > 0 ? '+' : '')) + s; }
+  function upd() {
+    var E = parseFloat(e.value), A = parseFloat(a.value);
+    if (!(E > 0) || !(A >= 0)) {
+      r1.querySelector('b').textContent = '—'; r2el.querySelector('b').textContent = '—';
+      r1.className = 'res'; r2el.className = 'res';
+      m.className = 'verdict'; m.textContent = '✍️ اكتب الرقمين.'; return;
+    }
+    var v = A - E, p = v / E * 100;
+    r1.querySelector('b').textContent = f1(v) + ' h';
+    r2el.querySelector('b').textContent = f1(p) + '%';
+    var cls = v < 0 ? 'res pos' : (v > 0 ? 'res neg' : 'res');
+    r1.className = cls; r2el.className = cls;
+    if (v < 0) { m.className = 'verdict pos'; m.textContent = '✅ خلصت أسرع من التقدير (تحت الـ estimate).'; }
+    else if (v > 0) { m.className = 'verdict neg'; m.textContent = '⚠️ عدّت التقدير — الـ PM لازم يراجع التقديرات الباقية ويحدّث الـ work plan.'; }
+    else { m.className = 'verdict'; m.textContent = '➖ مطابق للتقدير.'; }
+  }
+  e.addEventListener('input', upd); a.addEventListener('input', upd);
+  upd();
+})();
+
+/* ---------- Brooks: communication channels ---------- */
+(function () {
+  var rng = $i('brRange'), svg = $i('brSvg');
+  if (!rng || !svg) return;
+  var nT = $i('brN'), cT = $i('brC'), m = $i('brMsg');
+  function upd() {
+    var n = +rng.value, ch = n * (n - 1) / 2;
+    nT.textContent = n; cT.textContent = ch;
+    var cx = 110, cy = 110, R = 88, pts = [], h = '';
+    for (var i = 0; i < n; i++) {
+      var ang = 2 * Math.PI * i / n - Math.PI / 2;
+      pts.push([cx + R * Math.cos(ang), cy + R * Math.sin(ang)]);
+    }
+    for (var a = 0; a < n; a++) for (var b = a + 1; b < n; b++)
+      h += '<line x1="' + pts[a][0].toFixed(1) + '" y1="' + pts[a][1].toFixed(1) + '" x2="' + pts[b][0].toFixed(1) + '" y2="' + pts[b][1].toFixed(1) + '"/>';
+    pts.forEach(function (p) { h += '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="7"/>'; });
+    svg.innerHTML = h;
+    m.className = 'note' + (n >= 10 ? ' warn' : '');
+    m.innerHTML = 'آخر شخص انضمّ ضاف <b>' + (n - 1) + '</b> قناة تواصل جديدة — ومحتاج <b>تدريب</b> من الفريق الحالي. ' +
+      (n >= 10 ? 'الـ overhead هنا كبير جداً ← ده سبب <b class="en">Brooks’ Law</b>.' : 'جرّب تكبّر الفريق وشوف إزاي القنوات بتزيد أسرع من الناس.');
+  }
+  rng.addEventListener('input', upd);
+  upd();
+})();
+
+/* ---------- timebox simulator ---------- */
+(function () {
+  var root = $i('tbx');
+  if (!root) return;
+  var boxes = [].slice.call(root.querySelectorAll('input'));
+  var CAP = 12;
+  function upd() {
+    var used = 0, coreOut = 0, niceIn = 0, any = 0;
+    boxes.forEach(function (b) {
+      var w = +b.getAttribute('data-w'), core = b.getAttribute('data-core') === '1';
+      if (b.checked) { used += w; any++; if (!core) niceIn++; }
+      else if (core) coreOut++;
+    });
+    var pct = Math.min(100, used / CAP * 100);
+    $i('tbxBar').style.width = (100 - pct) + '%';
+    $i('tbxTxt').textContent = used + ' / ' + CAP + ' weeks';
+    var m = $i('tbxMsg');
+    if (!any) { m.className = 'note'; m.textContent = 'اختار الـ features اللي هتدخل جوه الـ timebox — التاريخ ثابت.'; }
+    else if (used > CAP) { m.className = 'note bad'; m.textContent = '❌ عدّيت الـ timebox بـ ' + (used - CAP) + ' أسبوع. في الـ timeboxing التاريخ ما بيتحركش، يبقى الحل تشيل features (مش تمد الموعد).'; }
+    else if (coreOut > 0) { m.className = 'note warn'; m.textContent = '⚠️ جوه الـ box، بس لسه فيه ' + coreOut + ' من الـ core features برّه. الـ core الأول!'; }
+    else if (niceIn > 0) { m.className = 'note ok'; m.textContent = '✅ كل الـ core جوه الـ box ومعاهم إضافات ودخلوا في الميعاد.'; }
+    else { m.className = 'note ok'; m.textContent = '✅ ممتاز: كل الـ core جوه الـ timebox (' + used + ' من ' + CAP + ' أسبوع) بجودة عالية، والباقي (Dashboard و Mobile app) بيتأجّل لـ timebox جاي. ده بالظبط الـ timeboxing.'; }
+  }
+  root.addEventListener('change', upd);
+  upd();
+})();
+
+/* ---------- catch-up helper ---------- */
+(function () {
+  var root = $i('catchUp');
+  if (!root) return;
+  var boxes = [].slice.call(root.querySelectorAll('input'));
+  var m = $i('catchMsg');
+  function upd() {
+    var n = boxes.filter(function (b) { return b.checked; }).length;
+    if (n === 2) { m.className = 'note ok'; m.innerHTML = '✅ <b>الحالة الوحيدة</b> اللي تقدر فيها تعوّض وقت. حتى كده قيّم تعقيد الباقي بدقة وعدّل الـ schedule لو لزم.'; }
+    else { m.className = 'note bad'; m.innerHTML = '❌ <b>متفترضش إنك هتلحق.</b> قيّم تعقيد الباقي وعدّل الـ schedule (أو الـ scope) — وإضافة ناس مش دايماً الحل.'; }
+  }
+  root.addEventListener('change', upd);
+  upd();
+})();
+</script>
+</body>
+</html>

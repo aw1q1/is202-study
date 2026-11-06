@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IS202 · Mock Exam</title>
+<style>
+/* ==========================================================
+   IS202 study pages — shared design system
+   ========================================================== */
+:root{
+  --bg:#0d1220; --card:#172038; --card2:#1d2848; --line:#2a3862;
+  --text:#eaf0ff; --muted:#9fb0d8;
+  --accent:#7aa8ff; --accent-rgb:122,168,255; --on-accent:#0a1226;
+  --ok:#4ade80; --ok-rgb:74,222,128;
+  --bad:#ff7b8c; --bad-rgb:255,123,140;
+  --warn:#fbbf24; --warn-rgb:251,191,36;
+  --c-plan:#4cc9f0; --c-plan-rgb:76,201,240;
+  --c-ana:#fbbf24;  --c-ana-rgb:251,191,36;
+  --c-des:#b69cff;  --c-des-rgb:182,156,255;
+  --c-imp:#4ade80;  --c-imp-rgb:74,222,128;
+  --shadow:0 12px 32px rgba(0,0,0,.35);
+  --radius:18px;
+}
+[data-theme="light"]{
+  --bg:#f5f2ea; --card:#ffffff; --card2:#f6f3ec; --line:#ddd6c3;
+  --text:#1b2336; --muted:#5a6684;
+  --accent:#2f66e0; --accent-rgb:47,102,224; --on-accent:#ffffff;
+  --ok:#15803d; --ok-rgb:21,128,61;
+  --bad:#c0263d; --bad-rgb:192,38,61;
+  --warn:#a85d00; --warn-rgb:168,93,0;
+  --c-plan:#0b84a8; --c-plan-rgb:11,132,168;
+  --c-ana:#b86e00;  --c-ana-rgb:184,110,0;
+  --c-des:#6b44e0;  --c-des-rgb:107,68,224;
+  --c-imp:#17803d;  --c-imp-rgb:23,128,61;
+  --shadow:0 10px 26px rgba(70,55,20,.12);
+}
+
+/* colour helpers: put on any element, children read --c / --c-rgb */
+.ph-plan{--c:var(--c-plan);--c-rgb:var(--c-plan-rgb)}
+.ph-ana{--c:var(--c-ana);--c-rgb:var(--c-ana-rgb)}
+.ph-des{--c:var(--c-des);--c-rgb:var(--c-des-rgb)}
+.ph-imp{--c:var(--c-imp);--c-rgb:var(--c-imp-rgb)}
+.t-ok{--c:var(--ok);--c-rgb:var(--ok-rgb)}
+.t-warn{--c:var(--warn);--c-rgb:var(--warn-rgb)}
+.t-bad{--c:var(--bad);--c-rgb:var(--bad-rgb)}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+body{
+  margin:0;min-height:100vh;color:var(--text);
+  font:17px/1.85 "Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;
+  background:
+    radial-gradient(900px 480px at 85% -8%,rgba(var(--accent-rgb),.14),transparent 62%),
+    radial-gradient(700px 420px at 5% 14%,rgba(var(--c-des-rgb),.08),transparent 60%),
+    var(--bg);
+  background-attachment:fixed;
+}
+b,strong{font-weight:700}
+button{font-family:inherit}
+h2{font-size:32px;line-height:1.35;margin:0 0 6px}
+h3{font-size:20px;margin:0 0 10px}
+h4{font-size:17px;margin:0 0 8px}
+.sec{margin:30px 0 12px;font-size:21px}
+.sec small{color:var(--muted);font-weight:400;font-size:14px}
+.lead{color:var(--muted);margin:0 0 18px;font-size:18px}
+.muted{color:var(--muted)}
+.en{direction:ltr;unicode-bidi:isolate;font-family:"Segoe UI",system-ui,sans-serif;font-weight:600}
+.en.plain{font-weight:400}
+
+/* ---------- top bar ---------- */
+.topbar{
+  position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;
+  padding:10px clamp(12px,3vw,28px);
+  background:var(--bg);
+  background:color-mix(in srgb,var(--bg) 84%,transparent);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--line);
+}
+.home,.icon-btn{
+  width:40px;height:40px;display:grid;place-items:center;border-radius:12px;
+  border:1px solid var(--line);background:var(--card);color:var(--text);
+  text-decoration:none;font-size:18px;cursor:pointer;flex:none;
+}
+.home:hover,.icon-btn:hover{border-color:var(--accent)}
+.ttl{display:flex;flex-direction:column;line-height:1.3}
+.ttl small{color:var(--muted);font-size:13px}
+.prog{margin-inline-start:auto;display:flex;align-items:center;gap:10px;min-width:150px;color:var(--muted);font-size:14px}
+.bar{flex:1;height:9px;border-radius:99px;background:rgba(var(--accent-rgb),.16);overflow:hidden;min-width:90px}
+.bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--c-imp));transition:width .5s}
+
+/* ---------- layout + nav ---------- */
+.layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:26px;max-width:1160px;margin:0 auto;padding:24px clamp(12px,3vw,24px) 70px;align-items:start}
+.nav{position:sticky;top:78px;display:flex;flex-direction:column;gap:6px}
+.nav button{
+  display:flex;align-items:center;gap:10px;text-align:start;width:100%;
+  background:transparent;border:1px solid transparent;color:var(--muted);
+  padding:9px 12px;border-radius:14px;cursor:pointer;font-size:15px;transition:.18s;
+}
+.nav button:hover{background:rgba(var(--accent-rgb),.08);color:var(--text)}
+.nav .num{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;background:var(--card2);border:1px solid var(--line)}
+.nav .lbl{flex:1}
+.nav .tick{opacity:0;color:var(--ok);font-weight:800}
+.nav button.on{background:var(--card);border-color:var(--line);color:var(--text);box-shadow:var(--shadow)}
+.nav button.on .num{background:var(--accent);color:var(--on-accent);border-color:transparent}
+.nav button.done .tick{opacity:1}
+
+/* ---------- stations ---------- */
+.station{display:none}
+.station.on{display:block;animation:rise .45s ease}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.station-foot{display:flex;justify-content:space-between;gap:12px;margin-top:34px;padding-top:18px;border-top:1px dashed var(--line)}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow);margin:16px 0}
+.card.tint{border-top:4px solid var(--c)}
+.card.tint h4{color:var(--c)}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border-radius:14px;
+  border:1px solid var(--line);background:var(--card);color:var(--text);font-size:16px;font-weight:600;
+  cursor:pointer;transition:.18s;text-decoration:none;
+}
+.btn:hover{transform:translateY(-1px);border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--on-accent);border-color:transparent}
+.btn.good{background:rgba(var(--ok-rgb),.16);border-color:rgba(var(--ok-rgb),.55)}
+.btn.bad{background:rgba(var(--bad-rgb),.14);border-color:rgba(var(--bad-rgb),.5)}
+.btn.ghost{background:transparent}
+
+.chip{
+  display:inline-flex;align-items:center;gap:6px;padding:4px 14px;margin:4px;border-radius:999px;font-size:15px;line-height:1.7;
+  background:rgba(var(--c-rgb,var(--accent-rgb)),.14);border:1px solid rgba(var(--c-rgb,var(--accent-rgb)),.45);
+}
+.chip.en{font-weight:600}
+.note{margin:14px 0;padding:12px 16px;border-radius:14px;background:rgba(var(--c-rgb,var(--accent-rgb)),.1);border:1px solid rgba(var(--c-rgb,var(--accent-rgb)),.38)}
+.note.warn{--c-rgb:var(--warn-rgb)}
+.note.ok{--c-rgb:var(--ok-rgb)}
+.note.bad{--c-rgb:var(--bad-rgb)}
+
+/* ---------- tabs / panes / segmented ---------- */
+.pane{display:none}
+.pane.on{display:block;animation:rise .35s ease}
+.seg{display:inline-flex;gap:6px;padding:5px;border-radius:16px;background:var(--card2);border:1px solid var(--line);flex-wrap:wrap;margin-bottom:14px}
+.seg button{border:0;background:transparent;color:var(--muted);padding:9px 18px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;transition:.18s}
+.seg button.on{background:rgba(var(--c-rgb,var(--accent-rgb)),.2);color:var(--text);box-shadow:inset 0 0 0 1.5px rgba(var(--c-rgb,var(--accent-rgb)),.7)}
+
+/* ---------- big picture ---------- */
+.story{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap}
+.beat{flex:1;min-width:150px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;padding:14px;border-radius:16px;background:rgba(var(--bad-rgb),.1);border:1px solid rgba(var(--bad-rgb),.4)}
+.beat.ok{background:rgba(var(--ok-rgb),.12);border-color:rgba(var(--ok-rgb),.5)}
+.beat .emo{font-size:30px;line-height:1.3}
+.arrow{align-self:center;font-size:22px;color:var(--muted)}
+.punch{text-align:center;font-size:20px;font-weight:700;margin:16px 0 12px}
+.tile{
+  display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:start;padding:18px;border-radius:18px;
+  border:1px solid rgba(var(--c-rgb),.45);background:linear-gradient(155deg,rgba(var(--c-rgb),.2),var(--card) 72%);
+  color:var(--text);cursor:pointer;transition:.2s;font-size:17px;
+}
+.tile:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.tile .emo{font-size:30px;line-height:1.3}
+.tile small{color:var(--muted);font-size:14.5px}
+
+/* ---------- translator diagram ---------- */
+.trans{display:flex;align-items:center;justify-content:center;gap:8px;direction:ltr;flex-wrap:wrap;margin-bottom:16px}
+.trans>*{direction:rtl}
+.tnode{
+  display:flex;flex-direction:column;align-items:center;gap:0;min-width:160px;padding:14px 18px;border-radius:18px;
+  border:1.5px solid rgba(var(--c-rgb),.4);background:rgba(var(--c-rgb),.1);color:var(--text);cursor:pointer;transition:.2s;font-size:16px;
+}
+.tnode .emo{font-size:30px;line-height:1.3}
+.tnode.on{background:rgba(var(--c-rgb),.24);border-color:var(--c);transform:translateY(-3px);box-shadow:0 8px 22px rgba(var(--c-rgb),.25)}
+.tlink{font-size:26px;color:var(--muted)}
+.bigq{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.bigq .chip{font:800 20px/1.5 "Segoe UI",sans-serif;padding:6px 20px}
+
+/* ---------- flip cards (roles) ---------- */
+.flip{perspective:1000px;cursor:pointer;outline:none}
+.flip-in{display:grid;min-height:170px;transition:transform .55s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
+.flip.open .flip-in{transform:rotateY(180deg)}
+.flip .face{
+  grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:18px;padding:16px 18px;
+  display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:4px;
+  border:1px solid rgba(var(--c-rgb,var(--accent-rgb)),.5);
+  background:linear-gradient(155deg,rgba(var(--c-rgb,var(--accent-rgb)),.2),var(--card) 75%);
+}
+.flip .front .emo{font-size:32px;line-height:1.3}
+.flip .front b{font-size:18px}
+.flip .front small{color:var(--muted)}
+.flip .back{transform:rotateY(180deg);background:var(--card2);font-size:16px;line-height:1.75}
+.flip:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:18px}
+.hint{color:var(--muted);font-size:13px}
+
+/* ---------- SDLC path ---------- */
+.path{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;direction:ltr;margin:6px 0 18px}
+.node{
+  position:relative;direction:rtl;display:flex;flex-direction:column;align-items:center;gap:2px;padding:16px 10px;border-radius:20px;
+  border:1.5px solid rgba(var(--c-rgb),.4);background:rgba(var(--c-rgb),.09);color:var(--text);cursor:pointer;transition:.22s;text-align:center;font-size:15px;
+}
+.node i{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font:800 24px/1 "Segoe UI",sans-serif;font-style:normal;background:rgba(var(--c-rgb),.25);color:var(--c);margin-bottom:4px;transition:.22s}
+.node b{font-size:18px;font-family:"Segoe UI",sans-serif}
+.node small{color:var(--muted);font-size:13.5px;line-height:1.4}
+.node:not(:last-child)::after{content:"➜";position:absolute;right:-22px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:18px}
+.node.on{background:rgba(var(--c-rgb),.22);border-color:var(--c);transform:translateY(-4px);box-shadow:0 12px 26px rgba(var(--c-rgb),.28)}
+.node.on i{background:var(--c);color:var(--bg)}
+.node b,.node small,.ph-head .q,.tile b.en{direction:ltr;unicode-bidi:isolate}
+.mnemo{text-align:center;font-size:19px;margin:0 0 14px;color:var(--muted)}
+.mnemo b{color:var(--text)}
+.panel{background:var(--card);border:1px solid rgba(var(--c-rgb),.5);border-top:5px solid var(--c);border-radius:18px;padding:20px 22px;box-shadow:var(--shadow)}
+.ph-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.ph-head .q{font:800 24px/1.3 "Segoe UI",sans-serif;color:var(--c);padding:4px 16px;border-radius:12px;background:rgba(var(--c-rgb),.15)}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0}
+.steps li{counter-increment:s;position:relative;padding:6px 0;padding-inline-start:50px;margin:6px 0}
+.steps li::before{content:counter(s);position:absolute;inset-inline-start:0;top:6px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:rgba(var(--c-rgb),.2);color:var(--c)}
+.deliv{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+
+/* ---------- BPM ---------- */
+.cycle{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;direction:ltr}
+.cycle>div{direction:rtl;padding:14px;border-radius:16px;background:var(--card2);border:1px solid var(--line);font-size:15.5px;line-height:1.65}
+.cycle .n{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-weight:800;margin-bottom:6px}
+.loopnote{text-align:center;color:var(--muted);margin:10px 0 0}
+.range-wrap{direction:ltr;padding:6px 6px 0}
+.range-wrap input{width:100%;height:10px;accent-color:var(--accent);cursor:pointer}
+.ticks{display:flex;justify-content:space-between;direction:ltr;font:800 16px "Segoe UI",sans-serif;margin-top:8px}
+.ticks span{cursor:pointer;padding:4px 14px;border-radius:10px;color:var(--muted);transition:.18s}
+.ticks span.on{background:rgba(var(--c-rgb),.22);color:var(--text)}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:16px 0 8px}
+.metric small{display:flex;justify-content:space-between;color:var(--muted);margin-bottom:4px}
+.meter{direction:ltr;position:relative;height:12px;border-radius:99px;background:linear-gradient(90deg,var(--ok),var(--warn),var(--bad));overflow:hidden}
+.meter i{position:absolute;top:0;bottom:0;right:0;width:100%;background:var(--card2);transition:width .55s cubic-bezier(.2,.8,.2,1)}
+
+/* ---------- decks (games / quiz) ---------- */
+.deck{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px 22px;box-shadow:var(--shadow);margin:14px 0}
+.deck-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;color:var(--muted);font-size:15px}
+.cnt,.fc-count{direction:ltr;unicode-bidi:isolate}
+.deck-bar{flex:1;height:8px;border-radius:99px;background:rgba(var(--accent-rgb),.16);overflow:hidden}
+.deck-bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--c-imp));transition:width .4s}
+.deck-q{font-size:21px;font-weight:600;line-height:1.7;margin:4px 0 16px;min-height:56px}
+.opts{display:grid;gap:10px}
+.opts.c2{grid-template-columns:repeat(2,1fr)}
+.opts.c3{grid-template-columns:repeat(3,1fr)}
+.opt{
+  text-align:start;padding:13px 16px;border-radius:14px;border:1.5px solid var(--line);background:var(--card2);
+  color:var(--text);font-size:17px;cursor:pointer;transition:.18s;line-height:1.6;
+}
+.opt.ph-plan,.opt.ph-ana,.opt.ph-des,.opt.ph-imp,.opt.t-ok,.opt.t-warn,.opt.t-bad{border-color:rgba(var(--c-rgb),.55);background:rgba(var(--c-rgb),.1);font-weight:600}
+.opt:hover:not(:disabled){border-color:var(--accent);transform:translateY(-1px)}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--ok);background:rgba(var(--ok-rgb),.2)}
+.opt.wrong{border-color:var(--bad);background:rgba(var(--bad-rgb),.2)}
+.fb{margin-top:16px;padding:14px 16px;border-radius:14px;animation:rise .3s ease}
+.fb.ok{background:rgba(var(--ok-rgb),.13);border:1px solid rgba(var(--ok-rgb),.5)}
+.fb.no{background:rgba(var(--bad-rgb),.12);border:1px solid rgba(var(--bad-rgb),.5)}
+.fb .btn{margin-top:10px}
+.deck-end{text-align:center;padding:12px 0}
+.deck-end .big{font:800 56px/1.2 "Segoe UI",sans-serif;color:var(--accent)}
+
+/* ---------- flashcards ---------- */
+.fc{background:transparent}
+.fc-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.fc-top .seg{margin:0}
+.fc-card{perspective:1200px;cursor:pointer;outline:none;margin:10px 0 14px}
+.fc-in{display:grid;min-height:270px;transition:transform .6s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
+.fc-card.open .fc-in{transform:rotateY(180deg)}
+.fc-in .face{
+  grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:24px;padding:28px;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:12px;
+  border:1px solid var(--line);font-size:23px;line-height:1.7;box-shadow:var(--shadow);
+}
+.fc-in .front{background:linear-gradient(160deg,rgba(var(--accent-rgb),.22),var(--card))}
+.fc-in .back{background:linear-gradient(160deg,rgba(var(--ok-rgb),.18),var(--card));transform:rotateY(180deg);font-size:19.5px}
+.fc-in small{color:var(--muted);font-size:13.5px}
+.fc-card:focus-visible .fc-in .front{outline:2px solid var(--accent)}
+.fc-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+.fc-stat{text-align:center;margin:8px 0 0}
+
+/* ---------- essay ---------- */
+.essay textarea{width:100%;min-height:110px;resize:vertical;padding:12px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--card2);color:var(--text);font:16px/1.7 "Segoe UI",sans-serif;margin:8px 0 12px}
+.essay textarea:focus{outline:none;border-color:var(--accent)}
+.model{margin-top:14px;animation:rise .3s ease}
+.mdl{padding:14px 16px;border-radius:14px;background:rgba(var(--ok-rgb),.1);border:1px solid rgba(var(--ok-rgb),.4);margin-bottom:12px}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:6px 0;cursor:pointer}
+.chk input{width:20px;height:20px;margin-top:5px;accent-color:var(--ok);flex:none}
+.pts-sc{font-weight:700;margin-top:6px;color:var(--ok)}
+
+/* ---------- tables (summary) ---------- */
+.tbl{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:14px;border:1px solid var(--line);font-size:15.5px;line-height:1.65;margin:8px 0 18px}
+.tbl th,.tbl td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:start;vertical-align:top}
+.tbl tr:last-child td{border-bottom:0}
+.tbl th{background:var(--card2);font-size:14.5px;color:var(--muted)}
+.tbl td:first-child{font-weight:700;white-space:nowrap}
+.tbl .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);margin-inline-end:8px}
+
+/* ---------- calculators / inputs ---------- */
+.calc-top{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.calc-top label{display:inline-flex;align-items:center;gap:8px;font-weight:600}
+.calc input[type=number]{width:100%;max-width:132px;padding:7px 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--card2);color:var(--text);font:600 16px "Segoe UI",sans-serif;direction:ltr;text-align:right}
+.calc input[type=number]:focus{outline:none;border-color:var(--accent)}
+.calc-top input[type=number]{max-width:90px}
+.calc input[type=range]{accent-color:var(--accent);cursor:pointer;direction:ltr;width:170px}
+main{min-width:0}
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:4px 0;direction:ltr}
+.ctbl{min-width:680px;direction:ltr;margin:0}
+.ctbl th,.ctbl td{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ctbl th:first-child,.ctbl td:first-child{text-align:left}
+.ctbl input[type=number]{min-width:112px}
+.tbl.ctbl td:first-child{white-space:nowrap}
+.ctbl.sm{min-width:0}
+.ctbl.sm input[type=number]{min-width:0}
+.ctbl.sm th,.ctbl.sm td{white-space:normal}
+.tbl.ctbl.sm td:first-child{white-space:nowrap}
+.ctbl .neg{color:var(--bad)}
+.ctbl .pos{color:var(--ok)}
+.ctbl tr.tot td{background:var(--card2);font-weight:700}
+.res-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:14px}
+.res{padding:12px 14px;border-radius:14px;background:var(--card2);border:1px solid var(--line)}
+.res small{display:block;color:var(--muted);font-size:14px}
+.res b{display:block;font:800 22px/1.5 "Segoe UI",sans-serif;direction:ltr;unicode-bidi:isolate;text-align:start}
+.res.pos{border-color:rgba(var(--ok-rgb),.6);background:rgba(var(--ok-rgb),.12)}
+.res.neg{border-color:rgba(var(--bad-rgb),.6);background:rgba(var(--bad-rgb),.12)}
+.verdict{margin-top:14px;padding:12px 16px;border-radius:14px;font-weight:700;font-size:18px;background:var(--card2);border:1px solid var(--line)}
+.verdict.pos{background:rgba(var(--ok-rgb),.14);border-color:rgba(var(--ok-rgb),.55)}
+.verdict.neg{background:rgba(var(--bad-rgb),.13);border-color:rgba(var(--bad-rgb),.55)}
+.checks{display:grid;gap:4px;margin-bottom:10px}
+.checks .chk{padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card2);margin:0}
+.checks .chk:hover{border-color:var(--accent)}
+.formula{direction:ltr;unicode-bidi:isolate;text-align:center;font:700 19px/1.9 "Segoe UI",sans-serif;padding:12px 16px;border-radius:14px;background:rgba(var(--accent-rgb),.1);border:1px solid rgba(var(--accent-rgb),.4);margin:12px 0}
+.formula small{display:block;font:400 14px "Segoe UI",sans-serif;color:var(--muted)}
+
+/* ---------- share disclaimer (footer injected by core.js) ---------- */
+.disclaimer{max-width:1160px;margin:0 auto;padding:0 clamp(12px,3vw,24px) 46px}
+.disclaimer>div{padding:14px 18px;border-radius:16px;border:1px solid rgba(var(--warn-rgb),.5);background:rgba(var(--warn-rgb),.08);font-size:14.5px;line-height:1.85;color:var(--muted)}
+.disclaimer b{color:var(--text)}
+.disclaimer .d-en{direction:ltr;text-align:left;margin-top:10px;padding-top:10px;border-top:1px dashed rgba(var(--warn-rgb),.4);font-family:"Segoe UI",system-ui,sans-serif;font-size:13.5px;line-height:1.7}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;gap:12px;padding-top:12px}
+  .nav{position:sticky;top:60px;z-index:20;flex-direction:row;overflow-x:auto;gap:6px;padding:8px 2px;background:var(--bg)}
+  .nav{scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav button{width:auto;flex:none;padding:6px 10px}
+  .nav button:not(.on) .lbl{display:none}
+  .nav .tick{display:none}
+  .nav button.done .num{background:var(--ok);color:#06210f;border-color:transparent}
+  .ttl small{display:none}
+}
+@media (max-width:700px){
+  body{font-size:16px}
+  h2{font-size:26px}
+  .path{grid-template-columns:repeat(2,1fr);gap:12px}
+  .node::after{display:none!important}
+  .cycle{grid-template-columns:repeat(2,1fr)}
+  .opts.c3{grid-template-columns:1fr}
+  .metrics{grid-template-columns:1fr}
+  .prog{min-width:0}
+  .tbl{font-size:14px}
+  .tbl th,.tbl td{padding:8px 7px}
+  .tbl td:first-child{white-space:normal}
+  .prog .bar{min-width:50px}
+  .card.calc{padding:16px 10px}
+  .calc input[type=number]{padding:6px 4px;font-size:15px}
+  .ctbl.sm th,.ctbl.sm td{padding:8px 4px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* ---------- print: only the summary station ---------- */
+@media print{
+  :root,[data-theme="dark"],[data-theme="light"]{--bg:#fff;--card:#fff;--card2:#f3f3f3;--line:#ccc;--text:#111;--muted:#444;--shadow:none}
+  body{background:#fff!important;font-size:12pt;line-height:1.55}
+  .topbar,.nav,.station-foot,.noprint{display:none!important}
+  .layout{display:block;padding:0}
+  .station{display:none!important}
+  .station.summary{display:block!important}
+  .card,.panel{box-shadow:none;break-inside:avoid}
+  .tbl{break-inside:avoid}
+}
+
+</style>
+<style>
+/* ---------- Mock exam only ---------- */
+.xwrap{max-width:860px;margin:0 auto;padding:22px clamp(12px,3vw,24px) 40px}
+.timer{font:800 17px "Segoe UI",sans-serif;padding:6px 14px;border-radius:12px;background:var(--card);border:1px solid var(--line);direction:ltr;white-space:nowrap;flex:none}
+.timer.warn{color:var(--warn);border-color:var(--warn)}
+.timer.bad{color:var(--bad);border-color:var(--bad);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.55}}
+
+.hero2{text-align:center;margin:10px 0 22px}
+.hero2 h1{font-size:34px;line-height:1.35;margin:0 0 6px}
+.hero2 p{color:var(--muted);margin:0;font-size:18px}
+.rules{margin:0;padding-inline-start:22px;line-height:2}
+.big{font-size:18px;padding:13px 26px}
+.seg.tm button{min-width:96px}
+
+.part{margin:34px 0 8px;font-size:25px}
+.part small{color:var(--muted);font-size:15px;font-weight:400}
+.q{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;margin:14px 0;box-shadow:var(--shadow)}
+.q.answered{border-color:rgba(var(--accent-rgb),.55)}
+.qh{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.qn{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font:800 15px "Segoe UI",sans-serif;background:rgba(var(--accent-rgb),.18);color:var(--accent);flex:none}
+.qt{font-size:19px;font-weight:600;line-height:1.7;margin:2px 0 12px}
+.qo{display:grid;gap:9px}
+.qo.c2{grid-template-columns:1fr 1fr}
+.q .opt{display:flex;gap:10px;align-items:flex-start;width:100%}
+.q .opt .lt{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:800 13px "Segoe UI",sans-serif;background:var(--card);border:1px solid var(--line)}
+.q .opt.sel{border-color:var(--accent);background:rgba(var(--accent-rgb),.16)}
+.q .opt.sel .lt{background:var(--accent);color:var(--on-accent);border-color:transparent}
+.q .opt .mine{margin-inline-start:auto;font:600 12px "Segoe UI",sans-serif;font-style:normal;padding:0 9px;border-radius:99px;background:var(--card);border:1px solid var(--line);white-space:nowrap;align-self:center}
+.q.ok{border-inline-start:6px solid var(--ok)}
+.q.no{border-inline-start:6px solid var(--bad)}
+.q.skip{border-inline-start:6px solid var(--warn)}
+.chip.lec{padding:0 12px;font:800 13px "Segoe UI",sans-serif;margin:0}
+.chip.lec.l1{--c-rgb:var(--c-plan-rgb)}
+.chip.lec.l2{--c-rgb:var(--c-ana-rgb)}
+.chip.lec.l3{--c-rgb:var(--c-des-rgb)}
+.chip.lec.l4{--c-rgb:var(--c-imp-rgb)}
+.chip.bk{--c-rgb:var(--ok-rgb);padding:0 12px;font-size:13px;margin:0}
+.rv{margin-top:8px;font-size:15px}
+.rv a{color:var(--accent);font-weight:700}
+.q.essay textarea{min-height:150px}
+.q.essay .qfb .model{margin-top:6px}
+
+.submitbar{margin:34px 0 10px;text-align:center}
+#confirmBox{text-align:start}
+#confirmBox .btn{margin:6px 6px 0 0}
+
+.rescard h2{margin:0 0 4px}
+.bigpct{font:800 64px/1.2 "Segoe UI",sans-serif;color:var(--accent);text-align:center;direction:ltr}
+.lrow{display:grid;grid-template-columns:96px 1fr 54px auto;gap:10px;align-items:center;margin:8px 0}
+.lrow .nm{font:700 15px "Segoe UI",sans-serif;direction:ltr;text-align:left}
+.lrow .lb{height:14px;border-radius:99px;background:rgba(var(--c-rgb),.14);overflow:hidden;direction:ltr}
+.lrow .lb i{display:block;height:100%;border-radius:99px;background:var(--c);transition:width .6s}
+.lrow b{direction:ltr;text-align:center;font-family:"Segoe UI",sans-serif}
+.lrow a{color:var(--accent);font-weight:700;font-size:14.5px;white-space:nowrap}
+.exam-only-wrong .q.ok{display:none}
+
+@media (max-width:700px){
+  .qo.c2{grid-template-columns:1fr 1fr}
+  .bigpct{font-size:52px}
+  .lrow{grid-template-columns:78px 1fr 44px;gap:8px}
+  .lrow a{grid-column:1/-1}
+  .hero2 h1{font-size:28px}
+  .q{padding:16px 13px}
+  .timer{font-size:15px;padding:5px 10px}
+}
+</style>
+</head>
+<body data-lecture="exam">
+
+<header class="topbar">
+  <a class="home" href="index.html" title="القائمة الرئيسية">🏠</a>
+  <div class="ttl"><b>IS202 · Mock Exam</b><small class="en plain">T/F · MCQ · Essay</small></div>
+  <div class="prog" id="progBox" hidden><div class="bar"><i id="xBar"></i></div><span id="xTxt">0/45</span></div>
+  <div class="timer" id="timer" hidden>⏱ <span id="tmTxt">--:--</span></div>
+  <button id="themeBtn" class="icon-btn" type="button" title="فاتح / داكن">☀️</button>
+</header>
+
+<main class="xwrap">
+
+<!-- =====================================================  START -->
+<section id="vStart">
+  <div class="hero2">
+    <h1><span class="en">Mock Exam</span> 🎓</h1>
+    <p>امتحان تجريبي بنفس شكل الامتحان: <span class="en">True/False · MCQ · Essay</span></p>
+  </div>
+
+  <div id="resume" class="note ok" hidden></div>
+
+  <div class="grid g3">
+    <div class="card tint ph-plan" style="margin:0"><h4><span class="en">Part A</span> — صح / غلط</h4><p style="margin:0"><b class="en">20</b> سؤال</p></div>
+    <div class="card tint ph-ana" style="margin:0"><h4><span class="en">Part B</span> — <span class="en">MCQ</span></h4><p style="margin:0"><b class="en">20</b> سؤال</p></div>
+    <div class="card tint ph-des" style="margin:0"><h4><span class="en">Part C</span> — <span class="en">Essay</span></h4><p style="margin:0"><b class="en">5</b> أسئلة (فيهم حسابات و case)</p></div>
+  </div>
+
+  <div class="card">
+    <h4>📋 قبل ما تبدأ</h4>
+    <ul class="rules">
+      <li>الأسئلة من المحاضرات الأربعة (٥ <span class="en">T/F</span> + ٥ <span class="en">MCQ</span> من كل محاضرة + <span class="en">Essay</span> واحد على الأقل).</li>
+      <li>اللي عليها علامة <b>📖 الكتاب</b> (هتظهر بعد التسليم) متاخدة من الـ <span class="en">Assessment</span> بتاع الكتاب بصياغة معدّلة شوية؛ والباقي من عندي من السلايدز.</li>
+      <li><b>مفيش تصحيح فوري</b> زي الامتحان الحقيقي: تقدر تغيّر إجابتك لحد ما تدوس <b>سلّم</b>، وبعدها تشوف الصح والشرح وتراجع الجزء الضعيف.</li>
+      <li>الـ <span class="en">Essay</span> بتكتبه في الصفحة، وبعد التسليم بتقارن بالإجابة النموذجية وتعلّم بنفسك النقط اللي غطّيتها (<b>تقييم ذاتي</b>، فكن صادق مع نفسك 😉).</li>
+      <li>توزيع الدرجات هنا <b>تقديري من عندي</b> (١ لكل <span class="en">T/F</span> و<span class="en">MCQ</span>، و٤ لكل <span class="en">Essay</span>) — الامتحان الحقيقي ممكن يختلف في العدد والدرجات.</li>
+    </ul>
+  </div>
+
+  <div class="card" style="text-align:center">
+    <h4>⏱ التايمر</h4>
+    <div class="seg tm" id="tmSeg">
+      <button type="button" data-min="60">٦٠ دقيقة</button>
+      <button type="button" data-min="90" class="on">٩٠ دقيقة</button>
+      <button type="button" data-min="0">من غير تايمر</button>
+    </div>
+    <div><button type="button" class="btn primary big" id="btnStart">▶ ابدأ الامتحان</button></div>
+  </div>
+</section>
+
+<!-- =====================================================  EXAM -->
+<section id="vExam" hidden></section>
+
+</main>
+
+<script>
+/* ==========================================================
+   QUESTION BANK
+   l = lecture · st = station number in that lecture's page (for the "review" link)
+   bk = 1 → based on the book's Assessment (wording adapted) · bk = 0 → my own question from the slides
+   ========================================================== */
+var STN = {
+  1: { 2: 'الـ Systems Analyst', 3: 'الأدوار والمهارات', 4: 'الـ SDLC', 5: 'المشاريع و BPM' },
+  2: { 2: 'الـ System Request', 3: 'قيمة المشروع', 4: 'Technical Feasibility', 5: 'التكاليف والفوايد', 6: 'الـ NPV', 7: 'Organizational Feasibility' },
+  3: { 2: 'اختيار المشاريع و PPM', 4: 'Structured', 5: 'RAD', 6: 'Agile', 7: 'مصفوفة الاختيار' },
+  4: { 2: 'الـ Balancing Act', 3: 'التقدير', 4: 'Tasks · WBS · Work plan', 5: 'الـ Staffing', 7: 'Scope · Timeboxing' }
+};
+
+var BANK = {
+  /* ---------------------------------------------------- Part A: True / False */
+  tf: [
+    { id: 't1', l: 1, st: 4, bk: 1, a: true,
+      q: 'The main purpose of systems analysis is to determine WHAT the system must do (the business requirements); writing the program code happens later, in Implementation.',
+      why: 'صح. الـ <b>Analysis</b> بيجاوب What / Who / Where / When، والكود بيتكتب في <b>Implementation</b>. <span class="muted">(الكتاب سألها بالعكس: «الغرض الأساسي من التحليل هو كتابة الكود» ← <b>False</b>.)</span>' },
+    { id: 't2', l: 1, st: 5, bk: 1, a: false,
+      q: 'Business Process Reengineering (BPR) means making small, incremental improvements to the existing workflow.',
+      why: 'غلط. الـ <b>BPR</b> = إعادة تصميم <b>جذرية من الصفر</b>. التحسينات الصغيرة المتدرجة اسمها <b>BPI</b>.' },
+    { id: 't3', l: 1, st: 3, bk: 1, a: false,
+      q: 'An infrastructure analyst specialises in user training, organisational culture and overcoming resistance to change.',
+      why: 'غلط. ده شغل الـ <b>Change Management Analyst</b>. الـ Infrastructure Analyst بيهتم بالـ hardware والـ networks والبيئة التقنية.' },
+    { id: 't4', l: 1, st: 4, bk: 1, a: true,
+      q: 'Although the SDLC phases are drawn as a logical sequence, in real projects they are iterative: teams revisit earlier phases as their understanding grows.',
+      why: 'صح. الشكل النظري ورا بعض، لكن في الواقع بنرجع نعدّل في اللي قبلها.' },
+    { id: 't5', l: 1, st: 4, bk: 1, a: false,
+      q: 'A logical process model describes exactly which hardware and programming languages will be used to carry out an activity.',
+      why: 'غلط. الـ <b>logical</b> model بيوصف <b>WHAT</b> من غير أي تكنولوجيا. اللي بيوصف HOW (hardware / files / code) هو الـ <b>physical</b> model. <span class="muted">(الكتاب بيشرحها في Ch8، وسؤالها جاي في Ch1.)</span>' },
+
+    { id: 't6', l: 2, st: 2, bk: 1, a: false,
+      q: 'A System Request must include the detailed database schema and the source code.',
+      why: 'غلط. الـ System Request وثيقة <b>business عالية المستوى</b> (need, requirements, value...). التصميم التفصيلي بييجي في <b>Design</b>.' },
+    { id: 't7', l: 2, st: 6, bk: 1, a: true,
+      q: 'NPV is better than a simple payback analysis because it takes the time value of money into account.',
+      why: 'صح. الـ NPV بيخصم الفلوس المستقبلية لقيمتها الحالية (<b>PV</b>) بمعدل الخصم.' },
+    { id: 't8', l: 2, st: 4, bk: 1, a: false,
+      q: 'A project with high technical risk must always be rejected.',
+      why: 'غلط. الخطر العالي ممكن يتقبل لو القيمة الاستراتيجية كبيرة وفيه خطوات بتقلله (تدريب، prototyping...).' },
+    { id: 't9', l: 2, st: 5, bk: 1, a: false,
+      q: 'Operational costs are one-time expenses spent while the software is being developed and tested.',
+      why: 'غلط. الـ <b>operational costs</b> متكررة كل سنة (licences، hosting، maintenance). اللي بتحصل مرة واحدة دي <b>development costs</b>.' },
+    { id: 't10', l: 2, st: 7, bk: 0, a: true,
+      q: 'Organizational feasibility asks whether the organisation and its users will accept and use the system once it is built.',
+      why: 'صح — <i>If we build it, will they come?</i>' },
+
+    { id: 't11', l: 3, st: 4, bk: 1, a: false,
+      q: 'In the V-Model, acceptance tests are designed during the Implementation phase, while the programmers write the code.',
+      why: 'غلط. الـ acceptance tests بتتصمم في <b>Analysis</b>؛ الـ V-Model بيصمم الاختبارات بدري.' },
+    { id: 't12', l: 3, st: 5, bk: 1, a: true,
+      q: 'Throwaway prototyping is a good choice when the technology is unfamiliar and the system is complex.',
+      why: 'صح. الـ prototype بيخليك تجرّب وتتعلم من غير ما الكود الغلط يدخل الـ production. في المصفوفة: <b>Excellent</b> للـ unfamiliar technology وللـ complex systems.' },
+    { id: 't13', l: 3, st: 6, bk: 1, a: true,
+      q: 'Agile delivers working software at the end of every sprint, whereas Waterfall delays working software until the final implementation phase.',
+      why: 'صح. <span class="muted">(الكتاب سألها بالعكس: «الـ Waterfall بينتج working software أسرع من الـ Agile» ← <b>False</b>.)</span>' },
+    { id: 't14', l: 3, st: 6, bk: 1, a: false,
+      q: 'Agile methods such as Scrum work best on massive projects with hundreds of distributed developers and rigid government contracts.',
+      why: 'غلط. الـ Agile أحسن مع <b>فرق صغيرة في مكان واحد</b>، user involvement عالي، ومتطلبات مرنة.' },
+    { id: 't15', l: 3, st: 2, bk: 0, a: true,
+      q: 'Project Portfolio Management (PPM) looks at all active and proposed projects together as one portfolio, so a viable project can still be deferred.',
+      why: 'صح. المشروع ممكن يكون viable (NPV موجب) ويتأجّل بسبب موارد محدودة أو مشاريع أنسب في الـ portfolio.' },
+
+    { id: 't16', l: 4, st: 5, bk: 1, a: true,
+      q: 'Brooks’ Law says that adding people to a late software project can make it later.',
+      why: 'صح. زيادة الناس بتزوّد الـ communication والتدريب فبتبطّأ المشروع. <span class="muted">(الكتاب سألها بصيغة «بتسرّع التسليم» ← <b>False</b>.)</span>' },
+    { id: 't17', l: 4, st: 3, bk: 1, a: true,
+      q: 'In standard business-application projects, the Design phase takes the largest share of the effort (about 35%).',
+      why: 'صح. النسب: Planning 15 · Analysis 20 · <b>Design 35</b> · Implementation 30.' },
+    { id: 't18', l: 4, st: 7, bk: 1, a: false,
+      q: 'Timeboxing allows the delivery date to keep slipping until all the desired features have been coded.',
+      why: 'غلط. الـ timeboxing بيحط <b>تاريخ ثابت</b> وبيتحكم في الـ scope بإنه بيأجّل الـ features غير الأساسية.' },
+    { id: 't19', l: 4, st: 7, bk: 1, a: false,
+      q: 'Scope creep is controlled by letting developers implement every casual suggestion that users make in informal conversations.',
+      why: 'غلط. ده بيزوّد الـ scope creep. كل تغيير لازم يعدّي على <b>formal change approval</b> (طلب مكتوب + تقييم التأثير + steering committee).' },
+    { id: 't20', l: 4, st: 3, bk: 0, a: true,
+      q: 'Early project estimates can be off by a large margin (up to about 400% for cost), and the margin of error shrinks as the project moves forward.',
+      why: 'صح. في الكتاب: الـ cost estimate في الأول ممكن يغلط لحد <b>400%</b> والـ schedule لحد <b>60%</b>، وبتقل مع التقدم لحد حوالي <b>25% / 10%</b> عند الـ Design.' }
+  ],
+
+  /* ---------------------------------------------------- Part B: MCQ (a = index of the correct option, options are shuffled at run time) */
+  mcq: [
+    { id: 'm1', l: 1, st: 4, bk: 1, a: 2,
+      q: 'Which SDLC phase mainly answers the question “HOW will the system be built and operated?”',
+      opts: ['Planning', 'Analysis', 'Design', 'Implementation'],
+      why: 'الـ <b>Design</b> = How. الـ Planning = Why، والـ Analysis = What / Who / Where / When، والـ Implementation = بناء وتسليم.' },
+    { id: 'm2', l: 1, st: 3, bk: 1, a: 1,
+      q: 'A systems analyst who specialises in eliciting, analysing and structuring business needs directly from stakeholders is called a:',
+      opts: ['Database Administrator', 'Requirements Analyst', 'Infrastructure Analyst', 'Network Engineer'],
+      why: 'الـ <b>Requirements Analyst</b> بيجمّع الـ requirements من الـ stakeholders ويحللها وينظّمها.' },
+    { id: 'm3', l: 1, st: 5, bk: 1, a: 0,
+      q: 'Turning a paper admission form into an online PDF form, without changing any admission rules or review steps, is an example of:',
+      opts: ['Business Process Automation (BPA)', 'Business Process Improvement (BPI)', 'Business Process Reengineering (BPR)', 'Agile prototyping'],
+      why: '<b>BPA</b> = أتمتة العملية زي ما هي من غير ما نغيّر قواعدها. لو غيّرنا خطواتها شوية = BPI، ولو أعدنا تصميمها جذرياً = BPR.' },
+    { id: 'm4', l: 1, st: 4, bk: 1, a: 1,
+      q: 'Which deliverable marks the formal transition from the Planning phase to the Analysis phase?',
+      opts: ['System Specification', 'The approved project plan and feasibility study', 'Use Case Model', 'Test Plan'],
+      why: 'نهاية الـ Planning = الموافقة على الـ <b>project plan + feasibility study</b>. الـ System Specification ناتج الـ Design.' },
+    { id: 'm5', l: 1, st: 4, bk: 0, a: 1,
+      q: 'The deliverable of the Analysis phase, reviewed by the sponsor and the steering committee at the Go/No-Go decision, is the:',
+      opts: ['System Request', 'System Proposal', 'System Specification', 'Installed, working system'],
+      why: '<b>System Proposal</b> = ناتج الـ Analysis. الـ System Request بيبدأ المشروع، والـ System Specification ناتج الـ Design.' },
+
+    { id: 'm6', l: 2, st: 3, bk: 1, a: 2,
+      q: 'Which element of the System Request describes the tangible and intangible benefits the system is expected to bring to the organisation?',
+      opts: ['Business Need', 'Business Requirements', 'Business Value', 'Special Issues or Constraints'],
+      why: 'الـ <b>Business Value</b> = الفوايد (tangible و intangible).' },
+    { id: 'm7', l: 2, st: 4, bk: 1, a: 1,
+      q: 'An analyst checks whether the current IT staff has experience building mobile apps with Flutter. This is part of:',
+      opts: ['Economic feasibility', 'Technical feasibility', 'Organizational feasibility', 'Operational feasibility'],
+      why: 'الخبرة في التكنولوجيا (<i>familiarity with technology</i>) = <b>Technical</b> feasibility. (Operational feasibility مش من تقسيم المنهج.)' },
+    { id: 'm8', l: 2, st: 6, bk: 1, a: 0,
+      q: 'A project has a PV of total benefits of $1,500,000 and a PV of total costs of $1,200,000. Its NPV is:',
+      opts: ['$300,000', '−$300,000', '$2,700,000', '1.25'],
+      why: 'NPV = PV benefits − PV costs = 1,500,000 − 1,200,000 = <b>$300,000</b> (موجب ← المشروع مقبول اقتصادياً).' },
+    { id: 'm9', l: 2, st: 6, bk: 0, a: 0,
+      q: 'What is the present value of $5,500 received one year from now, at a 10% discount rate?',
+      opts: ['$5,000', '$4,950', '$5,500', '$6,050'],
+      why: 'PV = 5,500 ÷ 1.10 = <b>$5,000</b>. ($4,950 = خصمنا 10% من المبلغ مباشرة، و $6,050 = ضربنا بدل ما نقسم.)' },
+    { id: 'm10', l: 2, st: 2, bk: 0, a: 3,
+      q: 'A new system must be live by a fixed statutory (regulatory) deadline and must run on the company’s existing legacy hardware. In which section of the System Request are these items recorded?',
+      opts: ['Project Sponsor', 'Business Need', 'Business Requirements', 'Special Issues or Constraints'],
+      why: 'الـ deadlines القانونية وقيود الـ legacy hardware بتتسجل في <b>Special Issues or Constraints</b>.' },
+
+    { id: 'm11', l: 3, st: 5, bk: 1, a: 1,
+      q: 'Which methodology breaks the overall system into a series of versions that are developed one after another?',
+      opts: ['Parallel Development', 'Iterative Development', 'V-Model', 'Waterfall'],
+      why: 'الـ <b>Iterative Development</b>: بيطلّع النظام على إصدارات (versions) ورا بعض.' },
+    { id: 'm12', l: 3, st: 7, bk: 1, a: 2,
+      q: 'An aerospace company builds life-critical flight-control software using mature, well-understood avionics protocols. The requirements are completely stable. The best methodology is:',
+      opts: ['System Prototyping', 'Extreme Programming (XP)', 'V-Model', 'Parallel Development'],
+      why: 'متطلبات ثابتة + تكنولوجيا معروفة + reliability حرجة ← <b>V-Model</b> (في المصفوفة: Excellent للـ critical reliability).' },
+    { id: 'm13', l: 3, st: 6, bk: 1, a: 0,
+      q: 'Pair programming and continuous integration are hallmark practices of:',
+      opts: ['Extreme Programming (XP)', 'Waterfall', 'Throwaway Prototyping', 'Parallel Development'],
+      why: '<b>XP</b>: pair programming، continuous testing، short iterations، refactoring، وعميل موجود مع الفريق.' },
+    { id: 'm14', l: 3, st: 4, bk: 0, a: 0,
+      q: 'Which is a main weakness of the Waterfall methodology?',
+      opts: ['Users see no working software until late, and problems found late are costly to fix', 'Requirements are never documented', 'It cannot be combined with a written project plan', 'It requires daily stand-up meetings'],
+      why: 'ضعف الـ <b>Waterfall</b>: الـ users مبيشوفوش حاجة شغالة غير في الآخر، والمتطلبات متجمّدة بدري، فأي غلطة بتتكتشف متأخر وتكلّف كتير.' },
+    { id: 'm15', l: 3, st: 6, bk: 0, a: 1,
+      q: 'In Scrum, the work is organised into fixed-length iterations called:',
+      opts: ['Releases', 'Sprints', 'Prototypes', 'Phases'],
+      why: 'الـ <b>Sprints</b>: ثابتة الطول (2–4 أسابيع) وكل sprint بيطلّع potentially shippable increment.' },
+
+    { id: 'm16', l: 4, st: 3, bk: 1, a: 2,
+      q: 'An enterprise project completes the Planning phase in 3 months. Using the standard percentage for Planning (15%), what is the estimated total project duration?',
+      opts: ['12 months', '15 months', '20 months', '25 months'],
+      why: 'Planning = 15% ← الكل = 3 ÷ 0.15 = <b>20 months</b>.' },
+    { id: 'm17', l: 4, st: 4, bk: 1, a: 1,
+      q: 'A hierarchical outline that breaks a project down into phases, subtasks and work packages is called a:',
+      opts: ['System Request', 'Work Breakdown Structure (WBS)', 'Project Charter', 'Feasibility Matrix'],
+      why: 'الـ <b>WBS</b> = تقسيم هرمي للشغل (top-down decomposition).' },
+    { id: 'm18', l: 4, st: 7, bk: 1, a: 2,
+      q: 'What is the most effective way to handle missed project target dates?',
+      opts: ['Require 80-hour work weeks indefinitely', 'Immediately add 10 new developers', 'Re-evaluate the complexity of the remaining tasks and make informed schedule/scope adjustments', 'Ignore the delay'],
+      why: 'الصح: <b>نعيد تقييم</b> تعقيد الشغل المتبقي ونعدّل الـ schedule / scope بشكل واعي. زيادة الناس فجأة أو الساعات الطويلة مش حل (Brooks’ Law).' },
+    { id: 'm19', l: 4, st: 3, bk: 0, a: 0,
+      q: 'The Design phase of a business-application project took 14 months. Using the standard percentages (Planning 15%, Analysis 20%, Design 35%, Implementation 30%), the total project length is about:',
+      opts: ['40 months', '46.7 months', '70 months', '93.3 months'],
+      why: 'Design = 35% ← الكل = 14 ÷ 0.35 = <b>40 months</b>. باقي الاختيارات جاية من نسبة غلط: 30% ← 46.7 · 20% ← 70 · 15% ← 93.3.' },
+    { id: 'm20', l: 4, st: 2, bk: 0, a: 0,
+      q: 'The sponsor asks the project manager to finish one month earlier while keeping exactly the same list of features. According to the balancing act among size, cost and time, what has to change?',
+      opts: ['Cost must increase (for example more resources or consultants)', 'Cost can be reduced as well', 'Nothing: time is independent of size and cost', 'Size must increase'],
+      why: 'الـ Time قلّ والـ Size ثابت ← لازم الـ <b>Cost يزيد</b> (ناس / consultants / modules جاهزة). التلاتة مترابطين.' }
+  ],
+
+  /* ---------------------------------------------------- Part C: Essays */
+  essay: [
+    { id: 'e1', l: 1, st: 2, bk: 1,
+      q: 'Explain the difference between a business symptom and a root cause. Give a concrete enterprise scenario showing how an inexperienced systems analyst could waste company resources by solving the symptom instead of the real problem.',
+      model:
+        '<div dir="ltr" style="line-height:1.85">' +
+        '<b>Definitions.</b> A <b>symptom</b> is the visible effect or complaint (what users notice). A <b>root cause</b> is the underlying reason that produces it. Fixing only the symptom treats the effect; the problem stays and comes back.<br>' +
+        '<b>Scenario.</b> A call-centre manager says: “customers wait too long on the phone.” An inexperienced analyst treats that as the problem and proposes hiring 20 more agents and buying a bigger phone system. The real root cause is that the order system does not show delivery status, so customers keep calling to ask “where is my order?” — most calls are avoidable. After the expensive hiring, waiting time improves slightly, call volume keeps growing, the salary budget is wasted and the real problem is still there.<br>' +
+        '<b>How a good analyst avoids this.</b> Investigates before proposing: asks “why?” repeatedly, interviews users, studies the as-is process and checks data (e.g. reasons for the calls). This is the purpose of the <b>Analysis</b> phase: decide <b>WHAT</b> is really needed before deciding HOW to build it.' +
+        '<div class="muted" dir="rtl" style="margin-top:6px">📝 الكتاب بيسأل السؤال من غير إجابة نموذجية؛ دي إجابة من صياغتي بناءً على فكرة الـ Analysis.</div></div>',
+      points: [
+        'Defined symptom (visible effect / complaint)',
+        'Defined root cause (underlying reason)',
+        'Explained that fixing the symptom leaves the problem in place (it returns)',
+        'Gave a concrete scenario where money / time is wasted',
+        'Said the analyst investigates first (interviews, as-is analysis, “why?”): Analysis = WHAT before HOW'
+      ] },
+    { id: 'e2', l: 1, st: 5, bk: 1,
+      q: 'Analyse the role of the Project Sponsor. Why is strong sponsorship from the business side essential to the success of an enterprise information system?',
+      model:
+        '<div dir="ltr" style="line-height:1.85">' +
+        '<b>Who.</b> The Project Sponsor is a key person or department leader from the <b>business</b> side (not necessarily technical) who recognises a business need, envisions how a system can address it and <b>champions</b> the project through the organisation’s decision-making channels.<br>' +
+        '<b>Role.</b> • initiates the project and writes the <b>System Request</b> • defines the high-level business requirements and the business value • provides the political backing, funding and resources • takes part in the Go/No-Go decisions with the steering committee.<br>' +
+        '<b>Why strong sponsorship is essential.</b> (1) It keeps the system aligned with a real business need — the sponsor owns the “why” and the value. (2) It secures funding, priority and people; without a champion the project loses to competing projects. (3) It helps overcome resistance and win user acceptance (organizational feasibility). (4) It gives fast business decisions on requirements and scope trade-offs. A technically perfect system without a business owner may never be used.' +
+        '<div class="muted" dir="rtl" style="margin-top:6px">📝 الكتاب بيسأل السؤال من غير إجابة نموذجية؛ دي من صياغتي بناءً على شرح الـ Sponsor في Ch1 و Ch2.</div></div>',
+      points: [
+        'Sponsor = business-side person / department (not necessarily technical) who initiates the project',
+        'Defines business requirements and value; writes the System Request',
+        'Champions the project: funding, resources, political backing, Go/No-Go with the steering committee',
+        'Why essential: alignment with a real business need / user acceptance and overcoming resistance',
+        'Why essential: resources and fast decisions on scope; a system with no business owner may fail or never be used'
+      ] },
+    { id: 'e3', l: 2, st: 6, bk: 1,
+      q: 'A hospital plans a patient portal. The Year-0 development cost is $800,000. Operating costs are $100,000 per year in Years 1–3, and tangible benefits are $450,000 per year in Years 1–3. Using an 8% discount rate, build the cash-flow table, calculate the NPV and state your recommendation.',
+      model:
+        '<div dir="ltr" style="line-height:1.85">' +
+        '<div class="tscroll"><table class="tbl ctbl sm">' +
+        '<tr><th>Year</th><th>Benefits</th><th>Costs</th><th>Net cash flow</th><th>Discount factor (8%)</th><th>PV of net flow</th><th>Cumulative PV</th></tr>' +
+        '<tr><td>0</td><td>0</td><td>800,000</td><td class="neg">−800,000</td><td>1.0000</td><td class="neg">−800,000</td><td class="neg">−800,000</td></tr>' +
+        '<tr><td>1</td><td>450,000</td><td>100,000</td><td>350,000</td><td>0.9259</td><td>324,074</td><td class="neg">−475,926</td></tr>' +
+        '<tr><td>2</td><td>450,000</td><td>100,000</td><td>350,000</td><td>0.8573</td><td>300,069</td><td class="neg">−175,857</td></tr>' +
+        '<tr class="tot"><td>3</td><td>450,000</td><td>100,000</td><td>350,000</td><td>0.7938</td><td>277,841</td><td class="pos">+101,984</td></tr>' +
+        '</table></div>' +
+        '<b>NPV</b> = −800,000 + 324,074 + 300,069 + 277,841 = <b>+$101,984</b> &nbsp;(same as PV benefits 1,159,694 − PV costs 1,057,710).<br>' +
+        '<b>Recommendation.</b> NPV &gt; 0 → the project is economically feasible: it returns more than the required 8%. Accept / proceed. <span class="muted">(Optional extras: cumulative PV turns positive during Year 3, break-even ≈ 2.6 years; ROI ≈ 9.6%; also weigh intangible benefits and risks.)</span>' +
+        '<div class="muted" dir="rtl" style="margin-top:6px">ملحوظة: سنة 0 مبتتخصمش (factor = 1). صافي السنين 1–3 = 450,000 − 100,000 = 350,000.</div></div>',
+      points: [
+        'Year 0 = −800,000, not discounted',
+        'Net cash flow for Years 1–3 = 450,000 − 100,000 = 350,000',
+        'Used discount factors at 8%: 0.9259 / 0.8573 / 0.7938',
+        'PV of Years 1–3 ≈ 324,074 + 300,069 + 277,841, so NPV ≈ +$101,984',
+        'Recommendation: NPV is positive → accept (economically feasible)'
+      ] },
+    { id: 'e4', l: 3, st: 7, bk: 1,
+      q: 'Modern Retail Inc. wants an AI-powered product-recommendation engine. The marketing team has only vague ideas about what it should do, the IT staff has never deployed machine-learning models in cloud containers, and the company urgently wants to launch within 4 months. Using the methodology selection matrix, explain why Waterfall is inappropriate and recommend the best methodology with full justification.',
+      model:
+        '<div dir="ltr" style="line-height:1.85">' +
+        '<b>Project characteristics.</b> (1) Unclear user requirements (marketing has only vague ideas) · (2) Unfamiliar technology (IT has never deployed ML in cloud containers) · (3) Short time schedule (4 months, urgent).<br>' +
+        '<b>Why not Waterfall.</b> In the matrix Waterfall is <b>Poor</b> for unclear requirements (it freezes requirements early), <b>Poor</b> for unfamiliar technology, and <b>Poor</b> for a short schedule. Users would see nothing until the end, so wrong assumptions would be discovered far too late.<br>' +
+        '<b>Recommendation: Throwaway Prototyping (a RAD approach).</b> It is <b>Excellent</b> for unclear requirements, <b>Excellent</b> for unfamiliar technology and <b>Good</b> for a short schedule. The team builds quick prototypes of the recommendations to clarify what marketing really wants and to learn the ML / cloud technology, then discards them and builds the real system with the lessons learned.<br>' +
+        '<b>Alternatives.</b> Agile is Excellent for unclear requirements and short schedules but <b>Poor</b> for unfamiliar technology; Iterative (Good / Good / Excellent) is a reasonable second choice. Keep the prototypes time-boxed because 4 months is tight.</div>',
+      points: [
+        'Identified the 3 characteristics: unclear requirements, unfamiliar technology, short schedule',
+        'Waterfall is Poor on all three (requirements frozen early, users wait, problems found late)',
+        'Recommended Throwaway Prototyping (or another RAD / Agile choice justified with the matrix)',
+        'Justified with matrix ratings and the idea “prototype to learn, then throw it away”',
+        'Mentioned a trade-off or alternative (e.g. Agile is Poor for unfamiliar technology; Iterative; time-box)'
+      ] },
+    { id: 'e5', l: 4, st: 3, bk: 1,
+      q: 'An enterprise banking project needs 6 months for the Planning phase. Using the standard percentages (Planning 15%, Analysis 20%, Design 35%, Implementation 30%), calculate the total project duration and the time allocated to each phase. Show all your work.',
+      model:
+        '<div dir="ltr" style="line-height:1.85">' +
+        '<b>Step 1:</b> Planning = 15% of the project and it takes 6 months.<br>' +
+        '<b>Step 2:</b> Total X = 6 ÷ 0.15 = <b>40 months</b>.<br>' +
+        '<b>Step 3:</b> Phases = X × percentage:<br>' +
+        '&nbsp;• Planning (15%): 40 × 0.15 = <b>6</b><br>' +
+        '&nbsp;• Analysis (20%): 40 × 0.20 = <b>8</b><br>' +
+        '&nbsp;• Design (35%): 40 × 0.35 = <b>14</b><br>' +
+        '&nbsp;• Implementation (30%): 40 × 0.30 = <b>12</b><br>' +
+        '<b>Check:</b> 6 + 8 + 14 + 12 = 40 ✔' +
+        '<div class="muted" dir="rtl" style="margin-top:6px">📖 الكتاب كتب الوحدة person-months، والسلايد بيكتبها months؛ الحساب واحد (من غير حجم فريق، اعتبرها months).</div></div>',
+      points: [
+        'Total = 6 ÷ 0.15 = 40 months',
+        'Analysis = 8',
+        'Design = 14',
+        'Implementation = 12 (and Planning = 6)',
+        'Checked that the phases add up to 40 and showed the work'
+      ] }
+  ]
+};
+</script>
+
+<script>
+/* ==========================================================
+   IS202 study pages — shared interactive engine
+   Reads window.DATA = { decks:{}, flash:{}, essays:{} }
+   ========================================================== */
+(function () {
+  'use strict';
+
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const shuffle = (a) => {
+    a = a.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+
+  const DATA = window.DATA || {};
+  const KEY = 'is202:' + (document.body.dataset.lecture || 'x');
+  let S = {};
+  try { S = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { S = {}; }
+  S.done = S.done || {}; S.best = S.best || {}; S.fc = S.fc || {}; S.essay = S.essay || {};
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+
+  /* ---------- theme ---------- */
+  const TK = 'is202:theme';
+  let theme = 'dark';
+  try { theme = localStorage.getItem(TK) || 'dark'; } catch (e) {}
+  const themeBtn = $('#themeBtn');
+  function applyTheme(t) {
+    theme = t;
+    document.documentElement.setAttribute('data-theme', t);
+    if (themeBtn) themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
+    try { localStorage.setItem(TK, t); } catch (e) {}
+  }
+  applyTheme(theme);
+  if (themeBtn) themeBtn.addEventListener('click', () => applyTheme(theme === 'dark' ? 'light' : 'dark'));
+
+  /* ---------- stations ---------- */
+  const stations = $$('.station');
+  const nav = $('#nav');
+  const navBtns = [];
+  let cur = -1;
+
+  stations.forEach((st, i) => {
+    if (nav) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.innerHTML = `<span class="num">${i + 1}</span><span class="lbl">${st.dataset.icon || ''} ${st.dataset.title || ''}</span><span class="tick">✓</span>`;
+      b.addEventListener('click', () => go(i));
+      nav.appendChild(b);
+      navBtns.push(b);
+    }
+    const last = i === stations.length - 1;
+    const f = document.createElement('div');
+    f.className = 'station-foot noprint';
+    f.innerHTML =
+      `<button type="button" class="btn ghost" data-prev${i === 0 ? ' style="visibility:hidden"' : ''}>→ السابق</button>` +
+      (last
+        ? `<a class="btn primary" href="index.html" data-finish>خلّصت المحاضرة 🏁</a>`
+        : `<button type="button" class="btn primary" data-next>التالي ←</button>`);
+    st.appendChild(f);
+    const p = $('[data-prev]', f), n = $('[data-next]', f), fin = $('[data-finish]', f);
+    if (p) p.addEventListener('click', () => go(i - 1));
+    if (n) n.addEventListener('click', () => go(i + 1));
+    if (fin) fin.addEventListener('click', () => { S.done[i] = true; save(); });
+  });
+
+  function refresh() {
+    navBtns.forEach((b, k) => {
+      b.classList.toggle('on', k === cur);
+      b.classList.toggle('done', !!S.done[k]);
+    });
+    const n = stations.filter((_, k) => S.done[k]).length;
+    const pb = $('#progBar'), pt = $('#progTxt');
+    if (pb) pb.style.width = (n / stations.length * 100) + '%';
+    if (pt) pt.textContent = n + '/' + stations.length;
+  }
+
+  function go(i, init) {
+    i = Math.max(0, Math.min(stations.length - 1, i));
+    if (!init && cur >= 0 && i > cur) S.done[cur] = true;
+    cur = i;
+    stations.forEach((s, k) => s.classList.toggle('on', k === i));
+    S.last = i; save(); refresh();
+    try { history.replaceState(null, '', '#' + (i + 1)); } catch (e) {}
+    if (!init) window.scrollTo({ top: 0, behavior: 'smooth' });
+    const nb = navBtns[i];
+    if (nb && nav && nav.scrollWidth > nav.clientWidth) nb.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }
+
+  $$('[data-go]').forEach((e) => e.addEventListener('click', () => go(parseInt(e.dataset.go, 10) - 1)));
+
+  /* ---------- flip cards ---------- */
+  $$('.flip').forEach((el) => {
+    const f = $('.f', el), b = $('.b', el);
+    if (!f || !b) return;
+    const inn = document.createElement('div');
+    inn.className = 'flip-in';
+    f.className = 'face front'; b.className = 'face back';
+    inn.append(f, b); el.append(inn);
+    el.tabIndex = 0;
+    el.addEventListener('click', () => el.classList.toggle('open'));
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.classList.toggle('open'); }
+    });
+  });
+
+  /* ---------- tabs ---------- */
+  $$('[data-tabs]').forEach((root) => {
+    const btns = $$('[data-tab]', root), panes = $$('[data-pane]', root);
+    const set = (id) => {
+      btns.forEach((b) => b.classList.toggle('on', b.dataset.tab === id));
+      panes.forEach((p) => p.classList.toggle('on', p.dataset.pane === id));
+    };
+    btns.forEach((b) => b.addEventListener('click', () => set(b.dataset.tab)));
+    set(root.dataset.tabs || (btns[0] && btns[0].dataset.tab));
+  });
+
+  /* ---------- deck (quiz / sorting / true-false) ---------- */
+  function Deck(root, cfg) {
+    let cards = shuffle(cfg.cards), i = 0, score = 0, locked = false, order = [];
+    root.classList.add('deck');
+    root.innerHTML =
+      `<div class="deck-head"><span class="cnt"></span><div class="deck-bar"><i></i></div><span class="sc"></span></div><div class="deck-body"></div>`;
+    const body = $('.deck-body', root), cnt = $('.cnt', root), bar = $('.deck-bar i', root), sc = $('.sc', root);
+
+    function render() {
+      if (i >= cards.length) return end();
+      const c = cards[i];
+      locked = false;
+      cnt.textContent = (i + 1) + ' / ' + cards.length;
+      bar.style.width = (i / cards.length * 100) + '%';
+      sc.textContent = '⭐ ' + score;
+      const opts = c.opts || cfg.opts;
+      const cols = cfg.cols ? ' c' + cfg.cols : '';
+      body.innerHTML = `<div class="deck-q" dir="auto">${c.q}</div><div class="opts${cols}"></div><div class="fbwrap"></div>`;
+      const wrap = $('.opts', body);
+      // cfg.shuffleOpts: mix the answer order of per-card MCQ options so position never gives the answer away
+      order = opts.map((_, k) => k);
+      if (cfg.shuffleOpts && c.opts) order = shuffle(order);
+      order.forEach((oi, k) => {
+        const o = opts[oi];
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'opt' + (typeof o === 'object' && o.cls ? ' ' + o.cls : '');
+        b.setAttribute('dir', 'auto');
+        b.innerHTML = typeof o === 'string' ? o : o.t;
+        b.addEventListener('click', () => pick(k));
+        wrap.appendChild(b);
+      });
+    }
+
+    function pick(k) {
+      if (locked) return;
+      locked = true;
+      const c = cards[i], ok = order[k] === c.a;
+      if (ok) score++;
+      $$('.opt', body).forEach((b, j) => {
+        b.disabled = true;
+        if (order[j] === c.a) b.classList.add('right');
+        else if (j === k) b.classList.add('wrong');
+      });
+      sc.textContent = '⭐ ' + score;
+      const fb = $('.fbwrap', body);
+      fb.innerHTML =
+        `<div class="fb ${ok ? 'ok' : 'no'}"><b>${ok ? '✔ تمام!' : '✘ لأ — راجع الشرح'}</b><div dir="auto">${c.why || ''}</div>` +
+        `<button type="button" class="btn primary nxt">${i === cards.length - 1 ? 'شوف النتيجة' : 'التالي ←'}</button></div>`;
+      const nx = $('.nxt', fb);
+      nx.addEventListener('click', () => { i++; render(); });
+      nx.focus({ preventScroll: true });
+    }
+
+    function end() {
+      bar.style.width = '100%';
+      const pct = Math.round(score / cards.length * 100);
+      const best = Math.max(S.best[cfg.id] || 0, pct);
+      S.best[cfg.id] = best; save();
+      const msg = pct === 100 ? 'ممتاز! 🔥 الجزء ده تمام' : pct >= 70 ? 'كويس جداً 👏 راجع الغلطات بس' : 'لسه محتاج مراجعة — ارجع للشرح وجرّب تاني 💪';
+      sc.textContent = '⭐ ' + score;
+      cnt.textContent = 'خلصت';
+      body.innerHTML =
+        `<div class="deck-end"><div class="big">${pct}%</div><p>${score} من ${cards.length} — ${msg}</p>` +
+        `<p class="muted">أحسن نتيجة ليك: ${best}%</p><button type="button" class="btn primary again">🔁 العب تاني</button></div>`;
+      $('.again', body).addEventListener('click', () => { cards = shuffle(cfg.cards); i = 0; score = 0; render(); });
+      if (cfg.onDone) cfg.onDone(pct);
+    }
+    render();
+  }
+
+  /* ---------- flashcards ---------- */
+  function Flash(root, cards, id) {
+    let mode = 'all', pos = 0, list = [], timer;
+    root.classList.add('fc');
+    root.innerHTML =
+      `<div class="fc-top"><div class="seg"><button type="button" data-m="all" class="on">كل الكروت</button><button type="button" data-m="review">اللي لسه مش حافظها</button></div><span class="fc-count muted"></span></div>` +
+      `<div class="fc-card" tabindex="0"><div class="fc-in"><div class="face front"></div><div class="face back"></div></div></div>` +
+      `<div class="fc-actions"><button type="button" class="btn" data-a="prev">→ اللي قبلها</button><button type="button" class="btn bad" data-a="r">🔁 لسه مش حافظها</button><button type="button" class="btn good" data-a="k">✅ عرفتها</button><button type="button" class="btn" data-a="next">اللي بعدها ←</button></div>` +
+      `<div class="deck-bar"><i></i></div><p class="fc-stat muted"></p>`;
+    const card = $('.fc-card', root), front = $('.front', root), back = $('.back', root);
+    const cnt = $('.fc-count', root), bar = $('.deck-bar i', root), stat = $('.fc-stat', root);
+    const key = (n) => id + ':' + n;
+
+    function stats() {
+      const k = cards.filter((_, n) => S.fc[key(n)] === 'k').length;
+      stat.textContent = 'عرفت ' + k + ' من ' + cards.length;
+      bar.style.width = (k / cards.length * 100) + '%';
+    }
+    function show() {
+      list = cards.map((_, n) => n).filter((n) => mode === 'all' || S.fc[key(n)] !== 'k');
+      stats();
+      clearTimeout(timer);
+      if (!list.length) {
+        card.classList.remove('open');
+        front.innerHTML = '<div dir="auto">🎉 خلصت كل الكروت!</div><small>ارجع لـ "كل الكروت" لو عايز تراجع تاني</small>';
+        back.innerHTML = '';
+        cnt.textContent = '0 / 0';
+        return;
+      }
+      pos = ((pos % list.length) + list.length) % list.length;
+      const c = cards[list[pos]];
+      const fill = () => {
+        front.innerHTML = `<small>السؤال</small><div dir="auto">${c.f}</div><small>👆 اضغط عشان تقلب الكارت</small>`;
+        back.innerHTML = `<small>الإجابة</small><div dir="auto">${c.b}</div>`;
+      };
+      if (card.classList.contains('open')) { card.classList.remove('open'); timer = setTimeout(fill, 230); } else fill();
+      cnt.textContent = (pos + 1) + ' / ' + list.length;
+    }
+
+    root.addEventListener('click', (e) => {
+      const a = e.target.closest('[data-a]');
+      if (a) {
+        const act = a.dataset.a;
+        if (act === 'next') pos++;
+        else if (act === 'prev') pos--;
+        else {
+          S.fc[key(list[pos])] = act; save();
+          if (!(mode === 'review' && act === 'k')) pos++;
+        }
+        show();
+        return;
+      }
+      const m = e.target.closest('[data-m]');
+      if (m) {
+        mode = m.dataset.m; pos = 0;
+        $$('[data-m]', root).forEach((x) => x.classList.toggle('on', x === m));
+        show();
+        return;
+      }
+      if (e.target.closest('.fc-card')) card.classList.toggle('open');
+    });
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.classList.toggle('open'); }
+    });
+    show();
+  }
+
+  /* ---------- essay ---------- */
+  $$('.essay').forEach((el) => {
+    const id = el.dataset.essay, d = (DATA.essays || {})[id];
+    if (!d) return;
+    const ta = $('textarea', el), btn = $('[data-show]', el), box = $('.model', el);
+    ta.value = S.essay[id] || '';
+    ta.addEventListener('input', () => { S.essay[id] = ta.value; save(); });
+    $('.mdl', box).innerHTML = d.model;
+    const pts = $('.pts', box);
+    pts.innerHTML =
+      '<h4>✅ علّم على النقط اللي غطّيتها في إجابتك:</h4>' +
+      d.points.map((p) => `<label class="chk"><input type="checkbox"> <span dir="auto">${p}</span></label>`).join('') +
+      '<div class="pts-sc"></div>';
+    const sc = $('.pts-sc', pts);
+    const upd = () => {
+      const n = $$('input:checked', pts).length;
+      sc.textContent = 'غطّيت ' + n + ' من ' + d.points.length + (n === d.points.length ? ' 🔥' : '');
+    };
+    pts.addEventListener('change', upd); upd();
+    btn.addEventListener('click', () => {
+      box.hidden = !box.hidden;
+      btn.textContent = box.hidden ? '📖 اعرض الإجابة النموذجية' : '🙈 اخفي الإجابة';
+    });
+  });
+
+  /* ---------- keyboard for flashcards ---------- */
+  document.addEventListener('keydown', (e) => {
+    if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    const st = stations[cur];
+    const fc = st && $('.fc', st);
+    if (!fc) return;
+    if (e.key === 'ArrowLeft') $('[data-a="next"]', fc).click();
+    else if (e.key === 'ArrowRight') $('[data-a="prev"]', fc).click();
+    else if (e.key === ' ' && e.target.tagName !== 'BUTTON') { e.preventDefault(); $('.fc-card', fc).classList.toggle('open'); }
+  });
+
+  /* ---------- init decks / flashcards ---------- */
+  const markDone = (el) => {
+    const i = stations.indexOf(el.closest('.station'));
+    if (i >= 0) { S.done[i] = true; save(); refresh(); }
+  };
+  $$('[data-deck]').forEach((el) => {
+    const c = (DATA.decks || {})[el.dataset.deck];
+    if (c) Deck(el, Object.assign({}, c, { id: el.dataset.deck, onDone: () => markDone(el) }));
+  });
+  $$('[data-flash]').forEach((el) => {
+    const c = (DATA.flash || {})[el.dataset.flash];
+    if (c) Flash(el, c, el.dataset.flash);
+  });
+
+  /* ---------- share disclaimer: ONE place, shows at the bottom of every page (index.src.html has its own copy) ---------- */
+  (function () {
+    const f = document.createElement('footer');
+    f.className = 'disclaimer';
+    f.innerHTML =
+      '<div dir="rtl"><b>⚠️ تنبيه مهم قبل ما تعتمد على الصفحات دي:</b> دي ملخصات ومراجعة شخصية من إعداد طالب لمساعدة زمايله، وهي <b>مش مادة رسمية</b> ومش معتمدة من الدكتور ولا من الكلية. ممكن يكون فيها أخطاء أو نقص، والأسئلة اللي فيها مش بالضرورة شبه الامتحان الحقيقي. ' +
+      '<b>ومبتغنيش أبداً عن الكتاب والمحاضرات (المصدر الأساسي)</b> — ذاكر منهم الأول، وارجع لهم عشان تتأكد من أي معلومة. أي اعتماد مباشر على الصفحات دي بيكون على مسئولية المستخدم نفسه، ومُعِدّ الملخص غير مسئول عن أي نتيجة أو خسارة درجات. ' +
+      '<span class="muted">المصادر: كتاب المادة <span class="en">Systems Analysis and Design</span> (د. أسماء سعد) وسلايدات المحاضرات (مبنية على <span class="en">Dennis, Wixom &amp; Roth</span>).</span>' +
+      '<div class="d-en"><b>Disclaimer:</b> Unofficial, student-made study notes shared to help classmates — not official course material and not endorsed by the instructor or the university. They may contain mistakes or omissions, and the practice questions may differ from the real exam. ' +
+      'These pages are <b>NOT a substitute for the textbook and the lectures</b> (the primary source): study those first and use them to verify anything written here. Anyone relying on these pages directly does so at their own risk; the author accepts no responsibility for any result or loss of marks. Sources: the course textbook “Systems Analysis and Design” (Dr. Asmaa Saad) and the lecture slides (based on Dennis, Wixom &amp; Roth).</div></div>';
+    document.body.appendChild(f);
+  })();
+
+  /* ---------- start ---------- */
+  let start = parseInt((location.hash || '').slice(1), 10) - 1;
+  if (!(start >= 0 && start < stations.length)) start = Math.min(S.last || 0, stations.length - 1);
+  go(start, true);
+
+  window.Study = { go };
+})();
+
+</script>
+<script>
+/* ==========================================================
+   MOCK EXAM ENGINE
+   ========================================================== */
+(function () {
+  'use strict';
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var KEY = 'is202:examrun';
+  var LET = ['A', 'B', 'C', 'D'];
+  var ESSAY_W = 4;                                  // estimated marks per essay
+  var TF = BANK.tf, MC = BANK.mcq, ES = BANK.essay;
+  var TOTAL_Q = TF.length + MC.length + ES.length;
+  var MAX_PTS = TF.length + MC.length + ES.length * ESSAY_W;
+
+  var vStart = $('#vStart'), vExam = $('#vExam');
+  var minutes = 90, timerId = null;
+
+  function shuffle(a) {
+    a = a.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+  var fmt = function (ms) { var s = Math.max(0, Math.round(ms / 1000)); return pad(Math.floor(s / 60)) + ':' + pad(s % 60); };
+
+  /* ---------- storage: { best, run } ---------- */
+  var store = {};
+  try { store = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { store = {}; }
+  store.best = store.best || 0;
+  var run = store.run || null;
+  function persist() {
+    store.run = run;
+    try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {}
+  }
+
+  function newRun(min) {
+    var perm = {};
+    MC.forEach(function (q) { perm[q.id] = shuffle([0, 1, 2, 3]); });
+    return { min: min, start: Date.now(), end: 0, ans: {}, perm: perm, essay: {}, pts: {}, submitted: false, auto: false };
+  }
+
+  /* ---------- build the exam DOM ---------- */
+  var head = function (n) { return '<div class="qh"><span class="qn">' + n + '</span><span class="qmeta"></span></div>'; };
+
+  function buildExam() {
+    var n = 0, h = '<div id="resBox" hidden></div>';
+
+    h += '<h2 class="part"><span class="en">Part A</span> — صح / غلط <small>(' + TF.length + ' سؤال)</small></h2>';
+    TF.forEach(function (q) {
+      n++;
+      h += '<article class="q" id="q-' + q.id + '" data-id="' + q.id + '">' + head(n) +
+        '<div class="qt" dir="auto">' + q.q + '</div>' +
+        '<div class="qo c2">' +
+        '<button type="button" class="opt" dir="ltr" data-v="1"><span class="lt">T</span><span>True</span></button>' +
+        '<button type="button" class="opt" dir="ltr" data-v="0"><span class="lt">F</span><span>False</span></button>' +
+        '</div><div class="qfb" hidden></div></article>';
+    });
+
+    h += '<h2 class="part"><span class="en">Part B</span> — <span class="en">MCQ</span> <small>(' + MC.length + ' سؤال)</small></h2>';
+    MC.forEach(function (q) {
+      n++;
+      h += '<article class="q" id="q-' + q.id + '" data-id="' + q.id + '">' + head(n) +
+        '<div class="qt" dir="auto">' + q.q + '</div><div class="qo">';
+      run.perm[q.id].forEach(function (oi, k) {
+        h += '<button type="button" class="opt" dir="ltr" data-v="' + oi + '"><span class="lt">' + LET[k] + '</span><span>' + q.opts[oi] + '</span></button>';
+      });
+      h += '</div><div class="qfb" hidden></div></article>';
+    });
+
+    h += '<h2 class="part"><span class="en">Part C</span> — <span class="en">Essay</span> <small>(' + ES.length + ' أسئلة · ' + ESSAY_W + ' درجات تقديرية لكل واحد)</small></h2>';
+    ES.forEach(function (q) {
+      n++;
+      h += '<article class="q essay" id="q-' + q.id + '" data-id="' + q.id + '">' + head(n) +
+        '<div class="qt" dir="ltr">' + q.q + '</div>' +
+        '<textarea dir="auto" placeholder="اكتب إجابتك هنا… (بتتحفظ في المتصفح بس)"></textarea>' +
+        '<div class="qfb" hidden></div></article>';
+    });
+
+    h += '<div class="submitbar" id="submitBar">' +
+      '<button type="button" class="btn primary big" id="btnSubmit">✅ سلّم الامتحان</button>' +
+      '<div id="confirmBox" class="note warn" hidden></div></div>';
+    h += '<div class="submitbar" id="againBar" hidden><button type="button" class="btn primary big" id="btnAgain">🔁 ابدأ امتحان جديد</button></div>';
+
+    vExam.innerHTML = h;
+
+    // restore saved answers
+    TF.concat(MC).forEach(function (q) {
+      var a = run.ans[q.id];
+      if (typeof a !== 'number') return;
+      var el = $('#q-' + q.id);
+      $$('.opt', el).forEach(function (b) { b.classList.toggle('sel', parseInt(b.dataset.v, 10) === a); });
+      el.classList.add('answered');
+    });
+    ES.forEach(function (q) { $('#q-' + q.id + ' textarea').value = run.essay[q.id] || ''; });
+  }
+
+  /* ---------- progress ---------- */
+  function updateProg() {
+    var n = 0;
+    TF.concat(MC).forEach(function (q) { if (typeof run.ans[q.id] === 'number') n++; });
+    ES.forEach(function (q) { if ((run.essay[q.id] || '').trim()) n++; });
+    $('#xBar').style.width = (n / TOTAL_Q * 100) + '%';
+    $('#xTxt').textContent = n + '/' + TOTAL_Q;
+    return n;
+  }
+
+  /* ---------- timer ---------- */
+  function stopTimer() { if (timerId) { clearInterval(timerId); timerId = null; } }
+  function startTimer() {
+    stopTimer();
+    var box = $('#timer');
+    if (!run.min) { box.hidden = true; return; }
+    box.hidden = false;
+    var tick = function () {
+      var left = run.start + run.min * 60000 - Date.now();
+      if (left <= 0) { $('#tmTxt').textContent = '00:00'; submit(true); return; }
+      $('#tmTxt').textContent = fmt(left);
+      box.classList.toggle('warn', left < 10 * 60000 && left >= 5 * 60000);
+      box.classList.toggle('bad', left < 5 * 60000);
+    };
+    tick();
+    if (!run.submitted) timerId = setInterval(tick, 1000);
+  }
+
+  /* ---------- answering ---------- */
+  vExam.addEventListener('click', function (e) {
+    if (!run || run.submitted) return;
+    var o = e.target.closest('.opt');
+    if (!o) return;
+    var q = o.closest('.q');
+    if (!q) return;
+    run.ans[q.dataset.id] = parseInt(o.dataset.v, 10);
+    persist();
+    $$('.opt', q).forEach(function (b) { b.classList.toggle('sel', b === o); });
+    q.classList.add('answered');
+    updateProg();
+  });
+  vExam.addEventListener('input', function (e) {
+    if (!run || run.submitted || e.target.tagName !== 'TEXTAREA') return;
+    run.essay[e.target.closest('.q').dataset.id] = e.target.value;
+    persist();
+    updateProg();
+  });
+  vExam.addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    if (b.id === 'btnSubmit') {
+      var left = TOTAL_Q - updateProg(), box = $('#confirmBox');
+      if (left > 0) {
+        box.hidden = false;
+        box.innerHTML = 'لسه <b>' + left + '</b> سؤال من غير إجابة (الـ <span class="en">Essay</span> اللي مكتوبش فيه حاجة بيتحسب من غير إجابة). تسلّم برضه؟' +
+          '<br><button type="button" class="btn primary" id="btnYes">آه، سلّم</button><button type="button" class="btn" id="btnNo">لأ، أكمّل</button>';
+      } else submit(false);
+    } else if (b.id === 'btnYes') submit(false);
+    else if (b.id === 'btnNo') $('#confirmBox').hidden = true;
+    else if (b.id === 'btnAgain') { run = null; persist(); showStart(); }
+    else if (b.dataset.f) {
+      $$('[data-f]').forEach(function (x) { x.classList.toggle('on', x === b); });
+      vExam.classList.toggle('exam-only-wrong', b.dataset.f === 'wrong');
+    }
+  });
+  vExam.addEventListener('change', function (e) {
+    var c = e.target;
+    if (!c.matches || !c.matches('input[type=checkbox][data-e]')) return;
+    var id = c.dataset.e, q = ES.filter(function (x) { return x.id === id; })[0];
+    var arr = [];
+    $$('input[data-e="' + id + '"]').forEach(function (x, i) { arr[i] = x.checked; });
+    run.pts[id] = arr; persist();
+    var n = arr.filter(Boolean).length;
+    $('#q-' + id + ' .pts-sc').textContent = 'غطّيت ' + n + ' من ' + q.points.length + (n === q.points.length ? ' 🔥' : '');
+    renderResult();
+  });
+
+  /* ---------- submit + reveal ---------- */
+  function submit(auto) {
+    if (!run || run.submitted) return;
+    run.submitted = true; run.end = Date.now(); run.auto = !!auto;
+    persist(); stopTimer();
+    reveal();
+  }
+
+  function metaChips(q) {
+    return '<span class="chip lec l' + q.l + '">L' + q.l + '</span>' + (q.bk ? '<span class="chip bk">📖 الكتاب</span>' : '');
+  }
+  var rvLink = function (q) { return '<div class="rv">🔎 راجع: <a href="lecture' + q.l + '.html#' + q.st + '">Lecture ' + q.l + ' · ' + STN[q.l][q.st] + '</a></div>'; };
+
+  function markQ(q) {
+    var el = $('#q-' + q.id), correct = q.opts ? q.a : (q.a ? 1 : 0);
+    var a = run.ans[q.id], has = typeof a === 'number', ok = has && a === correct;
+    el.classList.remove('answered');
+    el.classList.add(ok ? 'ok' : (has ? 'no' : 'skip'));
+    $$('.opt', el).forEach(function (b) {
+      var v = parseInt(b.dataset.v, 10);
+      b.disabled = true; b.classList.remove('sel');
+      if (v === correct) b.classList.add('right');
+      else if (has && v === a) b.classList.add('wrong');
+      if (has && v === a) b.insertAdjacentHTML('beforeend', '<em class="mine">إجابتك</em>');
+    });
+    $('.qmeta', el).innerHTML = metaChips(q);
+    var fb = $('.qfb', el);
+    fb.hidden = false;
+    fb.innerHTML = '<div class="fb ' + (ok ? 'ok' : 'no') + '"><b>' + (ok ? '✔ صح' : (has ? '✘ غلط' : '⚠ مجبتش على السؤال ده')) + '</b>' +
+      '<div dir="auto">' + q.why + '</div>' + rvLink(q) + '</div>';
+  }
+
+  function markEssay(q) {
+    var el = $('#q-' + q.id), arr = run.pts[q.id] || [];
+    $('textarea', el).readOnly = true;
+    $('.qmeta', el).innerHTML = metaChips(q);
+    var fb = $('.qfb', el);
+    fb.hidden = false;
+    fb.innerHTML = '<div class="model"><div class="mdl">' + q.model + '</div><div class="pts"><h4>✅ علّم على النقط اللي غطّيتها في إجابتك:</h4>' +
+      q.points.map(function (p, i) {
+        return '<label class="chk"><input type="checkbox" data-e="' + q.id + '" data-i="' + i + '"' + (arr[i] ? ' checked' : '') + '> <span dir="auto">' + p + '</span></label>';
+      }).join('') +
+      '<div class="pts-sc"></div></div>' + rvLink(q) + '</div>';
+    var n = arr.filter(Boolean).length;
+    $('.pts-sc', el).textContent = 'غطّيت ' + n + ' من ' + q.points.length + (n === q.points.length ? ' 🔥' : '');
+  }
+
+  function stats() {
+    var s = { tf: 0, mc: 0, by: { 1: 0, 2: 0, 3: 0, 4: 0 }, ess: [], essFrac: 0 };
+    TF.forEach(function (q) { if (run.ans[q.id] === (q.a ? 1 : 0)) { s.tf++; s.by[q.l]++; } });
+    MC.forEach(function (q) { if (run.ans[q.id] === q.a) { s.mc++; s.by[q.l]++; } });
+    ES.forEach(function (q) {
+      var n = (run.pts[q.id] || []).filter(Boolean).length;
+      s.ess.push({ q: q, n: n });
+      s.essFrac += n / q.points.length;
+    });
+    s.pts = s.tf + s.mc + s.essFrac * ESSAY_W;
+    s.pct = Math.round(s.pts / MAX_PTS * 100);
+    return s;
+  }
+
+  function renderResult() {
+    var s = stats(), box = $('#resBox');
+    if (s.pct > store.best) { store.best = s.pct; }
+    persist();
+    var per = {};
+    TF.concat(MC).forEach(function (q) { per[q.l] = (per[q.l] || 0) + 1; });
+    var weakL = 1, weakV = 2;
+    [1, 2, 3, 4].forEach(function (l) { var v = s.by[l] / per[l]; if (v < weakV) { weakV = v; weakL = l; } });
+
+    var rows = [1, 2, 3, 4].map(function (l) {
+      var pc = Math.round(s.by[l] / per[l] * 100), t = pc >= 80 ? 't-ok' : (pc >= 60 ? 't-warn' : 't-bad');
+      return '<div class="lrow ' + t + '"><span class="nm">Lecture ' + l + '</span><div class="lb"><i style="width:' + pc + '%"></i></div><b>' + s.by[l] + '/' + per[l] + '</b>' +
+        '<a href="lecture' + l + '.html">راجع المحاضرة ←</a></div>';
+    }).join('');
+
+    var verdict, vcls;
+    if (s.pct >= 85) { verdict = '🔥 جاهز! مستواك عالي. راجع الغلطات (لو فيه) وخلاص.'; vcls = 'pos'; }
+    else if (s.pct >= 70) { verdict = '👏 كويس جداً. راجع الغلطات وكرّر الجزء الأضعف.'; vcls = 'pos'; }
+    else if (s.pct >= 50) { verdict = '💪 محتاج مراجعة مركزة على الجزء الأضعف، وبعدها جرّب امتحان تاني.'; vcls = ''; }
+    else { verdict = '📚 لسه المادة مش متثبتة. ارجع للمحاضرات (والكتاب الأول) وبعدين جرّب تاني.'; vcls = 'neg'; }
+
+    box.innerHTML =
+      '<div class="card rescard"><h2>📊 نتيجتك</h2>' +
+      (run.auto ? '<div class="note warn">⏰ الوقت خلص والامتحان اتسلّم تلقائياً.</div>' : '') +
+      '<div class="bigpct">' + s.pct + '%</div>' +
+      '<p style="text-align:center;margin:0" class="muted">تقدير: <b class="en">' + (Math.round(s.pts * 10) / 10) + ' / ' + MAX_PTS + '</b> · أحسن نتيجة ليك: <b class="en">' + store.best + '%</b> · الوقت: <b class="en">' + fmt((run.end || Date.now()) - run.start) + '</b></p>' +
+      '<div class="res-row">' +
+      '<div class="res"><small>Part A · <span class="en">T/F</span></small><b>' + s.tf + ' / ' + TF.length + '</b></div>' +
+      '<div class="res"><small>Part B · <span class="en">MCQ</span></small><b>' + s.mc + ' / ' + MC.length + '</b></div>' +
+      '<div class="res"><small>Part C · <span class="en">Essay</span> (تقييم ذاتي)</small><b>' + (Math.round(s.essFrac * ESSAY_W * 10) / 10) + ' / ' + (ES.length * ESSAY_W) + '</b></div></div>' +
+      '<div class="verdict ' + vcls + '">' + verdict + '</div>' +
+      '<h3 class="sec" style="margin-top:22px">حسب المحاضرة <small>(T/F + MCQ)</small></h3>' + rows +
+      '<div class="note" style="margin-top:14px">🎯 أضعف جزء عندك: <b class="en">Lecture ' + weakL + '</b>' + (weakV < 0.8 ? ' — ابدأ بيه.' : ' — كله كويس، بس ده الأقل.') + '</div>' +
+      '<div class="seg" style="margin-top:12px"><button type="button" data-f="all" class="on">كل الأسئلة</button><button type="button" data-f="wrong">الغلط والمتروك بس</button></div>' +
+      '<p class="muted" style="margin:0">⚠️ الـ <span class="en">Essay</span> تقييمه ذاتي (من اللي أنت علّمته)، والدرجات تقديرية — مش توقّع للدرجة الحقيقية.</p></div>';
+  }
+
+  function reveal() {
+    vExam.classList.add('locked');
+    $('#submitBar').hidden = true;
+    $('#againBar').hidden = false;
+    $('#timer').hidden = true;
+    TF.concat(MC).forEach(markQ);
+    ES.forEach(markEssay);
+    $('#resBox').hidden = false;
+    renderResult();
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  /* ---------- views ---------- */
+  function enterExam() {
+    vStart.hidden = true; vExam.hidden = false;
+    $('#progBox').hidden = false;
+    vExam.classList.remove('exam-only-wrong', 'locked');
+    buildExam();
+    updateProg();
+    if (run.submitted) reveal(); else startTimer();
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  function showStart() {
+    stopTimer();
+    vExam.hidden = true; vStart.hidden = false;
+    $('#progBox').hidden = true; $('#timer').hidden = true;
+    var box = $('#resume'), h = '';
+    if (run && !run.submitted) {
+      var n = 0;
+      TF.concat(MC).forEach(function (q) { if (typeof run.ans[q.id] === 'number') n++; });
+      h = '▶ فيه امتحان لسه شغال (جاوبت <b class="en">' + n + '</b> من <b class="en">' + (TF.length + MC.length) + '</b> سؤال اختيار). ' +
+        '<br><button type="button" class="btn primary" id="btnResume">كمّل الامتحان</button> <button type="button" class="btn" id="btnDrop">ابدأ من جديد</button>';
+    } else if (run && run.submitted) {
+      h = '📊 آخر محاولة اتسلّمت. أحسن نتيجة ليك: <b class="en">' + store.best + '%</b>. <br><button type="button" class="btn primary" id="btnReview">شوف المراجعة</button>';
+    } else if (store.best) {
+      h = '🏆 أحسن نتيجة ليك لحد دلوقتي: <b class="en">' + store.best + '%</b>';
+    }
+    box.hidden = !h; box.innerHTML = h;
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  $('#resume').addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    if (b.id === 'btnResume' || b.id === 'btnReview') enterExam();
+    else if (b.id === 'btnDrop') { run = null; persist(); showStart(); }
+  });
+  $('#tmSeg').addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    minutes = parseInt(b.dataset.min, 10);
+    $$('#tmSeg button').forEach(function (x) { x.classList.toggle('on', x === b); });
+  });
+  $('#btnStart').addEventListener('click', function () {
+    run = newRun(minutes); persist(); enterExam();
+  });
+
+  showStart();
+})();
+</script>
+</body>
+</html>
